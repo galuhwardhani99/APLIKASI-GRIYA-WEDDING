@@ -10,9 +10,9 @@ class KatalogController extends Controller
 {
     public function index()
     {
-        // Mengambil semua data paket dari database, urutkan dari yang terbaru
         $pakets = Paket::latest()->get();
         
+        // Disesuaikan jika nama filenya resources/views/admin/katalog.blade.php
         return view('admin.katalog.index', compact('pakets'));
     }
 

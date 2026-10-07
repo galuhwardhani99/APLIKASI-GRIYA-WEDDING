@@ -39,3 +39,10 @@ Route::middleware(['auth'])->group(function () {
     // Rute untuk memproses/submit data reservasi
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
 });
+// Rute untuk menampilkan halaman katalog (GET)
+Route::get('/katalog', function () {
+    return view('katalog');
+});
+
+// Rute untuk memproses penyimpanan data dari form (POST)
+Route::post('/katalog', [App\Http\Controllers\Admin\KatalogController::class, 'store'])->name('katalog.store');
