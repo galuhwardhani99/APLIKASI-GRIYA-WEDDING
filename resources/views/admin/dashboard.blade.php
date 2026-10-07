@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Admin Griya Rias Elly Jr.</title>
+    
+    <!-- FAVICON (Logo di Tab Browser) -->
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -12,34 +16,89 @@
 
     <style>
         :root {
-            --bg-dark: #241A16; 
-            --bg-sidebar: #33231D; 
+            /* Tema Cerah / Light Theme sesuai Figma Client */
+            --bg-light: #FDFBF7; 
+            --bg-card: #FFFFFF; 
             --gold-primary: #C58F43;
-            --text-light: #FDFBF8; 
-            --text-muted: #A0948D; 
-            --border-color: #4A362D;
+            --gold-hover: #A87632;
+            --text-dark: #241A16; 
+            --text-muted: #8C8279; 
+            --border-color: #EFE8DE;
             --success-color: #2e7d32;
             --warning-color: #b9770e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
+        body { 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            display: flex; 
+            min-height: 100vh; 
+        }
         
-        /* Sidebar Styles */
-        .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; }
-        .sidebar-brand { text-align: center; padding-bottom: 24px; border-bottom: 1px solid var(--border-color); }
-        .sidebar-brand h2 { font-family: 'Playfair Display', serif; color: var(--gold-primary); font-size: 1.2rem; margin-bottom: 4px; }
-        .sidebar-brand p { font-size: 0.8rem; color: var(--text-muted); }
+        /* Sidebar Styles Tema Cerah */
+        .sidebar { 
+            width: 260px; 
+            background-color: var(--bg-card); 
+            border-right: 1px solid var(--border-color); 
+            padding: 24px 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 24px; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+        }
+
+        /* Header Brand dengan Logo + Teks Flex */
+        .sidebar-brand { 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 20px; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+
+        .sidebar-brand img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .brand-text h2 { 
+            font-family: 'Playfair Display', serif; 
+            color: var(--gold-primary); 
+            font-size: 1.15rem; 
+            line-height: 1.2;
+            margin-bottom: 2px; 
+        }
+
+        .brand-text p { 
+            font-size: 0.78rem; 
+            color: var(--text-muted); 
+        }
+
         .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .nav-item { padding: 12px 16px; border-radius: 8px; color: var(--text-light); text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+        .nav-item { 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            color: var(--text-dark); 
+            text-decoration: none; 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            transition: all 0.2s; 
+            font-weight: 500;
+        }
         .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; color: var(--text-muted); }
-        .nav-item:hover { background-color: rgba(197, 143, 67, 0.1); }
+        .nav-item:hover { background-color: rgba(197, 143, 67, 0.08); color: var(--gold-primary); }
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
         
         /* Main Content */
         .main-content { flex: 1; padding: 40px; }
         
-        /* Header Dashboard + Tombol Unduh */
+        /* Header Dashboard + Tombol Cokelat */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -60,13 +119,14 @@
             gap: 8px;
             transition: all 0.2s ease;
             text-decoration: none;
+            box-shadow: 0 4px 12px rgba(197, 143, 67, 0.2);
         }
         .btn-pdf:hover {
-            background-color: #a87632;
+            background-color: var(--gold-hover);
             transform: translateY(-1px);
         }
 
-        /* Stats Grid */
+        /* Stats Grid Tema Cerah */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -74,14 +134,15 @@
             margin-bottom: 32px;
         }
         .stat-card {
-            background-color: var(--bg-sidebar);
+            background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
         .stat-title {
             font-size: 0.75rem;
-            color: var(--gold-primary);
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-weight: 700;
@@ -90,20 +151,21 @@
         .stat-value {
             font-family: 'Playfair Display', serif;
             font-size: 1.8rem;
-            color: var(--text-light);
+            color: var(--text-dark);
             font-weight: 700;
         }
 
-        /* Table Section */
+        /* Table Section Tema Cerah */
         .table-section {
-            background-color: var(--bg-sidebar);
+            background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
         .table-header {
             font-family: 'Playfair Display', serif;
-            color: var(--gold-primary);
+            color: var(--text-dark);
             font-size: 1.25rem;
             margin-bottom: 20px;
         }
@@ -118,14 +180,14 @@
             color: var(--gold-primary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border-bottom: 1px solid var(--border-color);
-            background-color: rgba(36, 26, 22, 0.5);
+            border-bottom: 2px solid var(--border-color);
+            background-color: #FAFAFA;
         }
         .data-table td {
             padding: 16px 12px;
             font-size: 0.9rem;
-            border-bottom: 1px solid rgba(74, 54, 45, 0.5);
-            color: var(--text-light);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
         }
         .data-table tr:last-child td { border-bottom: none; }
         
@@ -136,88 +198,71 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        .status-dp { background-color: rgba(185, 119, 14, 0.2); color: var(--warning-color); border: 1px solid var(--warning-color); }
-        .status-lunas { background-color: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid var(--success-color); }
+        .status-dp { background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
+        .status-lunas { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
 
-        /* ================= MODAL PREVIEW STYLING (SUDAH PRESISI & BISA DI-SCROLL) ================= */
+        /* ================= MODAL PREVIEW STYLING (PRESISI & CERAH) ================= */
         .modal-overlay {
             position: fixed;
-            top: 0; 
-            left: 0; 
-            width: 100vw; 
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(36, 26, 22, 0.6);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(4px);
             padding: 20px;
         }
 
-        .modal-overlay.show {
-            display: flex;
-        }
+        .modal-overlay.show { display: flex; }
 
         .modal-container {
-            background-color: #2a1d18;
+            background-color: #FFFFFF;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             width: 100%;
             max-width: 800px;
-            height: 85vh; /* Mengunci tinggi modal agar konsisten */
+            height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             overflow: hidden;
         }
 
         .modal-header-bar {
             padding: 16px 24px;
-            background-color: var(--bg-sidebar);
+            background-color: var(--bg-light);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0; /* Header tetap diam di atas */
+            flex-shrink: 0;
         }
 
         .modal-title {
             font-family: 'Playfair Display', serif;
-            color: var(--gold-primary);
+            color: var(--text-dark);
             font-size: 1.1rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* Area Bodi tempat Kertas A4 yang Bisa Di-scroll */
         .modal-body-preview {
             padding: 24px;
-            overflow-y: auto; /* Mengaktifkan scrollbar internal */
-            background-color: #1a120e;
+            overflow-y: auto;
+            background-color: #F4F1EA;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            flex: 1; /* Mengisi seluruh sisa ruang tengah */
+            flex: 1;
         }
 
-        /* Scrollbar Kustom Tema Emas/Cokelat */
-        .modal-body-preview::-webkit-scrollbar {
-            width: 8px;
-        }
-        .modal-body-preview::-webkit-scrollbar-track {
-            background: #1a120e;
-        }
-        .modal-body-preview::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-        .modal-body-preview::-webkit-scrollbar-thumb:hover {
-            background: var(--gold-primary);
-        }
+        .modal-body-preview::-webkit-scrollbar { width: 8px; }
+        .modal-body-preview::-webkit-scrollbar-track { background: #F4F1EA; }
+        .modal-body-preview::-webkit-scrollbar-thumb { background: #D6CEC3; border-radius: 4px; }
+        .modal-body-preview::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
 
-        /* Lembar Kertas Preview A4 */
         .paper-preview {
             background-color: #ffffff;
             color: #241A16;
@@ -225,7 +270,7 @@
             max-width: 680px;
             padding: 32px;
             border-radius: 6px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0 auto 20px auto;
         }
@@ -244,10 +289,7 @@
             margin-bottom: 4px;
         }
 
-        .paper-header p {
-            font-size: 0.8rem;
-            color: #666;
-        }
+        .paper-header p { font-size: 0.8rem; color: #666; }
 
         .paper-grid {
             display: grid;
@@ -302,44 +344,37 @@
 
         .modal-footer-bar {
             padding: 16px 24px;
-            background-color: var(--bg-sidebar);
+            background-color: var(--bg-light);
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            flex-shrink: 0; /* Footer tetap dikunci di bawah modal */
+            flex-shrink: 0;
         }
         
         .btn-cancel {
             background-color: transparent;
             color: var(--text-muted);
-            border: 1px solid var(--border-color);
+            border: 1px solid #D6CEC3;
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
         }
-        .btn-cancel:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+        .btn-cancel:hover { background-color: #EFE8DE; color: var(--text-dark); }
 
         /* ================= MEDIA PRINT ================= */
         @media print {
-            body * {
-                visibility: hidden !important;
-            }
-            #paper-preview, #paper-preview * {
-                visibility: visible !important;
-            }
+            body * { visibility: hidden !important; }
+            #paper-preview, #paper-preview * { visibility: visible !important; }
             #paper-preview {
                 position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+                left: 0 !important; top: 0 !important;
                 width: 100% !important;
                 box-shadow: none !important;
                 padding: 0 !important;
             }
-            .modal-overlay {
-                background: none !important;
-            }
+            .modal-overlay { background: none !important; }
         }
     </style>
 </head>
@@ -347,9 +382,13 @@
 
     <!-- Sidebar Admin -->
     <aside class="sidebar">
+        <!-- Brand + Logo Sidebar -->
         <div class="sidebar-brand">
-            <h2>Admin Panel</h2>
-            <p>Griya Rias Elly Jr.</p>
+            <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr.">
+            <div class="brand-text">
+                <h2>Admin Panel</h2>
+                <p>Griya Rias Elly Jr.</p>
+            </div>
         </div>
         <nav>
             <ul class="nav-menu">
@@ -370,7 +409,7 @@
 
         <!-- Dashboard Header Bar -->
         <div class="dashboard-header">
-            <h1 style="font-family: 'Playfair Display', serif; color: var(--gold-primary); font-size: 1.5rem;">Dashboard Overview</h1>
+            <h1 style="font-family: 'Playfair Display', serif; color: var(--text-dark); font-size: 1.5rem;">Dashboard Overview</h1>
             <button onclick="openPreviewModal()" class="btn-pdf">
                 <i class="fa-solid fa-file-pdf"></i> Unduh Laporan PDF
             </button>
@@ -434,7 +473,6 @@
             </div>
             
             <div class="modal-body-preview">
-                <!-- Lembaran Kertas A4 yang Akan Dicetak -->
                 <div class="paper-preview" id="paper-preview">
                     <div class="paper-header">
                         <h2>LAPORAN DASHBOARD ADMIN</h2>
@@ -514,8 +552,8 @@
                     title: 'Berhasil Login',
                     text: '{{ session('success') }}',
                     confirmButtonColor: '#C58F43',
-                    background: '#33231D',
-                    color: '#FDFBF8'
+                    background: '#FFFFFF',
+                    color: '#241A16'
                 });
             @endif
         });

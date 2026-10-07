@@ -9,12 +9,11 @@ use Illuminate\Http\Request;
 class KatalogController extends Controller
 {
     public function index()
-    {
-        $pakets = Paket::latest()->get();
-        
-        // Disesuaikan jika nama filenya resources/views/admin/katalog.blade.php
-        return view('admin.katalog.index', compact('pakets'));
-    }
+{
+    $pakets = Paket::latest()->get();
+    
+    return view('admin.katalog.index', compact('pakets'));
+}
 
     public function store(Request $request)
     {

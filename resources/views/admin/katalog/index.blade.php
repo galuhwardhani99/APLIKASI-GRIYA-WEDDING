@@ -4,107 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Katalog - Admin Griya Rias Elly Jr.</title>
+    
+    <!-- FAVICON (Logo di Tab Browser) -->
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
+    
+    <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS SweetAlert2 untuk Popup Notifikasi -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         :root {
-            --bg-dark: #241A16;
-            --bg-sidebar: #33231D;
+            /* Tema Cerah / Light Theme Konsisten Dengan Dashboard */
+            --bg-light: #FDFBF7; 
+            --bg-card: #FFFFFF; 
             --gold-primary: #C58F43;
             --gold-hover: #A87632;
-            --text-light: #FDFBF8;
-            --text-muted: #A0948D;
-            --border-color: #4A362D;
-            --bg-modal: #FDFBF8;
+            --text-dark: #241A16; 
+            --text-muted: #8C8279; 
+            --border-color: #EFE8DE;
+            --success-color: #2e7d32;
+            --warning-color: #b9770e;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            display: flex; 
+            min-height: 100vh; 
         }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            display: flex;
-            min-height: 100vh;
+        /* Sidebar Styles Tema Cerah */
+        .sidebar { 
+            width: 260px; 
+            background-color: var(--bg-card); 
+            border-right: 1px solid var(--border-color); 
+            padding: 24px 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 24px; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: 260px;
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .sidebar-brand {
-            text-align: center;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-brand h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--gold-primary);
-            font-size: 1.2rem;
-            margin-bottom: 4px;
-        }
-
-        .sidebar-brand p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .nav-menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 0.95rem;
+        /* Header Brand dengan Logo + Teks Flex */
+        .sidebar-brand { 
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: all 0.2s;
+            padding-bottom: 20px; 
+            border-bottom: 1px solid var(--border-color); 
         }
 
-        .nav-item:hover {
-            background-color: rgba(197, 143, 67, 0.1);
+        .sidebar-brand img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            border-radius: 6px;
         }
 
-        .nav-item.active {
-            background-color: var(--gold-primary);
-            color: #fff;
-            font-weight: 600;
+        .brand-text h2 { 
+            font-family: 'Playfair Display', serif; 
+            color: var(--gold-primary); 
+            font-size: 1.15rem; 
+            line-height: 1.2;
+            margin-bottom: 2px; 
         }
 
-        /* Main Content Styling */
-        .main-content {
-            flex: 1;
-            padding: 40px;
+        .brand-text p { 
+            font-size: 0.78rem; 
+            color: var(--text-muted); 
         }
+
+        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item { 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            color: var(--text-dark); 
+            text-decoration: none; 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            transition: all 0.2s; 
+            font-weight: 500;
+        }
+        .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; color: var(--text-muted); }
+        .nav-item:hover { background-color: rgba(197, 143, 67, 0.08); color: var(--gold-primary); }
+        .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
+        .nav-item.active i { color: #fff; }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 40px; }
 
         .header-action {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
         .page-title {
             font-family: 'Playfair Display', serif;
-            color: var(--gold-primary);
+            color: var(--text-dark);
             font-size: 1.5rem;
         }
 
@@ -112,54 +118,61 @@
             background-color: var(--gold-primary);
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 600;
-            font-family: inherit;
             cursor: pointer;
-            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(197, 143, 67, 0.2);
         }
 
         .btn-gold:hover {
             background-color: var(--gold-hover);
+            transform: translateY(-1px);
         }
 
-        /* Table Styling */
-        .table-container {
+        /* Table Styling Tema Cerah */
+        .table-section {
+            background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            overflow: hidden;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
         }
 
-        th {
-            background-color: rgba(0,0,0,0.2);
-            color: var(--gold-primary);
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
             font-size: 0.75rem;
+            color: var(--gold-primary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
+            background-color: #FAFAFA;
         }
 
-        td {
-            padding: 16px 20px;
+        .data-table td {
+            padding: 16px 12px;
+            font-size: 0.9rem;
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.95rem;
+            color: var(--text-dark);
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+        .data-table tr:last-child td { border-bottom: none; }
 
         .badge-active {
-            background-color: rgba(46, 125, 50, 0.2);
-            color: #81C784;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #C8E6C9;
             padding: 4px 10px;
             border-radius: 4px;
             font-size: 0.75rem;
@@ -169,43 +182,50 @@
         .action-btns {
             display: flex;
             gap: 8px;
+            justify-content: flex-start;
         }
 
         .btn-sm {
             padding: 6px 12px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             color: #fff;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-edit { background-color: #3B82F6; }
         .btn-delete { background-color: #EF4444; }
+        .btn-sm:hover { opacity: 0.85; }
 
-        /* Modal Styling */
+        /* Modal Styling Tema Cerah */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none; /* Ubah ke flex via JS untuk menampilkan */
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(36, 26, 22, 0.6);
+            display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            padding: 20px;
         }
 
+        .modal-overlay.show { display: flex; }
+
         .modal-card {
-            background-color: var(--bg-modal);
-            border: 4px solid var(--gold-primary);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             width: 100%;
-            max-width: 500px;
-            padding: 24px;
-            color: #333;
+            max-width: 520px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
         .modal-header {
@@ -213,50 +233,51 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid #E0DCD3;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 12px;
         }
 
         .modal-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.25rem;
-            color: #333;
+            font-size: 1.2rem;
+            color: var(--text-dark);
             font-weight: 700;
         }
 
         .btn-close {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            color: #888;
+            color: var(--text-muted);
         }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
         .modal-card label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            margin-bottom: 8px;
-            color: #4A4A4A;
+            margin-bottom: 6px;
+            color: var(--text-dark);
         }
 
         .modal-card input, .modal-card textarea {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #E0DCD3;
-            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             font-family: inherit;
             font-size: 0.9rem;
+            background-color: #FAFAFA;
+            color: var(--text-dark);
+        }
+
+        .modal-card input:focus, .modal-card textarea:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            background-color: #FFF;
         }
 
         .modal-actions {
@@ -267,22 +288,22 @@
 
         .btn-cancel {
             flex: 1;
-            background-color: #D1D5DB;
-            color: #374151;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid #D6CEC3;
+            padding: 10px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
         }
-        
+
         .btn-save {
             flex: 1;
             background-color: var(--gold-primary);
             color: #fff;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
         }
@@ -290,33 +311,60 @@
 </head>
 <body>
 
-    <!-- Sidebar Admin -->
+    <!-- Sidebar Admin Panel -->
     <aside class="sidebar">
+        <!-- Brand + Logo Sidebar -->
         <div class="sidebar-brand">
-            <h2>Admin Panel</h2>
-            <p>Griya Rias Elly Jr.</p>
-        </div>
+    <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr.">
+    <div class="brand-text">
+        <h2>Admin Panel</h2>
+        <p>Griya Rias Elly Jr.</p>
+    </div>
+</div>
         <nav>
-            <nav>
-    <ul class="nav-menu">
-        <li><a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
-        <li><a href="{{ route('admin.katalog.index') }}" class="nav-item active"><i class="fa-solid fa-box-open"></i> Kelola Katalog</a></li>
-        <li><a href="#" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
-        <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>
-    </ul>
-</nav> 
+            <ul class="nav-menu">
+                <li>
+                    <a href="{{ route('admin.dashboard') }}" class="nav-item">
+                        <i class="fa-solid fa-shapes"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.katalog.index') }}" class="nav-item active">
+                        <i class="fa-solid fa-box-open"></i> Kelola Katalog
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item">
+                        <i class="fa-regular fa-calendar"></i> Jadwal Acara
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item">
+                        <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+                    </a>
+                </li>
+            </ul>
         </nav>
+        
+        <!-- Tombol Kembali ke Halaman Utama -->
+        <div style="margin-top: auto;">
+             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                 <i class="fa-solid fa-arrow-left"></i> Halaman Utama
+             </a>
+        </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
         <div class="header-action">
             <h1 class="page-title">Daftar Paket Rias &amp; WO</h1>
-            <button class="btn-gold" onclick="openModal()">+ Tambah Paket Baru</button>
+            <button class="btn-gold" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i> Tambah Paket Baru
+            </button>
         </div>
 
-        <div class="table-container">
-            <table>
+        <div class="table-section">
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th>Nama Paket</th>
@@ -329,25 +377,31 @@
                 <tbody>
     @forelse($pakets as $paket)
         <tr>
-            <td>{{ $paket->nama_paket }}</td>
-            <td>{{ $paket->kategori }}</td>
-            <td style="color: var(--gold-primary); font-weight: 600;">Rp {{ number_format($paket->harga, 0, ',', '.') }}</td>
-            <td><span class="badge-active">{{ $paket->status }}</span></td>
+            <td style="font-weight: 600;">{{ $paket->nama_paket }}</td>
+            <td style="color: var(--text-muted);">{{ $paket->kategori }}</td>
+            <td style="color: var(--gold-primary); font-weight: 600;">
+                Rp {{ number_format($paket->harga, 0, ',', '.') }}
+            </td>
+            <td>
+                <span class="badge-active">{{ $paket->status ?? 'Aktif' }}</span>
+            </td>
             <td class="action-btns">
-                <!-- Tombol Edit (Tugas selanjutnya: mengoper data ke modal) -->
-                <button class="btn-sm btn-edit" onclick="openModalEdit({{ $paket }})">Edit</button>
+                <button class="btn-sm btn-edit" onclick="openModalEdit({{ json_encode($paket) }})">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
                 
-                <!-- Form Hapus -->
                 <form action="{{ route('admin.katalog.destroy', $paket->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket ini?');">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-sm btn-delete">Hapus</button>
+                    <button type="submit" class="btn-sm btn-delete">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
                 </form>
             </td>
         </tr>
     @empty
         <tr>
-            <td colspan="5" style="text-align: center; color: var(--text-muted);">Belum ada data paket layanan.</td>
+            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Belum ada data paket layanan.</td>
         </tr>
     @endforelse
 </tbody>
@@ -355,20 +409,16 @@
         </div>
     </main>
 
-    <!-- Modal Form Tambah/Edit -->
-    <!-- Modal Form Tambah/Edit -->
+    <!-- Modal Form Tambah / Edit Paket -->
     <div class="modal-overlay" id="packageModal">
         <div class="modal-card">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Tambah Paket Layanan</h2>
-                <button class="btn-close" onclick="closeModal()">&times;</button>
+                <button class="btn-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <!-- Beri ID pada form agar mudah dimanipulasi JS -->
             <form id="paketForm" action="{{ route('admin.katalog.store') }}" method="POST">
                 @csrf
-                
-                <!-- Input ini akan diaktifkan lewat JS jika sedang mode Edit -->
                 <input type="hidden" name="_method" id="methodField" value="POST">
                 
                 <div class="form-group">
@@ -400,56 +450,59 @@
         </div>
     </div>
 
-    <!-- Script Kontrol Modal -->
-    <!-- Script Kontrol Modal -->
+    <!-- Script Kontrol Modal & Notifikasi SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const modal = document.getElementById('packageModal');
         const form = document.getElementById('paketForm');
         const modalTitle = document.getElementById('modalTitle');
         const methodField = document.getElementById('methodField');
 
-        // URL dasar untuk store (Tambah Data)
         const storeUrl = "{{ route('admin.katalog.store') }}";
 
-        // Fungsi untuk mode Tambah
         function openModal() {
             modalTitle.innerText = "Tambah Paket Layanan";
             form.action = storeUrl;
             methodField.value = "POST";
-            
-            // Reset isi form
             form.reset();
-            
-            modal.style.display = 'flex';
+            modal.classList.add('show');
         }
 
-        // Fungsi untuk mode Edit
         function openModalEdit(paket) {
             modalTitle.innerText = "Edit Paket Layanan";
-            
-            // Ubah action form ke rute update (contoh: /admin/katalog/1)
             form.action = `/admin/katalog/${paket.id}`;
-            methodField.value = "PUT"; // Framework Laravel butuh ini untuk metode update
+            methodField.value = "PUT";
             
-            // Isi nilai input form dengan data yang ada
-            document.getElementById('nama_paket').value = paket.nama_paket;
-            document.getElementById('kategori').value = paket.kategori;
-            document.getElementById('harga').value = paket.harga;
-            document.getElementById('deskripsi').value = paket.deskripsi;
+            document.getElementById('nama_paket').value = paket.nama_paket || '';
+            document.getElementById('kategori').value = paket.kategori || '';
+            document.getElementById('harga').value = paket.harga || '';
+            document.getElementById('deskripsi').value = paket.deskripsi || '';
             
-            modal.style.display = 'flex';
+            modal.classList.add('show');
         }
 
         function closeModal() {
-            modal.style.display = 'none';
+            modal.classList.remove('show');
         }
 
-        // Tutup modal jika user mengklik area luar kotak form
         window.onclick = function(event) {
             if (event.target == modal) {
                 closeModal();
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#C58F43',
+                    background: '#FFFFFF',
+                    color: '#241A16'
+                });
+            @endif
+        });
     </script>
 </body>
 </html>
