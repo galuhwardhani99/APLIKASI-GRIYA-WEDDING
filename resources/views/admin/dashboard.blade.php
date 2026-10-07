@@ -139,33 +139,39 @@
         .status-dp { background-color: rgba(185, 119, 14, 0.2); color: var(--warning-color); border: 1px solid var(--warning-color); }
         .status-lunas { background-color: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid var(--success-color); }
 
-        /* ================= MODAL PREVIEW STYLING (PRESISI & BISA DI-SCROLL) ================= */
+        /* ================= MODAL PREVIEW STYLING (SUDAH PRESISI & BISA DI-SCROLL) ================= */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(5px);
             padding: 20px;
         }
+
         .modal-overlay.show {
             display: flex;
         }
+
         .modal-container {
             background-color: #2a1d18;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             width: 100%;
-            max-width: 850px;
-            max-height: 85vh; /* Membatasi tinggi modal */
+            max-width: 800px;
+            height: 85vh; /* Mengunci tinggi modal agar konsisten */
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             overflow: hidden;
         }
+
         .modal-header-bar {
             padding: 16px 24px;
             background-color: var(--bg-sidebar);
@@ -173,23 +179,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0; /* Header tetap dikunci di atas */
+            flex-shrink: 0; /* Header tetap diam di atas */
         }
+
         .modal-title {
             font-family: 'Playfair Display', serif;
             color: var(--gold-primary);
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        /* Area Bodi tempat Kertas A4 yang Bisa Di-scroll */
         .modal-body-preview {
             padding: 24px;
-            overflow-y: auto; /* Aktifkan scroll di bagian dalam */
+            overflow-y: auto; /* Mengaktifkan scrollbar internal */
             background-color: #1a120e;
             display: flex;
             justify-content: center;
-            flex: 1;
+            align-items: flex-start;
+            flex: 1; /* Mengisi seluruh sisa ruang tengah */
         }
 
-        /* Scrollbar kustom tema emas-cokelat */
+        /* Scrollbar Kustom Tema Emas/Cokelat */
         .modal-body-preview::-webkit-scrollbar {
             width: 8px;
         }
@@ -204,75 +217,89 @@
             background: var(--gold-primary);
         }
 
-        /* Tampilan Lembar Kertas PDF A4 */
+        /* Lembar Kertas Preview A4 */
         .paper-preview {
             background-color: #ffffff;
             color: #241A16;
             width: 100%;
-            max-width: 700px;
+            max-width: 680px;
             padding: 32px;
             border-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            margin-bottom: 10px;
+            margin: 0 auto 20px auto;
         }
+
         .paper-header {
             text-align: center;
             margin-bottom: 24px;
             padding-bottom: 12px;
             border-bottom: 2px solid #241A16;
         }
+
         .paper-header h2 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             color: #241A16;
+            margin-bottom: 4px;
         }
+
         .paper-header p {
             font-size: 0.8rem;
             color: #666;
         }
+
         .paper-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 24px;
         }
+
         .paper-stat {
-            border: 1px solid #ddd;
+            border: 1px solid #e0e0e0;
             padding: 12px;
             border-radius: 6px;
+            background-color: #fafafa;
         }
+
         .paper-stat-title {
             font-size: 0.65rem;
             color: #B9833B;
             font-weight: 700;
             text-transform: uppercase;
+            margin-bottom: 4px;
         }
+
         .paper-stat-val {
             font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: #241A16;
         }
+
         .paper-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
         }
+
         .paper-table th {
             background-color: #f4f4f4;
             color: #241A16;
             text-align: left;
-            padding: 8px;
+            padding: 10px 8px;
             border-bottom: 2px solid #ccc;
             font-size: 0.75rem;
+            text-transform: uppercase;
         }
+
         .paper-table td {
             padding: 10px 8px;
             border-bottom: 1px solid #eee;
             color: #333;
         }
-        
+
         .modal-footer-bar {
             padding: 16px 24px;
             background-color: var(--bg-sidebar);
@@ -280,8 +307,9 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            flex-shrink: 0; /* Footer tetap dikunci di bawah */
+            flex-shrink: 0; /* Footer tetap dikunci di bawah modal */
         }
+        
         .btn-cancel {
             background-color: transparent;
             color: var(--text-muted);
