@@ -7,6 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- CSS SweetAlert2 untuk Popup -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         :root {
             --bg-dark: #241A16; 
@@ -36,6 +39,33 @@
         /* Main Content */
         .main-content { flex: 1; padding: 40px; }
         
+        /* Header Dashboard + Tombol Unduh */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        .btn-pdf {
+            background-color: var(--gold-primary);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .btn-pdf:hover {
+            background-color: #a87632;
+            transform: translateY(-1px);
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -89,7 +119,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             border-bottom: 1px solid var(--border-color);
-            background-color: rgba(36, 26, 22, 0.5); /* slightly darker than sidebar */
+            background-color: rgba(36, 26, 22, 0.5);
         }
         .data-table td {
             padding: 16px 12px;
@@ -108,6 +138,181 @@
         }
         .status-dp { background-color: rgba(185, 119, 14, 0.2); color: var(--warning-color); border: 1px solid var(--warning-color); }
         .status-lunas { background-color: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid var(--success-color); }
+
+        /* ================= MODAL PREVIEW STYLING (PRESISI & BISA DI-SCROLL) ================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            padding: 20px;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-container {
+            background-color: #2a1d18;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 850px;
+            max-height: 85vh; /* Membatasi tinggi modal */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .modal-header-bar {
+            padding: 16px 24px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0; /* Header tetap dikunci di atas */
+        }
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-primary);
+            font-size: 1.1rem;
+        }
+        .modal-body-preview {
+            padding: 24px;
+            overflow-y: auto; /* Aktifkan scroll di bagian dalam */
+            background-color: #1a120e;
+            display: flex;
+            justify-content: center;
+            flex: 1;
+        }
+
+        /* Scrollbar kustom tema emas-cokelat */
+        .modal-body-preview::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-body-preview::-webkit-scrollbar-track {
+            background: #1a120e;
+        }
+        .modal-body-preview::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        .modal-body-preview::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-primary);
+        }
+
+        /* Tampilan Lembar Kertas PDF A4 */
+        .paper-preview {
+            background-color: #ffffff;
+            color: #241A16;
+            width: 100%;
+            max-width: 700px;
+            padding: 32px;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-bottom: 10px;
+        }
+        .paper-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #241A16;
+        }
+        .paper-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: #241A16;
+        }
+        .paper-header p {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .paper-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .paper-stat {
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .paper-stat-title {
+            font-size: 0.65rem;
+            color: #B9833B;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .paper-stat-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #241A16;
+        }
+        .paper-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .paper-table th {
+            background-color: #f4f4f4;
+            color: #241A16;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid #ccc;
+            font-size: 0.75rem;
+        }
+        .paper-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .modal-footer-bar {
+            padding: 16px 24px;
+            background-color: var(--bg-sidebar);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-shrink: 0; /* Footer tetap dikunci di bawah */
+        }
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-cancel:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+
+        /* ================= MEDIA PRINT ================= */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #paper-preview, #paper-preview * {
+                visibility: visible !important;
+            }
+            #paper-preview {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .modal-overlay {
+                background: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -127,7 +332,6 @@
             </ul>
         </nav>
         
-        <!-- Back to Home Link placed at bottom of sidebar for layout consistency -->
         <div style="margin-top: auto;">
              <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-arrow-left"></i> Halaman Utama</a>
         </div>
@@ -135,6 +339,15 @@
 
     <!-- Main Content -->
     <main class="main-content">
+
+        <!-- Dashboard Header Bar -->
+        <div class="dashboard-header">
+            <h1 style="font-family: 'Playfair Display', serif; color: var(--gold-primary); font-size: 1.5rem;">Dashboard Overview</h1>
+            <button onclick="openPreviewModal()" class="btn-pdf">
+                <i class="fa-solid fa-file-pdf"></i> Unduh Laporan PDF
+            </button>
+        </div>
+
         <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -184,5 +397,100 @@
         </div>
     </main>
 
+    <!-- ================= MODAL PREVIEW PRATINJAU PDF ================= -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-container">
+            <div class="modal-header-bar">
+                <div class="modal-title"><i class="fa-solid fa-eye"></i> Pratinjau Laporan PDF</div>
+                <button onclick="closePreviewModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body-preview">
+                <!-- Lembaran Kertas A4 yang Akan Dicetak -->
+                <div class="paper-preview" id="paper-preview">
+                    <div class="paper-header">
+                        <h2>LAPORAN DASHBOARD ADMIN</h2>
+                        <p>Griya Rias Elly Jr. - Dicetak pada: {{ date('d F Y') }}</p>
+                    </div>
+
+                    <div class="paper-grid">
+                        <div class="paper-stat">
+                            <div class="paper-stat-title">Total Pendapatan</div>
+                            <div class="paper-stat-val">Rp 48.500.000</div>
+                        </div>
+                        <div class="paper-stat">
+                            <div class="paper-stat-title">Total Reservasi</div>
+                            <div class="paper-stat-val">18 Acara</div>
+                        </div>
+                        <div class="paper-stat">
+                            <div class="paper-stat-title">Pelanggan Aktif</div>
+                            <div class="paper-stat-val">124 User</div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 0.95rem; margin-bottom: 12px; font-family: 'Playfair Display', serif;">Daftar Transaksi Terbaru</h4>
+                    <table class="paper-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pelanggan</th>
+                                <th>Layanan</th>
+                                <th>Tgl Acara</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#GR-0892</td>
+                                <td>Siti Rahmawati</td>
+                                <td>Rias Akad & Resepsi Gold</td>
+                                <td>06 Oct 2026</td>
+                                <td>DP Verified</td>
+                            </tr>
+                            <tr>
+                                <td>#GR-0891</td>
+                                <td>Anisa Putri</td>
+                                <td>WO Package Intimate</td>
+                                <td>12 Oct 2026</td>
+                                <td>Lunas 100%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer-bar">
+                <button onclick="closePreviewModal()" class="btn-cancel">Batal</button>
+                <button onclick="window.print()" class="btn-pdf">
+                    <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script SweetAlert2 & Modal JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function openPreviewModal() {
+            document.getElementById('previewModal').classList.add('show');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil Login',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#C58F43',
+                    background: '#33231D',
+                    color: '#FDFBF8'
+                });
+            @endif
+        });
+    </script>
 </body>
 </html>

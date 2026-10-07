@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -20,48 +19,45 @@ class LoginController extends Controller
         $request->validate([
             'login'    => ['required', 'string'],
             'password' => ['required', 'string'],
-        ], [
-            'login.required'    => 'Email atau nomor WhatsApp wajib diisi.',
-            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
-        $login = trim($request->input('login'));
-        $isEmail = filter_var($login, FILTER_VALIDATE_EMAIL);
+        $input = $request->input('login');
 
-        $credentials = [
-            $isEmail ? 'email' : 'phone' => $isEmail ? strtolower($login) : User::normalizePhone($login),
-            'password' => $request->input('password'),
-        ];
-
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            throw ValidationException::withMessages([
-                'login' => 'Email/No. WhatsApp atau kata sandi salah.',
-            ]);
+        // Cek apakah input berupa Email atau No. WA
+        if (filter_var($input, FILTER_VALIDATE_EMAIL)) {
+            $credentials = ['email' => $input, 'password' => $request->password];
+        } else {
+            $normalizedPhone = User::normalizePhone($input);
+            $credentials = ['phone' => $normalizedPhone, 'password' => $request->password];
         }
 
-        $request->session()->regenerate();
+        if (Auth::attempt($credentials, $request->has('remember'))) {
+            $request->session()->regenerate();
 
-        // Admin & client sama-sama masuk ke beranda
-        return redirect()->intended(route('home'));
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            throw ValidationException::withMessages([
-                'login' => 'Email/No. WhatsApp atau kata sandi salah.',
-            ]);
+            if (Auth::user()->isAdmin()) {
+                return redirect()->intended(route('admin.dashboard'))
+                    ->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '!');
+            }
+
+            return redirect()->intended(route('home'))
+                ->with('success', 'Berhasil masuk! Selamat datang kembali.');
         }
 
-        $request->session()->regenerate();
-
-        // Tambahkan ->with('success', ...) untuk memicu popup
-        return redirect()->intended(route('home'))->with('success', 'Selamat datang! Anda berhasil masuk.');
+        return back()->withErrors([
+            'login' => 'Email/No. WhatsApp atau kata sandi yang Anda masukkan salah.',
+        ])->onlyInput('login');
     }
-    
 
     public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+{
+    Auth::logout();
 
-        return redirect()->route('home');
-    }
+    // Matikan sesi lama
+    $request->session()->invalidate();
+
+    // Buat CSRF token baru untuk form selanjutnya
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login')->with('success', 'Berhasil keluar akun.');
+}
 }

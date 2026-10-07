@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- CSRF Token untuk Keamanan Sesi -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <title>@yield('title', 'Beranda') - Griya Rias Elly Jr.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,14 +17,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
-        /* Perbaikan Styling Agar Lebih Longgar, Presisi, dan Estetik */
         .nav-side.nav-right {
-            gap: 24px !important; /* Memperlebar jarak antar menu kanan secara keseluruhan */
+            gap: 24px !important;
         }
         .user-profile-group {
             display: flex;
             align-items: center;
-            gap: 18px; /* Jarak longgar antara teks profil dan tombol */
+            gap: 18px;
             padding-right: 4px;
         }
         .user-meta-box {
@@ -60,7 +63,6 @@
             text-decoration: underline;
         }
 
-        /* Penyesuaian Tombol Pill agar Teks Center Sempurna */
         .btn-pill-center {
             display: inline-flex;
             flex-direction: column;
@@ -70,7 +72,7 @@
             line-height: 1.2;
             padding: 10px 22px;
             border-radius: 50px;
-            background-color: #B9833B; /* Menyesuaikan warna tema tombol utama */
+            background-color: #B9833B;
             color: #FFFFFF;
             font-weight: 700;
             font-size: 0.8rem;
@@ -109,7 +111,6 @@
                 <a href="#galeri" class="nav-link">Galeri Portofolio</a>
                 <a href="#kontak" class="nav-link">Kontak</a>
                 
-                <!-- Logika Tombol Auth & Guest yang Dirapikan -->
                 @auth
                     <div class="user-profile-group">
                         <div class="user-meta-box">
@@ -122,7 +123,6 @@
                             </form>
                         </div>
 
-                        <!-- Tombol dengan teks di-center sempurna -->
                         <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('reservasi.create') }}" class="btn-pill-center">
                             @if(auth()->user()->isAdmin())
                                 DASHBOARD<br>ADMIN
@@ -132,7 +132,6 @@
                         </a>
                     </div>
                 @else
-                    <!-- Tombol untuk Guest (belum login) -->
                     <a href="{{ route('login') }}" class="btn-link">Masuk</a>
                     <a href="{{ route('register') }}" class="btn-pill-center">DAFTAR</a>
                 @endauth
@@ -142,7 +141,6 @@
         </div>
     </header>
 
-    {{-- Menu mobile --}}
     <aside class="drawer" id="drawer">
         <a href="#beranda">Beranda</a>
         <a href="#katalog">Katalog WO/EO</a>
@@ -150,7 +148,6 @@
         <a href="#galeri">Galeri Portofolio</a>
         <a href="#kontak">Kontak</a>
         
-        <!-- Logika Tombol Auth & Guest di Mobile -->
         @auth
             <div style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -185,24 +182,24 @@
 
     <script src="{{ asset('js/home.js') }}"></script>
     
-    <!-- Script SweetAlert2 untuk memunculkan Popup -->
+    <!-- Script SweetAlert2 untuk Notifikasi -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
-                    title: 'Berhasil',
+                    title: 'Berhasil!',
                     text: '{{ session('success') }}',
                     confirmButtonColor: '#B9833B'
                 });
             @endif
 
-            @if(session('status'))
+            @if(session('error'))
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Pendaftaran Berhasil',
-                    text: '{{ session('status') }}',
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
                     confirmButtonColor: '#B9833B'
                 });
             @endif
