@@ -43,7 +43,18 @@ class LoginController extends Controller
 
         // Admin & client sama-sama masuk ke beranda
         return redirect()->intended(route('home'));
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            throw ValidationException::withMessages([
+                'login' => 'Email/No. WhatsApp atau kata sandi salah.',
+            ]);
+        }
+
+        $request->session()->regenerate();
+
+        // Tambahkan ->with('success', ...) untuk memicu popup
+        return redirect()->intended(route('home'))->with('success', 'Selamat datang! Anda berhasil masuk.');
     }
+    
 
     public function logout(Request $request)
     {
