@@ -15,7 +15,7 @@ class RegisterTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Siti Aminah',
             'email' => 'SITI@example.com',
-            'phone' => '+62 812-3456-7890',
+            'phone' => '+62 878-4760-4348',
             'address' => 'Jl. Melati No. 10, Bandung',
             'password' => 'password123',
         ]);
@@ -57,7 +57,7 @@ class RegisterTest extends TestCase
         $response = $this->from('/register')->post('/register', [
             'name' => 'Siti Aminah',
             'email' => 'siti@example.com',
-            'phone' => '+62 812-3456-7890',
+            'phone' => '+62 878-4760-4348', // Nomor yang sama dengan pengguna lama
             'address' => 'Jl. Melati No. 10, Bandung',
             'password' => 'password123',
         ]);
