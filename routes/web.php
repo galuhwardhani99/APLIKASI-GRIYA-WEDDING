@@ -5,8 +5,11 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
 use App\Http\Controllers\Admin\KatalogController;
+use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController;
+use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
 
+// Halaman Utama Client
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ---------- Guest ----------
@@ -25,24 +28,28 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
     
-    // CRUD Katalog (Hanya menggunakan index, store, update, destroy karena form menggunakan Modal pop-up)
+    // CRUD Katalog
     Route::resource('katalog', KatalogController::class)->only([
         'index', 'store', 'update', 'destroy'
     ]);
+
+    // CRUD Portofolio
+    Route::resource('portofolio', AdminPortofolioController::class);
 });
 
 // ---------- Client ----------
+Route::get('/galeri', function () {
+    $portofolios = Portofolio::latest()->get();
+    return view('galeri', compact('portofolios'));
+})->name('galeri');
+
 Route::middleware(['auth'])->group(function () {
-    // Rute untuk menampilkan form reservasi
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi.create');
-    
-    // Rute untuk memproses/submit data reservasi
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
 });
-// Rute untuk menampilkan halaman katalog (GET)
+
 Route::get('/katalog', function () {
     return view('katalog');
 });
 
-// Rute untuk memproses penyimpanan data dari form (POST)
-Route::post('/katalog', [App\Http\Controllers\Admin\KatalogController::class, 'store'])->name('katalog.store');
+Route::post('/katalog', [KatalogController::class, 'store'])->name('katalog.store');

@@ -63,7 +63,7 @@
         .sidebar-brand img {
             width: 42px;
             height: 42px;
-            object-fit: contain;
+            object-fit: cover;
             border-radius: 6px;
         }
 
@@ -97,6 +97,24 @@
         .nav-item:hover { background-color: rgba(197, 143, 67, 0.08); color: var(--gold-primary); }
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
+
+        /* Style Tombol Logout Bottom Sidebar */
+        .btn-logout {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #EF4444;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            margin-top: 8px;
+        }
+        .btn-logout:hover { color: #DC2626; }
 
         /* Main Content */
         .main-content { flex: 1; padding: 40px; }
@@ -312,15 +330,17 @@
 <body>
 
     <!-- Sidebar Admin Panel -->
+    <!-- Sidebar Admin Panel -->
     <aside class="sidebar">
         <!-- Brand + Logo Sidebar -->
         <div class="sidebar-brand">
-    <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr.">
-    <div class="brand-text">
-        <h2>Admin Panel</h2>
-        <p>Griya Rias Elly Jr.</p>
-    </div>
-</div>
+            <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr.">
+            <div class="brand-text">
+                <h2>Admin Panel</h2>
+                <p>Griya Rias Elly Jr.</p>
+            </div>
+        </div>
+
         <nav>
             <ul class="nav-menu">
                 <li>
@@ -334,6 +354,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('admin.portofolio.index') }}" class="nav-item">
+                        <i class="fa-solid fa-images"></i> Galeri Portofolio
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="nav-item">
                         <i class="fa-regular fa-calendar"></i> Jadwal Acara
                     </a>
@@ -344,13 +369,20 @@
                     </a>
                 </li>
             </ul>
-        </nav>
+        </nav>        
         
-        <!-- Tombol Kembali ke Halaman Utama -->
-        <div style="margin-top: auto;">
-             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout) -->
+        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
+             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 500;">
                  <i class="fa-solid fa-arrow-left"></i> Halaman Utama
              </a>
+
+             <form action="{{ route('logout') }}" method="POST">
+                 @csrf
+                 <button type="submit" class="btn-logout">
+                     <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
+                 </button>
+             </form>
         </div>
     </aside>
 
@@ -375,36 +407,36 @@
                     </tr>
                 </thead>
                 <tbody>
-    @forelse($pakets as $paket)
-        <tr>
-            <td style="font-weight: 600;">{{ $paket->nama_paket }}</td>
-            <td style="color: var(--text-muted);">{{ $paket->kategori }}</td>
-            <td style="color: var(--gold-primary); font-weight: 600;">
-                Rp {{ number_format($paket->harga, 0, ',', '.') }}
-            </td>
-            <td>
-                <span class="badge-active">{{ $paket->status ?? 'Aktif' }}</span>
-            </td>
-            <td class="action-btns">
-                <button class="btn-sm btn-edit" onclick="openModalEdit({{ json_encode($paket) }})">
-                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                </button>
-                
-                <form action="{{ route('admin.katalog.destroy', $paket->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket ini?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn-sm btn-delete">
-                        <i class="fa-solid fa-trash"></i> Hapus
-                    </button>
-                </form>
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Belum ada data paket layanan.</td>
-        </tr>
-    @endforelse
-</tbody>
+                    @forelse($pakets as $paket)
+                        <tr>
+                            <td style="font-weight: 600;">{{ $paket->nama_paket }}</td>
+                            <td style="color: var(--text-muted);">{{ $paket->kategori }}</td>
+                            <td style="color: var(--gold-primary); font-weight: 600;">
+                                Rp {{ number_format($paket->harga, 0, ',', '.') }}
+                            </td>
+                            <td>
+                                <span class="badge-active">{{ $paket->status ?? 'Aktif' }}</span>
+                            </td>
+                            <td class="action-btns">
+                                <button class="btn-sm btn-edit" onclick="openModalEdit({{ json_encode($paket) }})">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                
+                                <form action="{{ route('admin.katalog.destroy', $paket->id) }}" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this)">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="btn-sm btn-delete">
+        <i class="fa-solid fa-trash"></i> Hapus
+    </button>
+</form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Belum ada data paket layanan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
     </main>
@@ -480,6 +512,29 @@
             
             modal.classList.add('show');
         }
+        function confirmDelete(event, form) {
+    event.preventDefault(); // Menghentikan submit bawaan form
+
+    Swal.fire({
+        title: 'Hapus Foto Portofolio?',
+        text: "Foto yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#8C8279',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        background: '#FFFFFF',
+        color: '#241A16',
+        customClass: {
+            popup: 'swal2-styled-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit(); // Jalankan submit jika user klik 'Ya, Hapus!'
+        }
+    });
+}
 
         function closeModal() {
             modal.classList.remove('show');

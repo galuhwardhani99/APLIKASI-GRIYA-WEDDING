@@ -94,6 +94,24 @@
         .nav-item:hover { background-color: rgba(197, 143, 67, 0.08); color: var(--gold-primary); }
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
+
+        /* Style untuk Tombol Logout di Bottom Sidebar */
+        .btn-logout {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #EF4444;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            margin-top: 8px;
+        }
+        .btn-logout:hover { color: #DC2626; }
         
         /* Main Content */
         .main-content { flex: 1; padding: 40px; }
@@ -258,11 +276,6 @@
             flex: 1;
         }
 
-        .modal-body-preview::-webkit-scrollbar { width: 8px; }
-        .modal-body-preview::-webkit-scrollbar-track { background: #F4F1EA; }
-        .modal-body-preview::-webkit-scrollbar-thumb { background: #D6CEC3; border-radius: 4px; }
-        .modal-body-preview::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
-
         .paper-preview {
             background-color: #ffffff;
             color: #241A16;
@@ -394,13 +407,24 @@
             <ul class="nav-menu">
                 <li><a href="{{ route('admin.dashboard') }}" class="nav-item active"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
                 <li><a href="{{ route('admin.katalog.index') }}" class="nav-item"><i class="fa-solid fa-box-open"></i> Kelola Katalog</a></li>
+                <li><a href="{{ route('admin.portofolio.index') }}" class="nav-item"><i class="fa-solid fa-images"></i> Galeri Portofolio</a></li>
                 <li><a href="#" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
                 <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>
             </ul>
         </nav>
         
-        <div style="margin-top: auto;">
-             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-arrow-left"></i> Halaman Utama</a>
+        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout) -->
+        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
+             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                 <i class="fa-solid fa-arrow-left"></i> Halaman Utama
+             </a>
+             
+             <form action="{{ route('logout') }}" method="POST">
+                 @csrf
+                 <button type="submit" class="btn-logout">
+                     <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
+                 </button>
+             </form>
         </div>
     </aside>
 
