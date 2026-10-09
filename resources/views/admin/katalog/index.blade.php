@@ -502,7 +502,7 @@
                     </div>
                     <div class="form-group">
                         <label>Harga (Rp)</label>
-                        <input type="number" name="harga" id="harga" placeholder="7500000" required>
+                        <input type="text" name="harga" id="harga" placeholder="7.500.000" onkeyup="formatRupiah(this)" required>
                     </div>
                 </div>
 
@@ -536,6 +536,25 @@
             form.reset();
             modal.classList.add('show');
         }
+        function formatRupiah(element) {
+    let value = element.value.replace(/[^0-9]/g, '');
+    element.value = value ? new Intl.NumberFormat('id-ID').format(value) : '';
+}
+
+function openModalEdit(paket) {
+    modalTitle.innerText = "Edit Paket Layanan";
+    form.action = `/admin/katalog/${paket.id}`;
+    methodField.value = "PUT";
+
+    document.getElementById('nama_paket').value = paket.nama_paket || '';
+    document.getElementById('kategori').value = paket.kategori || '';
+
+    // Format angka dari database ke format titik
+    document.getElementById('harga').value = paket.harga ? new Intl.NumberFormat('id-ID').format(paket.harga) : '';
+    document.getElementById('deskripsi').value = paket.deskripsi || '';
+
+    modal.classList.add('show');
+}
 
         function openModalEdit(paket) {
             modalTitle.innerText = "Edit Paket Layanan";

@@ -39,7 +39,7 @@
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
 
-        /* ================= SIDEBAR BOTTOM ACTIONS (DESAIN RAPI) ================= */
+        /* ================= SIDEBAR BOTTOM ACTIONS ================= */
         .sidebar-footer {
             margin-top: auto;
             padding-top: 16px;
@@ -224,14 +224,16 @@
                     <input type="text" name="judul" id="judul" placeholder="Contoh: Rias Pengantin Sunda Siger Gold" required>
                 </div>
                 
+                <!-- Dropdown Kategori Dinamis Mengambil dari Tabel Katalog (Paket) -->
                 <div class="form-group">
                     <label>Kategori Rias / Acara</label>
                     <select name="kategori" id="kategori" required>
-                        <option value="Foto Rias Pengantin">Foto Rias Pengantin</option>
-                        <option value="Foto Wedding Organizer">Foto Wedding Organizer</option>
-                        <option value="Foto Rias Wisuda">Foto Rias Wisuda</option>
-                        <option value="Foto Prewedding">Foto Prewedding</option>
-                        <option value="Foto Dekorasi Acara">Foto Dekorasi Acara</option>
+                        <option value="" disabled selected>-- Pilih Kategori --</option>
+                        @forelse($kategoriList as $kat)
+                            <option value="Foto {{ $kat }}">Foto {{ $kat }}</option>
+                        @empty
+                            <option value="" disabled>Belum ada kategori di Kelola Katalog</option>
+                        @endforelse
                     </select>
                 </div>
 
@@ -272,7 +274,7 @@
         }
 
         function confirmDelete(event, form) {
-            event.preventDefault(); // Menghentikan submit bawaan form
+            event.preventDefault();
 
             Swal.fire({
                 title: 'Hapus Foto Portofolio?',

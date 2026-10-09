@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Portofolio;
+use App\Models\Paket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,7 +13,11 @@ class PortofolioController extends Controller
     public function index()
     {
         $portofolios = Portofolio::latest()->get();
-        return view('admin.portofolio.index', compact('portofolios'));
+        
+        // Ambil kategori unik yang tersimpan di tabel pakets
+        $kategoriList = Paket::select('kategori')->distinct()->pluck('kategori');
+
+        return view('admin.portofolio.index', compact('portofolios', 'kategoriList'));
     }
 
     public function store(Request $request)

@@ -401,10 +401,10 @@
                         <input type="text" name="kategori" id="kategori" placeholder="Rias Pengantin" required>
                     </div>
                     <div class="form-group">
-                        <label>Harga (Rp)</label>
-                        <input type="number" name="harga" id="harga" placeholder="7500000" required>
-                    </div>
-                </div>
+    <label>Harga (Rp)</label>
+    <!-- Ubah type menjadi text dan panggil fungsi formatRupiah saat di-input -->
+    <input type="text" name="harga" id="harga" placeholder="7.500.000" onkeyup="formatRupiah(this)" required>
+</div>
 
                 <div class="form-group">
                     <label>Deskripsi Paket</label>
@@ -437,6 +437,16 @@
             modal.classList.add('show');
         }
 
+        // Fungsi memformat angka menjadi format ribuan dengan titik secara real-time
+function formatRupiah(element) {
+    let value = element.value.replace(/[^0-9]/g, ''); // Hapus semua karakter selain angka
+    if (value) {
+        element.value = new Intl.NumberFormat('id-ID').format(value);
+    } else {
+        element.value = '';
+    }
+}
+
         function openModalEdit(paket) {
             modalTitle.innerText = "Edit Paket Layanan";
             form.action = `/admin/katalog/${paket.id}`;
@@ -444,7 +454,7 @@
             
             document.getElementById('nama_paket').value = paket.nama_paket || '';
             document.getElementById('kategori').value = paket.kategori || '';
-            document.getElementById('harga').value = paket.harga || '';
+            document.getElementById('harga').value = new Intl.NumberFormat('id-ID').format(paket.harga || 0);
             document.getElementById('deskripsi').value = paket.deskripsi || '';
             
             modal.classList.add('show');
