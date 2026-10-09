@@ -44,7 +44,7 @@
             padding: 24px 16px; 
             display: flex; 
             flex-direction: column; 
-            gap: 24px; 
+            gap: 20px; 
             box-shadow: 2px 0 10px rgba(0,0,0,0.02);
         }
 
@@ -95,23 +95,59 @@
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
 
-        /* Style untuk Tombol Logout di Bottom Sidebar */
-        .btn-logout {
-            width: 100%;
-            background: none;
-            border: none;
-            color: #EF4444;
-            padding: 10px 0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
+        /* ================= SIDEBAR BOTTOM ACTIONS (DESAIN RAPI) ================= */
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-sidebar-home {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: color 0.2s;
-            margin-top: 8px;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
-        .btn-logout:hover { color: #DC2626; }
+
+        .btn-sidebar-home:hover {
+            background-color: rgba(197, 143, 67, 0.12);
+            color: var(--gold-primary);
+            border-color: var(--gold-primary);
+        }
+
+        .btn-sidebar-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #DC2626;
+            background-color: #FEF2F2;
+            border: 1px solid #FCA5A5;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-sidebar-logout:hover {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border-color: #F87171;
+        }
         
         /* Main Content */
         .main-content { flex: 1; padding: 40px; }
@@ -219,7 +255,7 @@
         .status-dp { background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
         .status-lunas { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
 
-        /* ================= MODAL PREVIEW STYLING (PRESISI & CERAH) ================= */
+        /* ================= MODAL PREVIEW STYLING ================= */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -403,6 +439,7 @@
                 <p>Griya Rias Elly Jr.</p>
             </div>
         </div>
+        
         <nav>
             <ul class="nav-menu">
                 <li><a href="{{ route('admin.dashboard') }}" class="nav-item active"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
@@ -413,15 +450,17 @@
             </ul>
         </nav>
         
-        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout) -->
-        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
-             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 500;">
-                 <i class="fa-solid fa-arrow-left"></i> Halaman Utama
+        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout Mandiri) -->
+        <div class="sidebar-footer">
+             <!-- Link Halaman Utama (Berdiri Sendiri) -->
+             <a href="{{ route('home') }}" class="btn-sidebar-home">
+                 <i class="fa-solid fa-globe"></i> Halaman Utama
              </a>
              
-             <form action="{{ route('logout') }}" method="POST">
+             <!-- Form Logout Mandiri -->
+             <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                  @csrf
-                 <button type="submit" class="btn-logout">
+                 <button type="submit" class="btn-sidebar-logout">
                      <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
                  </button>
              </form>

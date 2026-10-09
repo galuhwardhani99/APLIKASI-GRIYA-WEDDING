@@ -26,7 +26,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
 
-        .sidebar { width: 260px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
+        .sidebar { width: 260px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
         .sidebar-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
         .sidebar-brand img { width: 42px; height: 42px; object-fit: cover; border-radius: 6px; }
         .brand-text h2 { font-family: 'Playfair Display', serif; color: var(--gold-primary); font-size: 1.15rem; line-height: 1.2; margin-bottom: 2px; }
@@ -39,22 +39,59 @@
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
 
-        .btn-logout {
-            width: 100%;
-            background: none;
-            border: none;
-            color: #EF4444;
-            padding: 10px 0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
+        /* ================= SIDEBAR BOTTOM ACTIONS (DESAIN RAPI) ================= */
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-sidebar-home {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: color 0.2s;
-            margin-top: 8px;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
-        .btn-logout:hover { color: #DC2626; }
+
+        .btn-sidebar-home:hover {
+            background-color: rgba(197, 143, 67, 0.12);
+            color: var(--gold-primary);
+            border-color: var(--gold-primary);
+        }
+
+        .btn-sidebar-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #DC2626;
+            background-color: #FEF2F2;
+            border: 1px solid #FCA5A5;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-sidebar-logout:hover {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border-color: #F87171;
+        }
 
         .main-content { flex: 1; padding: 40px; }
         .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
@@ -66,11 +103,11 @@
         .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
         .portfolio-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         .portfolio-img { 
-    width: 100%; 
-    height: 320px; 
-    object-fit: contain; /* Menampilkan seluruh area foto secara utuh */
-    background-color: #FAFAFA;
-}
+            width: 100%; 
+            height: 320px; 
+            object-fit: contain; 
+            background-color: #FAFAFA;
+        }
         .portfolio-body { padding: 16px; }
         .portfolio-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
         .portfolio-cat { font-size: 0.8rem; color: var(--gold-primary); font-weight: 600; text-transform: uppercase; margin-bottom: 12px; }
@@ -95,10 +132,10 @@
 </head>
 <body>
 
-    <!-- Sidebar Admin -->
+    <!-- Sidebar Admin Panel -->
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <img src="{{ asset('images/logo.jpeg') }}" alt="Logo">
+            <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr.">
             <div class="brand-text">
                 <h2>Admin Panel</h2>
                 <p>Griya Rias Elly Jr.</p>
@@ -114,14 +151,17 @@
             </ul>
         </nav>
 
-        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
-             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 500;">
-                 <i class="fa-solid fa-arrow-left"></i> Halaman Utama
+        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout Mandiri) -->
+        <div class="sidebar-footer">
+             <!-- Link Halaman Utama Mandiri -->
+             <a href="{{ route('home') }}" class="btn-sidebar-home">
+                 <i class="fa-solid fa-globe"></i> Halaman Utama
              </a>
-             
-             <form action="{{ route('logout') }}" method="POST">
+
+             <!-- Form Logout Mandiri -->
+             <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                  @csrf
-                 <button type="submit" class="btn-logout">
+                 <button type="submit" class="btn-sidebar-logout">
                      <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
                  </button>
              </form>
@@ -136,35 +176,35 @@
         </div>
 
         <div class="portfolio-grid">
-    @forelse($portofolios as $item)
-        <div class="portfolio-card">
-            <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}" class="portfolio-img">
-            <div class="portfolio-body">
-                <div class="portfolio-cat">{{ $item->kategori }}</div>
-                <h3 class="portfolio-title">{{ $item->judul }}</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">{{ Str::limit($item->deskripsi, 60) }}</p>
-                
-                <div class="portfolio-actions">
-                    <button class="btn-sm btn-edit" onclick="openModalEdit({{ json_encode($item) }})">
-                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                    </button>
-                    
-                    <form action="{{ route('admin.portofolio.destroy', $item->id) }}" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this)">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn-sm btn-delete">
-        <i class="fa-solid fa-trash"></i> Hapus
-    </button>
-</form>
+            @forelse($portofolios as $item)
+                <div class="portfolio-card">
+                    <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}" class="portfolio-img">
+                    <div class="portfolio-body">
+                        <div class="portfolio-cat">{{ $item->kategori }}</div>
+                        <h3 class="portfolio-title">{{ $item->judul }}</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">{{ Str::limit($item->deskripsi, 60) }}</p>
+                        
+                        <div class="portfolio-actions">
+                            <button class="btn-sm btn-edit" onclick="openModalEdit({{ json_encode($item) }})">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            
+                            <form action="{{ route('admin.portofolio.destroy', $item->id) }}" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this)">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-sm btn-delete">
+                                    <i class="fa-solid fa-trash"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @empty
+                <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px solid var(--border-color);">
+                    Belum ada foto portofolio yang diunggah.
+                </div>
+            @endforelse
         </div>
-    @empty
-        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px; background: #fff; border-radius: 12px; border: 1px solid var(--border-color);">
-            Belum ada foto portofolio yang diunggah.
-        </div>
-    @endforelse
-</div>
     </main>
 
     <!-- Modal Form -->
@@ -214,6 +254,7 @@
         </div>
     </div>
 
+    <!-- Script Notifikasi & Modal -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const modal = document.getElementById('portofolioModal');
@@ -229,29 +270,27 @@
             form.reset();
             modal.classList.add('show');
         }
-        function confirmDelete(event, form) {
-    event.preventDefault(); // Menghentikan submit bawaan form
 
-    Swal.fire({
-        title: 'Hapus Foto Portofolio?',
-        text: "Foto yang dihapus tidak dapat dikembalikan!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#EF4444',
-        cancelButtonColor: '#8C8279',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal',
-        background: '#FFFFFF',
-        color: '#241A16',
-        customClass: {
-            popup: 'swal2-styled-popup'
+        function confirmDelete(event, form) {
+            event.preventDefault(); // Menghentikan submit bawaan form
+
+            Swal.fire({
+                title: 'Hapus Foto Portofolio?',
+                text: "Foto yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            form.submit(); // Jalankan submit jika user klik 'Ya, Hapus!'
-        }
-    });
-}
 
         function openModalEdit(item) {
             modalTitle.innerText = "Edit Foto Portofolio";
@@ -270,16 +309,18 @@
             modal.classList.remove('show');
         }
 
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}',
-                confirmButtonColor: '#C58F43',
-                background: '#FFFFFF',
-                color: '#241A16'
-            });
-        @endif
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#C58F43',
+                    background: '#FFFFFF',
+                    color: '#241A16'
+                });
+            @endif
+        });
     </script>
 </body>
 </html>

@@ -47,7 +47,7 @@
             padding: 24px 16px; 
             display: flex; 
             flex-direction: column; 
-            gap: 24px; 
+            gap: 20px; 
             box-shadow: 2px 0 10px rgba(0,0,0,0.02);
         }
 
@@ -98,23 +98,59 @@
         .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
         .nav-item.active i { color: #fff; }
 
-        /* Style Tombol Logout Bottom Sidebar */
-        .btn-logout {
-            width: 100%;
-            background: none;
-            border: none;
-            color: #EF4444;
-            padding: 10px 0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
+        /* ================= SIDEBAR BOTTOM ACTIONS (DESAIN RAPI) ================= */
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-sidebar-home {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: color 0.2s;
-            margin-top: 8px;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
-        .btn-logout:hover { color: #DC2626; }
+
+        .btn-sidebar-home:hover {
+            background-color: rgba(197, 143, 67, 0.12);
+            color: var(--gold-primary);
+            border-color: var(--gold-primary);
+        }
+
+        .btn-sidebar-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #DC2626;
+            background-color: #FEF2F2;
+            border: 1px solid #FCA5A5;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-sidebar-logout:hover {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border-color: #F87171;
+        }
 
         /* Main Content */
         .main-content { flex: 1; padding: 40px; }
@@ -330,7 +366,6 @@
 <body>
 
     <!-- Sidebar Admin Panel -->
-    <!-- Sidebar Admin Panel -->
     <aside class="sidebar">
         <!-- Brand + Logo Sidebar -->
         <div class="sidebar-brand">
@@ -371,15 +406,17 @@
             </ul>
         </nav>        
         
-        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout) -->
-        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
-             <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 500;">
-                 <i class="fa-solid fa-arrow-left"></i> Halaman Utama
+        <!-- Bottom Actions (Kembali ke Halaman Utama & Logout Mandiri) -->
+        <div class="sidebar-footer">
+             <!-- Link Halaman Utama Mandiri -->
+             <a href="{{ route('home') }}" class="btn-sidebar-home">
+                 <i class="fa-solid fa-globe"></i> Halaman Utama
              </a>
 
-             <form action="{{ route('logout') }}" method="POST">
+             <!-- Form Logout Mandiri -->
+             <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                  @csrf
-                 <button type="submit" class="btn-logout">
+                 <button type="submit" class="btn-sidebar-logout">
                      <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
                  </button>
              </form>
@@ -423,12 +460,12 @@
                                 </button>
                                 
                                 <form action="{{ route('admin.katalog.destroy', $paket->id) }}" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this)">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn-sm btn-delete">
-        <i class="fa-solid fa-trash"></i> Hapus
-    </button>
-</form>
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-sm btn-delete">
+                                        <i class="fa-solid fa-trash"></i> Hapus
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty
@@ -512,29 +549,27 @@
             
             modal.classList.add('show');
         }
-        function confirmDelete(event, form) {
-    event.preventDefault(); // Menghentikan submit bawaan form
 
-    Swal.fire({
-        title: 'Hapus Foto Portofolio?',
-        text: "Foto yang dihapus tidak dapat dikembalikan!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#EF4444',
-        cancelButtonColor: '#8C8279',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal',
-        background: '#FFFFFF',
-        color: '#241A16',
-        customClass: {
-            popup: 'swal2-styled-popup'
+        function confirmDelete(event, form) {
+            event.preventDefault(); // Menghentikan submit bawaan form
+
+            Swal.fire({
+                title: 'Hapus Paket Layanan?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            form.submit(); // Jalankan submit jika user klik 'Ya, Hapus!'
-        }
-    });
-}
 
         function closeModal() {
             modal.classList.remove('show');
