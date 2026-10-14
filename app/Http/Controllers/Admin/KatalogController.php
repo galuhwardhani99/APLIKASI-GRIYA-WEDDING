@@ -12,12 +12,18 @@ class KatalogController extends Controller
     {
         $pakets = Paket::latest()->get();
         
-        // Disesuaikan jika nama filenya resources/views/admin/katalog.blade.php
         return view('admin.katalog.index', compact('pakets'));
     }
 
     public function store(Request $request)
     {
+        // Bersihkan tanda titik dari input harga sebelum validasi
+        if ($request->has('harga')) {
+            $request->merge([
+                'harga' => str_replace('.', '', $request->harga)
+            ]);
+        }
+
         $validated = $request->validate([
             'nama_paket' => 'required|string|max:255',
             'kategori'   => 'required|string|max:100',
@@ -33,6 +39,13 @@ class KatalogController extends Controller
 
     public function update(Request $request, string $id)
     {
+        // Bersihkan tanda titik dari input harga sebelum validasi
+        if ($request->has('harga')) {
+            $request->merge([
+                'harga' => str_replace('.', '', $request->harga)
+            ]);
+        }
+
         $validated = $request->validate([
             'nama_paket' => 'required|string|max:255',
             'kategori'   => 'required|string|max:100',

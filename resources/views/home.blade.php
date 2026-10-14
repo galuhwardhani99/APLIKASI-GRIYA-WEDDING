@@ -104,12 +104,22 @@
             <p>Sebagian hasil rias dan acara yang pernah kami kerjakan</p>
         </div>
 
-        <div class="gallery">
-            @foreach (['Rias Pengantin', 'Wedding Organizer', 'Rias Wisuda', 'Prewedding', 'Dekorasi Acara'] as $i => $label)
-                <figure class="g g{{ $i + 1 }} reveal" style="--d:{{ $i * 90 }}ms">
-                    <div class="g-in"><span>[ Foto {{ $label }} ]</span></div>
+        <div class="gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+            @forelse ($portofolios as $i => $item)
+                <figure class="g reveal" style="--d:{{ $i * 90 }}ms; margin: 0; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.06); background-color: #FFFFFF;">
+                    <div class="g-in" style="width: 100%; height: 380px; overflow: hidden; background-color: #FAFAFA;">
+                        <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.4s ease;">
+                    </div>
+                    <figcaption style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; background: linear-gradient(transparent, rgba(36,26,22,0.85)); color: #FFF;">
+                        <small style="color: #C58F43; font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">{{ $item->kategori }}</small>
+                        <h4 style="font-size: 1rem; margin-top: 2px; font-family: 'Playfair Display', serif; font-weight: 600;">{{ $item->judul }}</h4>
+                    </figcaption>
                 </figure>
-            @endforeach
+            @empty
+                <div style="grid-column: 1 / -1; text-align: center; color: #8C8279; padding: 40px; background: #FFF; border-radius: 12px; border: 1px solid #EFE8DE;">
+                    Belum ada foto portofolio yang diunggah.
+                </div>
+            @endforelse
         </div>
     </div>
 </section>
