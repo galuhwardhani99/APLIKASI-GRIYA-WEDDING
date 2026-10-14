@@ -344,7 +344,7 @@
                         $dataPakets = isset($pakets) ?$pakets : (isset($katalogs) ?$katalogs : []);
                     @endphp
 
-                    @forelse($dataPakets as$paket)
+                    @forelse($dataPakets as $paket)
                         <tr>
                             <td style="font-weight: 600;">{{ $paket->nama_paket }}</td>
                             <td style="text-align: center; color: var(--text-muted);">{{ $paket->kategori }}</td>

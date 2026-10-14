@@ -442,12 +442,15 @@
         
         <nav>
             <ul class="nav-menu">
-                <li><a href="{{ route('admin.dashboard') }}" class="nav-item active"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
-                <li><a href="{{ route('admin.katalog.index') }}" class="nav-item"><i class="fa-solid fa-box-open"></i> Kelola Katalog</a></li>
-                <li><a href="{{ route('admin.portofolio.index') }}" class="nav-item"><i class="fa-solid fa-images"></i> Galeri Portofolio</a></li>
-                <li><a href="#" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
-                <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>
-            </ul>
+    <li><a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
+    <li><a href="{{ route('admin.katalog.index') }}" class="nav-item"><i class="fa-solid fa-box-open"></i> Kelola Katalog</a></li>
+    <li><a href="{{ route('admin.portofolio.index') }}" class="nav-item"><i class="fa-solid fa-images"></i> Galeri Portofolio</a></li>
+    
+    <!-- Panggil nama route yang sudah didaftarkan -->
+    <li><a href="{{ route('admin.jadwal.index') }}" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
+    
+    <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>
+</ul>
         </nav>
         
         <!-- Bottom Actions (Kembali ke Halaman Utama & Logout Mandiri) -->

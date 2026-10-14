@@ -226,16 +226,16 @@
                 
                 <!-- Dropdown Kategori Dinamis Mengambil dari Tabel Katalog (Paket) -->
                 <div class="form-group">
-                    <label>Kategori Rias / Acara</label>
-                    <select name="kategori" id="kategori" required>
-                        <option value="" disabled selected>-- Pilih Kategori --</option>
-                        @forelse($kategoriList as $kat)
-                            <option value="Foto {{ $kat }}">Foto {{ $kat }}</option>
-                        @empty
-                            <option value="" disabled>Belum ada kategori di Kelola Katalog</option>
-                        @endforelse
-                    </select>
-                </div>
+    <label>Kategori Rias / Acara</label>
+    <select name="kategori" id="kategori" required>
+        <option value="">-- Pilih Kategori --</option>
+        
+        {{-- Loop kategori unik dari Paket/Katalog --}}
+        @foreach($kategoriList as $kategori)
+            <option value="{{ $kategori }}">{{ $kategori }}</option>
+        @endforeach
+    </select>
+</div>
 
                 <div class="form-group">
                     <label>File Foto Gambar</label>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\KatalogController;
 use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController;
 use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\JadwalController;
 
 // Halaman Utama Client
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -25,6 +26,22 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
 // ---------- Admin ----------
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+    Route::post('/jadwal/validasi/{id}', [JadwalController::class, 'validasi'])->name('jadwal.validasi');
+    Route::put('/jadwal/update-tanggal/{id}', [JadwalController::class, 'updateTanggal'])->name('jadwal.updateTanggal');
+});
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('katalog', KatalogController::class);
+    Route::resource('portofolio', PortofolioController::class);
+
+    // Route untuk Jadwal Acara
+    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+    Route::post('/jadwal/validasi/{id}', [JadwalController::class, 'validasi'])->name('jadwal.validasi');
+    Route::put('/jadwal/update-tanggal/{id}', [JadwalController::class, 'updateTanggal'])->name('jadwal.updateTanggal');
+});
+
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
     
