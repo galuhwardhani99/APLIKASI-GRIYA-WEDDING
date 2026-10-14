@@ -9,7 +9,6 @@ class Reservasi extends Model
 {
     use HasFactory;
 
-    // Explicitly set nama tabel tanpa akhiran 's'
     protected $table = 'reservasi';
     protected $primaryKey = 'id_reservasi';
 
@@ -22,6 +21,7 @@ class Reservasi extends Model
         'tanggal_pengajuan',
         'status_reservasi',
         'id_akun',
+        'bukti_transfer',
     ];
 
     public function user()
