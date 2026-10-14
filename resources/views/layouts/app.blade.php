@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <title>@yield('title', 'Beranda') - Griya Rias Elly Jr.</title>
+    <link rel="icon" href="{{ asset('images/logo.jpg') }}" type="image/jpeg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -95,18 +96,17 @@
 
     <header class="nav" id="nav">
         <div class="nav-inner">
-            <nav class="nav-side nav-left">
+ <nav class="nav-side nav-left">
                 <a href="#beranda" class="nav-link active">Beranda</a>
                 <a href="#katalog" class="nav-link">Katalog WO/EO</a>
                 <a href="#tentang" class="nav-link">Tentang Kami</a>
             </nav>
 
-            <a href="{{ route('home') }}" class="brand">
-                <small>GRIYA RIAS</small>
-                <strong>Elly Jr.</strong>
-                <em>Make Up &amp; Event Organizer</em>
+            <a href="{{ route('home') }}" class="brand" style="margin: 0; padding: 5px; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Logo Elly Jr" style="max-height: 70px; width: auto; border-radius: 8px;">
             </a>
 
+            <nav class="nav-side nav-right">
             <nav class="nav-side nav-right">
                 <a href="#galeri" class="nav-link">Galeri Portofolio</a>
                 <a href="#kontak" class="nav-link">Kontak</a>

@@ -20,21 +20,25 @@
         </div>
 
         <nav class="flex flex-col gap-3">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-[#432d22] hover:text-white transition duration-200">
+            <!-- Menu Dashboard -->
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-[#d79d57] text-[#241712] font-bold' : 'text-gray-400 hover:bg-[#432d22] hover:text-white' }} transition duration-200">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span class="text-sm font-medium">Dashboard</span>
             </a>
             
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#d79d57] text-[#241712] transition shadow-md">
+            <!-- Menu Kelola Katalog -->
+            <a href="{{ route('admin.katalog.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('admin.katalog*') ? 'bg-[#d79d57] text-[#241712] font-bold' : 'text-gray-400 hover:bg-[#432d22] hover:text-white' }} transition duration-200">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 <span class="text-sm font-bold">Kelola Katalog</span>
             </a>
 
+            <!-- Menu Jadwal Acara -->
             <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-[#432d22] hover:text-white transition duration-200">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 <span class="text-sm font-medium">Jadwal Acara</span>
             </a>
 
+            <!-- Menu Laporan Transaksi -->
             <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-[#432d22] hover:text-white transition duration-200">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 <span class="text-sm font-medium">Laporan Transaksi</span>
@@ -82,12 +86,12 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-6 px-6 text-center text-sm text-gray-400">Belum ada data paket yang ditambahkan.</td>
+                                <td colspan="5" class="py-6 px-6 text-center text-sm text-gray-400">Belum ada data paket layanan.</td>
                             </tr>
                         @endforelse
                     @else
                         <tr>
-                            <td colspan="5" class="py-6 px-6 text-center text-sm text-gray-400">Belum ada data paket yang ditambahkan.</td>
+                            <td colspan="5" class="py-6 px-6 text-center text-sm text-gray-400">Belum ada data paket layanan.</td>
                         </tr>
                     @endisset
                 </tbody>
@@ -103,8 +107,8 @@
 
             <h3 class="text-gray-900 font-serif font-bold text-lg mb-4 border-b pb-2">Form Tambah / Edit Paket Layanan</h3>
 
-            <!-- Form Mengarah ke rute POST /katalog -->
-            <form action="{{ url('/katalog') }}" method="POST">
+            <!-- Form Mengarah ke rute admin katalog store -->
+            <form action="{{ route('admin.katalog.store') }}" method="POST">
                 @csrf
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Paket Layanan</label>
