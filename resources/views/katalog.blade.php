@@ -286,6 +286,33 @@
             <h2>Admin Panel</h2>
             <p>Griya Rias Elly Jr.</p>
         </div>
+<<<<<<< HEAD
+
+        <nav class="flex flex-col gap-3">
+            <!-- Menu Dashboard -->
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-[#d79d57] text-[#241712] font-bold' : 'text-gray-400 hover:bg-[#432d22] hover:text-white' }} transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="text-sm font-medium">Dashboard</span>
+            </a>
+            
+            <!-- Menu Kelola Katalog -->
+            <a href="{{ route('admin.katalog.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('admin.katalog*') ? 'bg-[#d79d57] text-[#241712] font-bold' : 'text-gray-400 hover:bg-[#432d22] hover:text-white' }} transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <span class="text-sm font-bold">Kelola Katalog</span>
+            </a>
+
+            <!-- Menu Jadwal Acara -->
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-[#432d22] hover:text-white transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-sm font-medium">Jadwal Acara</span>
+            </a>
+
+            <!-- Menu Laporan Transaksi -->
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-[#432d22] hover:text-white transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span class="text-sm font-medium">Laporan Transaksi</span>
+            </a>
+=======
         <nav>
             <ul class="nav-menu">
                 <li>
@@ -309,6 +336,7 @@
                     </a>
                 </li>
             </ul>
+>>>>>>> f6f1e2703e6814a15be976d70ce6583ee0cced41
         </nav>
         
         <!-- Tombol Kembali ke Halaman Utama -->
@@ -339,6 +367,31 @@
                         <th style="text-align: center;">Aksi</th>
                     </tr>
                 </thead>
+<<<<<<< HEAD
+                <tbody class="divide-y divide-[#432d22]">
+                    @isset($katalogs)
+                        @forelse($katalogs as $item)
+                            <tr class="hover:bg-[#3a271d] transition duration-150">
+                                <td class="py-4 px-6 text-sm font-medium text-gray-200">{{ $item->nama_paket }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-400 text-center">{{ $item->kategori }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-400 text-center">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                <td class="py-4 px-6 text-sm text-center">
+                                    <span class="text-green-500 font-semibold tracking-wide">Aktif</span>
+                                </td>
+                                <td class="py-4 px-6 text-sm text-center space-x-2">
+                                    <button class="bg-[#2563eb] hover:bg-blue-700 text-white px-4 py-1.5 rounded text-xs font-medium transition shadow">Edit</button>
+                                    <button class="bg-[#dc2626] hover:bg-red-700 text-white px-4 py-1.5 rounded text-xs font-medium transition shadow">Hapus</button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-6 px-6 text-center text-sm text-gray-400">Belum ada data paket layanan.</td>
+                            </tr>
+                        @endforelse
+                    @else
+                        <tr>
+                            <td colspan="5" class="py-6 px-6 text-center text-sm text-gray-400">Belum ada data paket layanan.</td>
+=======
                 <tbody>
                     @php
                         $dataPakets = isset($pakets) ?$pakets : (isset($katalogs) ?$katalogs : []);
@@ -367,6 +420,7 @@
                                     </button>
                                 </form>
                             </td>
+>>>>>>> f6f1e2703e6814a15be976d70ce6583ee0cced41
                         </tr>
                     @empty
                         <tr>
@@ -386,7 +440,16 @@
                 <button class="btn-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
+<<<<<<< HEAD
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+
+            <h3 class="text-gray-900 font-serif font-bold text-lg mb-4 border-b pb-2">Form Tambah / Edit Paket Layanan</h3>
+
+            <!-- Form Mengarah ke rute admin katalog store -->
+            <form action="{{ route('admin.katalog.store') }}" method="POST">
+=======
             <form id="paketForm" action="{{ route('admin.katalog.store') }}" method="POST">
+>>>>>>> f6f1e2703e6814a15be976d70ce6583ee0cced41
                 @csrf
                 <input type="hidden" name="_method" id="methodField" value="POST">
                 

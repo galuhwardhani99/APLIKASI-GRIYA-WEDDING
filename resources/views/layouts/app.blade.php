@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Favicon (Logo Tab Browser) -->
-    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
     
     <!-- CSRF Token untuk Keamanan Sesi -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -20,13 +20,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
-        /* Flex Topbar dengan Info & Tombol Keluar di Kanan Atas */
+        /* Flex Topbar dengan Teks di Tengah & Tombol Keluar di Kanan Atas */
         .topbar-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Membuat teks berada tepat di tengah */
             align-items: center;
             padding: 0 32px;
             width: 100%;
+            position: relative; /* Mengunci posisi tombol di dalam topbar */
+        }
+
+        .topbar-logout-form {
+            position: absolute;
+            right: 32px; /* Mengunci tombol keluar di pojok kanan */
         }
 
         .topbar-logout-btn {
@@ -88,10 +94,10 @@
     <!-- Topbar Paling Atas (Teks Sambutan + Tombol Keluar Akun) -->
     <div class="topbar">
         <div class="topbar-container">
-            <span>✨ Welcome to Griya Rias Elly Jr. - Spesialis Tata Rias Pengantin, Wedding &amp; Event Organizer</span>
+            <span style="text-align: center;">✨ Welcome to Griya Rias Elly Jr. - Spesialis Tata Rias Pengantin, Wedding &amp; Event Organizer</span>
             
             @auth
-                <form method="POST" action="{{ route('logout') }}" style="display:inline; margin:0;">
+                <form method="POST" action="{{ route('logout') }}" class="topbar-logout-form" style="margin:0;">
                     @csrf
                     <button type="submit" class="topbar-logout-btn">
                         <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
@@ -110,10 +116,11 @@
                 <a href="#tentang" class="nav-link">Tentang Kami</a>
             </nav>
 
-            <a href="{{ route('home') }}" class="brand">
+            <!-- Teks Logo Susun di Tengah -->
+            <a href="{{ route('home') }}" class="brand" style="padding-right: 12px;">
                 <small>GRIYA RIAS</small>
                 <strong>Elly Jr.</strong>
-                <em>Make Up &amp; Event Organizer</em>
+                <em style="padding-right: 6px; display: inline-block;">Make Up &amp; Event Organizer</em>
             </a>
 
             <nav class="nav-side nav-right">

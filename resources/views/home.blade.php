@@ -75,8 +75,8 @@
 <section class="section section-sand" id="tentang">
     <div class="container about">
         <div class="about-img reveal">
-            <div class="ph-big"><span>[ Foto Griya Rias Elly Jr. ]</span></div>
-            <div class="about-badge">Make Up &amp; Event Organizer</div>
+        <img src="{{ asset('images/logo.jpg') }}" alt="Griya Rias Elly Jr." style="width: 100%; border-radius: 10px;">            
+        <div class="about-badge">Make Up &amp; Event Organizer</div>
         </div>
 
         <div class="about-text">
