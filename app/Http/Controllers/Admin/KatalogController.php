@@ -8,16 +8,34 @@ use Illuminate\Http\Request;
 
 class KatalogController extends Controller
 {
-    public function index()
-    {
-        $pakets = Paket::latest()->get();
-        
-        return view('admin.katalog.index', compact('pakets'));
+    public function index(Request $request)
+{
+    try {
+        $query = Paket::query();
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('nama_paket', 'like', "%{$search}%")
+                  ->orWhere('kategori', 'like', "%{$search}%");
+        }
+
+        $pakets = $query->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $pakets
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+            'data'    => []
+        ], 500);
     }
+}
 
     public function store(Request $request)
     {
-        // Bersihkan tanda titik dari input harga sebelum validasi
         if ($request->has('harga')) {
             $request->merge([
                 'harga' => str_replace('.', '', $request->harga)
@@ -31,15 +49,17 @@ class KatalogController extends Controller
             'deskripsi'  => 'nullable|string',
         ]);
 
-        Paket::create($validated);
+        $paket = Paket::create($validated);
 
-        return redirect()->route('admin.katalog.index')
-            ->with('success', 'Katalog layanan berhasil ditambahkan.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Katalog layanan berhasil ditambahkan',
+            'data'    => $paket
+        ], 201);
     }
 
     public function update(Request $request, string $id)
     {
-        // Bersihkan tanda titik dari input harga sebelum validasi
         if ($request->has('harga')) {
             $request->merge([
                 'harga' => str_replace('.', '', $request->harga)
@@ -56,8 +76,11 @@ class KatalogController extends Controller
         $paket = Paket::findOrFail($id);
         $paket->update($validated);
 
-        return redirect()->route('admin.katalog.index')
-            ->with('success', 'Katalog layanan berhasil diperbarui.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Katalog layanan berhasil diperbarui',
+            'data'    => $paket
+        ], 200);
     }
 
     public function destroy(string $id)
@@ -65,7 +88,9 @@ class KatalogController extends Controller
         $paket = Paket::findOrFail($id);
         $paket->delete();
 
-        return redirect()->route('admin.katalog.index')
-            ->with('success', 'Katalog layanan berhasil dihapus.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Katalog layanan berhasil dihapus'
+        ], 200);
     }
 }
