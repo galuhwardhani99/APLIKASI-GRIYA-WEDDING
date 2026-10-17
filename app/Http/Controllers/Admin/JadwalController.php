@@ -33,8 +33,8 @@ class JadwalController extends Controller
             [
                 'divalidasi_oleh' => Auth::id(),
                 'status_validasi' => 'Tervalidasi',
-                'waktu_mulai'     => $request->waktu_mulai ?? '08:00:00',
-                'waktu_selesai'   => $request->waktu_selesai ?? '16:00:00',
+                'waktu_mulai'     => $request->waktu_mulai ?? $reservasi->waktu_mulai ?? '08:00:00',
+                'waktu_selesai'   => $request->waktu_selesai ?? $reservasi->waktu_selesai ?? '16:00:00',
             ]
         );
 

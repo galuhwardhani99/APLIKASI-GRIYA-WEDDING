@@ -57,6 +57,9 @@
             border-bottom: 1px solid var(--border-color); 
         }
 
+        .sidebar-brand img { display:none; }
+        .sidebar-brand { align-items:flex-start; padding-left:12px; }
+
         .sidebar-brand img {
             width: 42px;
             height: 42px;
@@ -67,9 +70,10 @@
         .brand-text h2 { 
             font-family: 'Playfair Display', serif; 
             color: var(--gold-primary); 
-            font-size: 1.15rem; 
+            font-size: 0.67rem; 
+            letter-spacing: .2em;
             line-height: 1.2;
-            margin-bottom: 2px; 
+            margin-bottom: 2px;
         }
 
         .brand-text p { 
@@ -77,13 +81,20 @@
             color: var(--text-muted); 
         }
 
-        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .admin-sidebar-user { display:flex; align-items:center; gap:11px; padding:16px 8px; border-bottom:1px solid var(--border-color); }
+        .admin-sidebar-avatar { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:#f4e6d2; color:#93622d; font-weight:800; }
+        .admin-sidebar-user strong,.admin-sidebar-user small { display:block; }
+        .admin-sidebar-user strong { font-size:.86rem; }
+        .admin-sidebar-user small { color:var(--text-muted); font-size:.72rem; margin-top:3px; }
+        .admin-nav-label { list-style:none; font-size:.65rem; letter-spacing:.12em; font-weight:800; color:#a59a8e; padding:2px 12px 4px; }
+
+        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 5px; }
         .nav-item { 
-            padding: 12px 16px; 
+            padding: 11px 12px; 
             border-radius: 8px; 
             color: var(--text-dark); 
             text-decoration: none; 
-            font-size: 0.95rem; 
+            font-size: 0.88rem; 
             display: flex; 
             align-items: center; 
             gap: 12px; 
@@ -435,13 +446,16 @@
         <div class="sidebar-brand">
             <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr.">
             <div class="brand-text">
-                <h2>Admin Panel</h2>
-                <p>Griya Rias Elly Jr.</p>
+                <h2>GRIYA RIAS</h2>
+                <p style="font-family:'Playfair Display',serif;font-size:1.25rem;color:#241a16;font-weight:700;">Elly Jr.</p>
+                <p>Area Admin</p>
             </div>
         </div>
+        <div class="admin-sidebar-user"><span class="admin-sidebar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span><div><strong>{{ auth()->user()->name }}</strong><small>Administrator</small></div></div>
         
         <nav>
             <ul class="nav-menu">
+    <li class="admin-nav-label">MENU UTAMA</li>
     <li><a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
     <li><a href="{{ route('admin.layanan.index') }}" class="nav-item"><i class="fa-solid fa-scissors"></i> Kelola Layanan</a></li>
     <li><a href="{{ route('admin.paket.index') }}" class="nav-item"><i class="fa-solid fa-box-open"></i> Kelola Paket</a></li>
@@ -449,6 +463,7 @@
     <li><a href="{{ route('admin.portofolio.index') }}" class="nav-item"><i class="fa-solid fa-images"></i> Galeri Portofolio</a></li>
     
     <!-- Panggil nama route yang sudah didaftarkan -->
+    <li class="admin-nav-label" style="padding-top:14px;">AKTIVITAS</li>
     <li><a href="{{ route('admin.jadwal.index') }}" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
     
     <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>

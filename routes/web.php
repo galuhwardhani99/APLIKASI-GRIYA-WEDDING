@@ -56,6 +56,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // ---------- Client ----------
 Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
+    Route::get('/riwayat-reservasi', [ClientDashboardController::class, 'riwayatReservasi'])->name('client.riwayat.reservasi');
+    Route::get('/riwayat-transaksi', [ClientDashboardController::class, 'riwayatTransaksi'])->name('client.riwayat.transaksi');
     Route::get('/katalog/layanan', [ClientDashboardController::class, 'katalogLayanan'])->name('client.katalog.layanan');
     Route::get('/katalog/paket', [ClientDashboardController::class, 'katalogPaket'])->name('client.katalog.paket');
 
