@@ -33,7 +33,11 @@
             <a href="{{ route('galeri') }}" class="text-[#C58F43] border-b-2 border-[#C58F43] pb-1">Galeri Portofolio</a>
             <a href="/kontak" class="hover:text-[#C58F43]">Kontak</a>
             @auth
-                <a href="{{ route('admin.dashboard') }}" class="bg-[#C58F43] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#a87632] transition">Dashboard Admin</a>
+                @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="bg-[#C58F43] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#a87632] transition">Dashboard Admin</a>
+                @else
+                    <a href="{{ route('client.dashboard') }}" class="bg-[#C58F43] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#a87632] transition">Dashboard Saya</a>
+                @endif
             @else
                 <a href="/login" class="bg-[#C58F43] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#a87632] transition">Login</a>
             @endauth
@@ -42,8 +46,8 @@
 
     <!-- Section Title -->
     <section class="text-center py-12 px-4">
-        <h1 class="font-serif text-4xl font-bold text-[#241A16] mb-3">Galeri Portofolio</h1>
-        <p class="text-gray-500 text-sm">Sebagian hasil rias dan acara yang pernah kami kerjakan</p>
+        <h1 class="font-serif text-4xl font-bold text-[#241A16] mb-3">Seluruh Galeri Portofolio</h1>
+        <p class="text-gray-500 text-sm">Kumpulan hasil rias dan acara yang pernah kami kerjakan</p>
     </section>
 
     <!-- Dynamic Portfolio Grid -->

@@ -144,7 +144,8 @@
         <nav>
             <ul class="nav-menu">
                 <li><a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-shapes"></i> Dashboard</a></li>
-                <li><a href="{{ route('admin.katalog.index') }}" class="nav-item"><i class="fa-solid fa-box-open"></i> Kelola Katalog</a></li>
+                <li><a href="{{ route('admin.layanan.index') }}" class="nav-item"><i class="fa-solid fa-scissors"></i> Kelola Layanan</a></li>
+                <li><a href="{{ route('admin.paket.index') }}" class="nav-item"><i class="fa-solid fa-box-open"></i> Kelola Paket</a></li>
                 <li><a href="{{ route('admin.portofolio.index') }}" class="nav-item active"><i class="fa-solid fa-images"></i> Galeri Portofolio</a></li>
                 <li><a href="#" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
                 <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>

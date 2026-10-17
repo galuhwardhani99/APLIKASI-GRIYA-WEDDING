@@ -1,17 +1,29 @@
 <?php
 
+use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\KategoriPaketController;
+use App\Http\Controllers\Admin\LayananController;
+use App\Http\Controllers\Admin\PaketController;
+use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
-use App\Http\Controllers\Admin\KatalogController;
-use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController;
 use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\JadwalController;
 
-// Halaman Utama Client
+// ---------- Halaman Publik ----------
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/galeri', function () {
+    $portofolios = Portofolio::latest()->get();
+
+    return view('galeri', compact('portofolios'));
+})->name('galeri');
+
+// Halaman katalog publik (hapus baris ini kalau resources/views/katalog.blade.php tidak ada)
+Route::view('/katalog', 'katalog')->name('katalog');
 
 // ---------- Guest ----------
 Route::middleware('guest')->group(function () {
@@ -23,50 +35,30 @@ Route::middleware('guest')->group(function () {
 });
 
 // ---------- Auth ----------
-Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
-
-// ---------- Admin ----------
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
-    Route::post('/jadwal/validasi/{id}', [JadwalController::class, 'validasi'])->name('jadwal.validasi');
-    Route::put('/jadwal/update-tanggal/{id}', [JadwalController::class, 'updateTanggal'])->name('jadwal.updateTanggal');
-});
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('katalog', KatalogController::class);
-    Route::resource('portofolio', PortofolioController::class);
-
-    // Route untuk Jadwal Acara
-    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
-    Route::post('/jadwal/validasi/{id}', [JadwalController::class, 'validasi'])->name('jadwal.validasi');
-    Route::put('/jadwal/update-tanggal/{id}', [JadwalController::class, 'updateTanggal'])->name('jadwal.updateTanggal');
-});
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
-    
-    // CRUD Katalog
-    Route::resource('katalog', KatalogController::class)->only([
-        'index', 'store', 'update', 'destroy'
-    ]);
 
-    // CRUD Portofolio
+    Route::resource('layanan', LayananController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('paket', PaketController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('kategori-paket', KategoriPaketController::class)->only(['index', 'store', 'update', 'destroy']);
+
     Route::resource('portofolio', AdminPortofolioController::class);
+
+    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+    Route::post('/jadwal/validasi/{id}', [JadwalController::class, 'validasi'])->name('jadwal.validasi');
+    Route::put('/jadwal/update-tanggal/{id}', [JadwalController::class, 'updateTanggal'])->name('jadwal.updateTanggal');
 });
 
 // ---------- Client ----------
-Route::get('/galeri', function () {
-    $portofolios = Portofolio::latest()->get();
-    return view('galeri', compact('portofolios'));
-})->name('galeri');
+Route::middleware(['auth', 'role:client'])->group(function () {
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
+    Route::get('/katalog/layanan', [ClientDashboardController::class, 'katalogLayanan'])->name('client.katalog.layanan');
+    Route::get('/katalog/paket', [ClientDashboardController::class, 'katalogPaket'])->name('client.katalog.paket');
 
-Route::middleware(['auth'])->group(function () {
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi.create');
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
 });
-
-Route::get('/katalog', function () {
-    return view('katalog');
-});
-
-Route::post('/katalog', [KatalogController::class, 'store'])->name('katalog.store');

@@ -111,9 +111,10 @@
     <header class="nav" id="nav">
         <div class="nav-inner">
             <nav class="nav-side nav-left">
-                <a href="#beranda" class="nav-link active">Beranda</a>
-                <a href="#katalog" class="nav-link">Katalog WO/EO</a>
-                <a href="#tentang" class="nav-link">Tentang Kami</a>
+                <a href="{{ request()->routeIs('home') ? '#beranda' : route('home') . '#beranda' }}" class="nav-link{{ request()->routeIs('home') ? ' active' : '' }}">Beranda</a>
+                <button type="button" class="nav-link location-trigger" data-location-open aria-haspopup="dialog" aria-controls="location-modal">LOKASI</button>
+                <a href="{{ request()->routeIs('home') ? '#katalog' : route('home') . '#katalog' }}" class="nav-link">Katalog WO/EO</a>
+                <a href="{{ request()->routeIs('home') ? '#tentang' : route('home') . '#tentang' }}" class="nav-link">Tentang Kami</a>
             </nav>
 
             <!-- Teks Logo Susun di Tengah -->
@@ -124,16 +125,16 @@
             </a>
 
             <nav class="nav-side nav-right">
-                <a href="#galeri" class="nav-link">Galeri Portofolio</a>
-                <a href="#kontak" class="nav-link">Kontak</a>
+                <a href="{{ request()->routeIs('home') ? '#galeri' : route('home') . '#galeri' }}" class="nav-link">Galeri Portofolio</a>
+                <a href="{{ request()->routeIs('home') ? '#kontak' : route('home') . '#kontak' }}" class="nav-link">Kontak</a>
                 
                 @auth
                     <!-- Bersih tanpa tulisan 'LOGIN: ADMIN Administrator' -->
-                    <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('reservasi.create') }}" class="btn-pill-center">
+                    <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('client.dashboard') }}" class="btn-pill-center">
                         @if(auth()->user()->isAdmin())
                             DASHBOARD<br>ADMIN
                         @else
-                            PESAN<br>JADWAL
+                            DASHBOARD<br>CLIENT
                         @endif
                     </a>
                 @else
@@ -148,11 +149,12 @@
 
     <!-- Mobile Drawer Sidebar -->
     <aside class="drawer" id="drawer">
-        <a href="#beranda">Beranda</a>
-        <a href="#katalog">Katalog WO/EO</a>
-        <a href="#tentang">Tentang Kami</a>
-        <a href="#galeri">Galeri Portofolio</a>
-        <a href="#kontak">Kontak</a>
+        <a href="{{ request()->routeIs('home') ? '#beranda' : route('home') . '#beranda' }}">Beranda</a>
+        <button type="button" class="drawer-location-trigger" data-location-open aria-haspopup="dialog" aria-controls="location-modal">LOKASI</button>
+        <a href="{{ request()->routeIs('home') ? '#katalog' : route('home') . '#katalog' }}">Katalog WO/EO</a>
+        <a href="{{ request()->routeIs('home') ? '#tentang' : route('home') . '#tentang' }}">Tentang Kami</a>
+        <a href="{{ request()->routeIs('home') ? '#galeri' : route('home') . '#galeri' }}">Galeri Portofolio</a>
+        <a href="{{ request()->routeIs('home') ? '#kontak' : route('home') . '#kontak' }}">Kontak</a>
         
         @auth
             <div style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -163,14 +165,43 @@
                 </form>
             </div>
 
-            <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('reservasi.create') }}" class="btn-pill-center" style="width: 100%; text-align: center;">
-                {{ auth()->user()->isAdmin() ? 'DASHBOARD ADMIN' : 'PESAN JADWAL' }}
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('client.dashboard') }}" class="btn-pill-center" style="width: 100%; text-align: center;">
+                {{ auth()->user()->isAdmin() ? 'DASHBOARD ADMIN' : 'DASHBOARD CLIENT' }}
             </a>
         @else
             <a href="{{ route('login') }}" class="btn-link light">Masuk</a>
             <a href="{{ route('register') }}" class="btn-pill-center" style="width: 100%; text-align: center;">DAFTAR</a>
         @endauth
     </aside>
+
+    <div class="location-modal" id="location-modal" hidden>
+        <button class="location-modal-backdrop" type="button" data-location-close aria-label="Tutup peta lokasi"></button>
+        <section class="location-modal-card" role="dialog" aria-modal="true" aria-labelledby="location-modal-title" aria-describedby="location-modal-address" tabindex="-1">
+            <header class="location-modal-header">
+                <div>
+                    <span class="location-modal-eyebrow">Temukan lokasi kami</span>
+                    <h2 id="location-modal-title"><span aria-hidden="true">⌖</span> Griya Rias Elly Jr.</h2>
+                </div>
+                <button type="button" class="location-modal-close" data-location-close aria-label="Tutup popup lokasi">&times;</button>
+            </header>
+            <p class="location-modal-address" id="location-modal-address">{{ config('services.griya.location') }}</p>
+            <div class="location-modal-map">
+                <iframe
+                    src="https://maps.google.com/maps?q={{ urlencode(config('services.griya.location')) }}&amp;z=16&amp;output=embed"
+                    title="Peta lokasi Griya Rias Elly Jr."
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <footer class="location-modal-footer">
+                <span><span aria-hidden="true">●</span> Kabupaten Kediri, Jawa Timur</span>
+                <a href="https://www.google.com/maps/dir/?api=1&amp;destination={{ urlencode(config('services.griya.location')) }}" target="_blank" rel="noopener">
+                    Buka petunjuk arah <span aria-hidden="true">↗</span>
+                </a>
+            </footer>
+        </section>
+    </div>
 
     <main>
         @yield('content')
@@ -179,7 +210,16 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-brand"><small>GRIYA RIAS</small> Elly Jr.</div>
-            <p>&copy; {{ date('Y') }} Griya Rias Elly Jr. Make Up &amp; Event Organizer.</p>
+            <p class="footer-description">Make Up &amp; Event Organizer untuk momen spesial Anda.</p>
+            <div class="footer-contact">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-label">WhatsApp</span>
+                    <a href="https://wa.me/{{ config('services.griya.whatsapp') }}" target="_blank" rel="noopener">
+                        +{{ config('services.griya.whatsapp') }}
+                    </a>
+                </div>
+            </div>
+            <p class="footer-copyright">&copy; {{ date('Y') }} Griya Rias Elly Jr. Semua hak dilindungi.</p>
         </div>
     </footer>
 

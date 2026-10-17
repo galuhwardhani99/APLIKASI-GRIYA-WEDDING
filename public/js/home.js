@@ -71,6 +71,36 @@
     }, { rootMargin: '-45% 0px -50% 0px' });
     $$('section[id]').forEach(s => spy.observe(s));
 
+    /* ---- Popup peta lokasi ---- */
+    const locationModal = $('#location-modal');
+    const locationDialog = $('.location-modal-card', locationModal);
+    const locationOpeners = $$('[data-location-open]');
+    const locationClosers = $$('[data-location-close]', locationModal);
+    let lastLocationOpener = null;
+
+    function closeLocationModal() {
+        if (locationModal.hidden) return;
+
+        locationModal.hidden = true;
+        locationModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('location-modal-open');
+        lastLocationOpener?.focus();
+    }
+
+    locationOpeners.forEach(opener => opener.addEventListener('click', () => {
+        lastLocationOpener = opener;
+        document.body.classList.remove('menu-open');
+        locationModal.hidden = false;
+        locationModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('location-modal-open');
+        locationDialog.focus();
+    }));
+
+    locationClosers.forEach(closer => closer.addEventListener('click', closeLocationModal));
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeLocationModal();
+    });
+
     /* ---- Kartu miring 3D ---- */
     if (matchMedia('(hover: hover)').matches && !reduce) {
         $$('.tilt').forEach(card => {

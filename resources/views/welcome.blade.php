@@ -22,10 +22,6 @@
             Melayani jasa tata rias pengantin tradisional/modern, acara resmi, hingga perencanaan lengkap Wedding &amp; Event Organizer.
         </p>
 
-        <div class="hero-actions fu" style="--d:1100ms">
-            <a href="#katalog" class="btn btn-gold">Lihat Katalog Paket</a>
-            <a href="#kontak" class="btn btn-outline">Cek Ketersediaan Tanggal</a>
-        </div>
     </div>
 </section>
 

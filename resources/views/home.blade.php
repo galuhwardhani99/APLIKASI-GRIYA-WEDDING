@@ -22,10 +22,6 @@
             Melayani jasa tata rias pengantin tradisional/modern, acara resmi, hingga perencanaan lengkap Wedding &amp; Event Organizer.
         </p>
 
-        <div class="hero-actions fu" style="--d:1100ms">
-            <a href="#katalog" class="btn btn-gold">Lihat Katalog Paket</a>
-            <a href="#kontak" class="btn btn-outline">Cek Ketersediaan Tanggal</a>
-        </div>
     </div>
 </section>
 
@@ -42,31 +38,64 @@
     </div>
 </div>
 
-{{-- ================= LAYANAN / KATALOG ================= --}}
-<section class="section" id="katalog">
+{{-- ================= LAYANAN UNGGULAN ================= --}}
+<section class="section" id="layanan-unggulan">
     <div class="container">
         <div class="section-head reveal">
-            <h2>Layanan Unggulan Kami</h2>
-            <p>Pilihan paket terfavorit calon pengantin dan pelaksana acara</p>
+            <h2>Layanan Unggulan</h2>
+            <p>Layanan pilihan dari Griya Rias Elly Jr.</p>
         </div>
 
         <div class="cards">
-            @foreach ($layanan as $i => $item)
+            @forelse ($layanans as $i => $layanan)
                 <div class="reveal" style="--d:{{ $i * 140 }}ms">
                     <article class="card tilt">
-                        <div class="card-img {{ $item['tone'] }}">
-                            @if ($item['gambar'])
-                                <img src="{{ asset($item['gambar']) }}" alt="{{ $item['judul'] }}">
+                        <div class="card-img {{ $i % 2 ? 'sand' : 'rose' }}">
+                            @if ($layanan->foto)
+                                <img src="{{ asset('storage/' . $layanan->foto) }}" alt="{{ $layanan->nama_layanan }}">
                             @else
-                                <span>{{ $item['label'] }}</span>
+                                <span>{{ $layanan->nama_layanan }}</span>
                             @endif
                         </div>
-                        <h3>{{ $item['judul'] }}</h3>
-                        <p>{{ $item['deskripsi'] }}</p>
-                        <div class="price">Rp {{ number_format($item['harga'], 0, ',', '.') }}</div>
+                        <h3>{{ $layanan->nama_layanan }}</h3>
+                        <p>{{ $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.' }}</p>
+                        @if ($layanan->variasi)<p class="subtle">{{ $layanan->variasi }}</p>@endif
+                        <div class="price">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</div>
                     </article>
                 </div>
-            @endforeach
+            @empty
+                <p class="gd-empty">Belum ada layanan unggulan untuk ditampilkan.</p>
+            @endforelse
+        </div>
+    </div>
+</section>
+
+{{-- ================= PAKET UNGGULAN ================= --}}
+<section class="section section-sand" id="katalog">
+    <div class="container">
+        <div class="section-head reveal">
+            <h2>Paket Unggulan</h2>
+            <p>Paket pilihan untuk membantu merencanakan momen istimewa Anda.</p>
+        </div>
+        <div class="cards">
+            @forelse ($pakets as $i => $paket)
+                <div class="reveal" style="--d:{{ $i * 140 }}ms">
+                    <article class="card tilt">
+                        <div class="card-img {{ $i % 2 ? 'rose' : 'sand' }}">
+                            @if ($paket->foto)
+                                <img src="{{ asset('storage/' . $paket->foto) }}" alt="{{ $paket->nama_paket }}">
+                            @else
+                                <span>{{ $paket->kategoriPaket?->nama_kategori ?? $paket->nama_paket }}</span>
+                            @endif
+                        </div>
+                        <h3>{{ $paket->nama_paket }}</h3>
+                        <p>{{ $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.' }}</p>
+                        <div class="price">Rp {{ number_format($paket->harga, 0, ',', '.') }}</div>
+                    </article>
+                </div>
+            @empty
+                <p class="gd-empty">Belum ada paket unggulan untuk ditampilkan.</p>
+            @endforelse
         </div>
     </div>
 </section>
@@ -97,32 +126,7 @@
 </section>
 
 {{-- ================= GALERI ================= --}}
-<section class="section" id="galeri">
-    <div class="container">
-        <div class="section-head reveal">
-            <h2>Galeri Portofolio</h2>
-            <p>Sebagian hasil rias dan acara yang pernah kami kerjakan</p>
-        </div>
-
-        <div class="gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
-            @forelse ($portofolios as $i => $item)
-                <figure class="g reveal" style="--d:{{ $i * 90 }}ms; margin: 0; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.06); background-color: #FFFFFF;">
-                    <div class="g-in" style="width: 100%; height: 380px; overflow: hidden; background-color: #FAFAFA;">
-                        <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.4s ease;">
-                    </div>
-                    <figcaption style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; background: linear-gradient(transparent, rgba(36,26,22,0.85)); color: #FFF;">
-                        <small style="color: #C58F43; font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">{{ $item->kategori }}</small>
-                        <h4 style="font-size: 1rem; margin-top: 2px; font-family: 'Playfair Display', serif; font-weight: 600;">{{ $item->judul }}</h4>
-                    </figcaption>
-                </figure>
-            @empty
-                <div style="grid-column: 1 / -1; text-align: center; color: #8C8279; padding: 40px; background: #FFF; border-radius: 12px; border: 1px solid #EFE8DE;">
-                    Belum ada foto portofolio yang diunggah.
-                </div>
-            @endforelse
-        </div>
-    </div>
-</section>
+@include('partials.galeri')
 
 {{-- ================= KONTAK ================= --}}
 <section class="contact" id="kontak">
@@ -140,7 +144,7 @@
 
         <div class="contact-info reveal" style="--d:300ms">
             {{-- GANTI dengan data asli --}}
-            <div><b>Alamat</b><span>[Alamat lengkap Griya Rias Elly Jr.]</span></div>
+            <div><b>Alamat</b><span>{{ config('services.griya.location') }}</span></div>
             <div><b>Jam Layanan</b><span>[Senin - Minggu, 08.00 - 20.00]</span></div>
             <div><b>WhatsApp</b><span>+{{ $whatsapp }}</span></div>
         </div>
