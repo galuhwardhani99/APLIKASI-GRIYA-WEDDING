@@ -3,11 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservasi;
+use App\Models\Paket;
+use App\Models\JadwalAcara;
+use App\Models\Layanan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ReservasiController extends Controller
 {
+    public function create(Request $request)
+    {
+        $pakets = Paket::with('kategoriPaket')->where('status', 'Aktif')->orderBy('nama_paket')->get();
+        $layanans = Layanan::where('status', 'Aktif')->orderBy('nama_layanan')->get();
+        $selectedPackageId = $request->query('id_paket');
+        $selectedItemValue = $selectedPackageId ? 'paket:' . $selectedPackageId : null;
+        $user = $request->user();
+
+        return view('client.reservasi', compact('pakets', 'layanans', 'selectedPackageId', 'selectedItemValue', 'user'));
+    }
+
     public function index()
     {
         try {
@@ -28,6 +44,58 @@ class ReservasiController extends Controller
 
     public function store(Request $request)
     {
+        if (! $request->expectsJson()) {
+            $validated = $request->validate([
+                'jenis_pesanan' => ['required', 'in:paket,layanan'],
+                'id_item' => ['required', 'regex:/^(paket|layanan):[0-9]+$/'],
+                'tgl_acara' => ['required', 'date', 'after_or_equal:today'],
+                'jumlah_pesanan' => ['required', 'integer', 'min:1', 'max:20'],
+                'waktu_mulai' => ['required', 'date_format:H:i'],
+                'waktu_selesai' => ['required', 'date_format:H:i', 'after:waktu_mulai'],
+                'lokasi_acara' => ['required', 'string', 'max:255'],
+                'catatan' => ['nullable', 'string', 'max:2000'],
+            ]);
+
+            abort_unless(str_starts_with($validated['id_item'], $validated['jenis_pesanan'] . ':'), 422, 'Pilihan tidak sesuai dengan jenis item.');
+            $itemId = (int) substr($validated['id_item'], strpos($validated['id_item'], ':') + 1);
+            $item = $validated['jenis_pesanan'] === 'paket'
+                ? Paket::where('status', 'Aktif')->findOrFail($itemId)
+                : Layanan::where('status', 'Aktif')->findOrFail($itemId);
+            $isPaket = $validated['jenis_pesanan'] === 'paket';
+            $reservasi = DB::transaction(function () use ($validated, $item, $isPaket) {
+                $jadwal = JadwalAcara::create([
+                    'tgl_acara' => $validated['tgl_acara'],
+                    'waktu_mulai' => $validated['waktu_mulai'],
+                    'waktu_selesai' => $validated['waktu_selesai'],
+                    'status_jadwal' => 'Menunggu Konfirmasi',
+                ]);
+
+                return Reservasi::create([
+                    'kode_reservasi' => 'RSV-' . strtoupper(Str::random(8)),
+                    'tgl_reservasi' => now(),
+                    'tgl_acara' => $validated['tgl_acara'],
+                    'lokasi_acara' => $validated['lokasi_acara'],
+                    'status_reservasi' => 'Menunggu Konfirmasi',
+                    'id_user' => Auth::id(),
+                    'id_jadwal' => $jadwal->id_jadwal,
+                    'jenis_pesanan' => $validated['jenis_pesanan'],
+                    'id_paket' => $isPaket ? $item->id : null,
+                    'nama_paket' => $isPaket ? $item->nama_paket : null,
+                    'harga_paket' => $isPaket ? $item->harga : null,
+                    'id_layanan' => $isPaket ? null : $item->id_layanan,
+                    'nama_layanan' => $isPaket ? null : $item->nama_layanan,
+                    'harga_layanan' => $isPaket ? null : $item->harga,
+                    'jumlah_pesanan' => $validated['jumlah_pesanan'],
+                    'biaya_sewa' => $item->harga * $validated['jumlah_pesanan'],
+                    'waktu_mulai' => $validated['waktu_mulai'],
+                    'waktu_selesai' => $validated['waktu_selesai'],
+                    'catatan' => $validated['catatan'] ?? null,
+                ]);
+            });
+
+            return to_route('client.riwayat.reservasi')->with('success', 'Pengajuan booking berhasil dikirim. Kode reservasi: ' . $reservasi->kode_reservasi);
+        }
+
         try {
             // Validasi input dari Android
             $request->validate([

@@ -7,6 +7,7 @@ use App\Models\Paket;
 use App\Models\Layanan;
 use App\Models\KategoriPaket;
 use App\Models\Portofolio;
+use App\Models\Reservasi;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,7 @@ class DashboardController extends Controller
             'layanansCount' => Layanan::where('status', 'Aktif')->count(),
             'pakets' => Paket::with('kategoriPaket')->where('status', 'Aktif')->latest()->take(6)->get(),
             'paketsCount' => Paket::where('status', 'Aktif')->count(),
+            'reservasisCount' => Reservasi::where('id_user', auth()->id())->count(),
             'portofolios' => Portofolio::latest()->take(6)->get(),
             'whatsapp' => config('services.griya.whatsapp'),
         ]);
@@ -71,5 +73,24 @@ class DashboardController extends Controller
         $kategoriPakets = KategoriPaket::orderBy('nama_kategori')->get();
 
         return view('client.katalog.paket', compact('pakets', 'kategoriPakets', 'filters'));
+    }
+
+    public function riwayatReservasi(): View
+    {
+        $reservasis = Reservasi::with(['paket', 'jadwal'])
+            ->where('id_user', auth()->id())
+            ->latest('id_reservasi')->paginate(10);
+
+        return view('client.riwayat-reservasi', compact('reservasis'));
+    }
+
+    public function riwayatTransaksi(): View
+    {
+        $transaksi = Reservasi::with(['paket', 'layanan'])
+            ->where('id_user', auth()->id())
+            ->where(fn ($query) => $query->whereNotNull('id_paket')->orWhereNotNull('id_layanan'))
+            ->latest('id_reservasi')->paginate(10);
+
+        return view('client.riwayat-transaksi', compact('transaksi'));
     }
 }

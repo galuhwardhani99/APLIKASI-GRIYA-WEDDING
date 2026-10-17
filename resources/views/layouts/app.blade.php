@@ -88,9 +88,10 @@
         }
     </style>
 </head>
-<body>
+<body class="{{ request()->routeIs('client.dashboard') ? 'client-dashboard-page' : '' }}">
     <div class="progress" id="progress"></div>
 
+    @unless(request()->routeIs('client.dashboard'))
     <!-- Topbar Paling Atas (Teks Sambutan + Tombol Keluar Akun) -->
     <div class="topbar">
         <div class="topbar-container">
@@ -173,6 +174,7 @@
             <a href="{{ route('register') }}" class="btn-pill-center" style="width: 100%; text-align: center;">DAFTAR</a>
         @endauth
     </aside>
+    @endunless
 
     <div class="location-modal" id="location-modal" hidden>
         <button class="location-modal-backdrop" type="button" data-location-close aria-label="Tutup peta lokasi"></button>
@@ -207,6 +209,7 @@
         @yield('content')
     </main>
 
+    @unless(request()->routeIs('client.dashboard'))
     <footer class="footer">
         <div class="container">
             <div class="footer-brand"><small>GRIYA RIAS</small> Elly Jr.</div>
@@ -222,6 +225,7 @@
             <p class="footer-copyright">&copy; {{ date('Y') }} Griya Rias Elly Jr. Semua hak dilindungi.</p>
         </div>
     </footer>
+    @endunless
 
     <script src="{{ asset('js/home.js') }}"></script>
     

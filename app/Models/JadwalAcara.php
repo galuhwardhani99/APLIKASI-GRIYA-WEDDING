@@ -10,18 +10,18 @@ class JadwalAcara extends Model
     use HasFactory;
 
     protected $primaryKey = 'id_jadwal';
+    protected $table = 'jadwal_acara';
 
     protected $fillable = [
-        'id_reservasi',
-        'divalidasi_oleh',
+        'tgl_acara',
         'waktu_mulai',
         'waktu_selesai',
-        'status_validasi',
+        'status_jadwal',
     ];
 
     public function reservasi()
     {
-        return $this->belongsTo(Reservasi::class, 'id_reservasi', 'id_reservasi');
+        return $this->hasOne(Reservasi::class, 'id_jadwal', 'id_jadwal');
     }
 
     public function validator()
