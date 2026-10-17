@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'griya' => [
+        'location' => env('GRIYA_LOCATION', '[Alamat lengkap Griya Rias Elly Jr.]'),
+        'whatsapp' => env('GRIYA_WHATSAPP', '6281234567890'),
+    ],
+
 ];

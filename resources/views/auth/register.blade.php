@@ -42,7 +42,7 @@
 
         @include('auth.partials.password')
 
-        <button type="submit" class="btn-primary">REGISTER</button>
+        <button type="submit" class="btn-primary">DAFTAR</button>
     </form>
 
     <div class="auth-footer">

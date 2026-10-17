@@ -39,7 +39,7 @@ class LoginController extends Controller
                     ->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '!');
             }
 
-            return redirect()->intended(route('home'))
+            return redirect()->intended(route('client.dashboard'))
                 ->with('success', 'Berhasil masuk! Selamat datang kembali.');
         }
 

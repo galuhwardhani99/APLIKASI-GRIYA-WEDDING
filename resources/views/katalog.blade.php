@@ -400,7 +400,7 @@
                     @forelse($dataPakets as $paket)
                         <tr>
                             <td style="font-weight: 600;">{{ $paket->nama_paket }}</td>
-                            <td style="text-align: center; color: var(--text-muted);">{{ $paket->kategori }}</td>
+                            <td style="text-align: center; color: var(--text-muted);">{{ $paket->kategoriPaket?->nama_kategori }}</td>
                             <td style="text-align: center; color: var(--gold-primary); font-weight: 600;">
                                 Rp {{ number_format($paket->harga, 0, ',', '.') }}
                             </td>
