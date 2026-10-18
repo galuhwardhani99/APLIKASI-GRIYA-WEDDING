@@ -5,11 +5,13 @@ use App\Http\Controllers\Admin\KategoriPaketController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PaketController;
 use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
+use App\Http\Controllers\UserProfileController;
 use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +24,7 @@ Route::get('/galeri', function () {
     return view('galeri', compact('portofolios'));
 })->name('galeri');
 
-// Halaman katalog publik (hapus baris ini kalau resources/views/katalog.blade.php tidak ada)
+// Halaman katalog publik
 Route::view('/katalog', 'katalog')->name('katalog');
 
 // ---------- Guest ----------
@@ -34,11 +36,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register'])->name('register.store');
 });
 
-// ---------- Auth ----------
+// ---------- Auth (Logout) ----------
 Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+// ---------- Admin ----------
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
 
@@ -47,6 +50,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori-paket', KategoriPaketController::class)->only(['index', 'store', 'update', 'destroy']);
 
     Route::resource('portofolio', AdminPortofolioController::class);
+
+    // Kelola Akun Pengguna oleh Admin
+    Route::resource('users', UserController::class);
 
     Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
     Route::post('/jadwal/validasi/{id}', [JadwalController::class, 'validasi'])->name('jadwal.validasi');
@@ -63,4 +69,10 @@ Route::middleware(['auth', 'role:client'])->group(function () {
 
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi.create');
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
+});
+
+// ---------- Profil User ----------
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profil', [UserProfileController::class, 'edit'])->name('user.profile.edit');
+    Route::put('/profil', [UserProfileController::class, 'update'])->name('user.profile.update');
 });

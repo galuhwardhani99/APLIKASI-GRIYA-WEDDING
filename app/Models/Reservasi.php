@@ -15,6 +15,8 @@ class Reservasi extends Model
     protected $casts = [
         'tgl_reservasi' => 'datetime',
         'tgl_acara' => 'date',
+        'tanggal_acara' => 'date',
+        'tanggal_pengajuan' => 'datetime',
     ];
 
     protected $fillable = [
@@ -29,7 +31,7 @@ class Reservasi extends Model
         'tanggal_acara',
         'tanggal_pengajuan',
         'status_reservasi',
-        'id_user',
+        'id_akun', // Disesuaikan dengan migration (sebelumnya id_user)
         'id_jadwal',
         'id_paket',
         'jenis_pesanan',
@@ -47,7 +49,7 @@ class Reservasi extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class, 'id_akun');
     }
 
     public function jadwal()
