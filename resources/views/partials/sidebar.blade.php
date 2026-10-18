@@ -15,7 +15,10 @@
         <span class="admin-sidebar-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</span>
         <div>
             <strong>{{ auth()->user()->name ?? 'Administrator' }}</strong>
-            <small>Administrator</small>
+            <!-- Tambahan Link Kelola Akun -->
+            <a href="{{ route('admin.users.index') }}" style="display:inline-block; margin-top: 4px; font-size: 0.75rem; color: var(--gold-primary); text-decoration: none; font-weight: 600;">
+                <i class="fa-solid fa-user-gear"></i> Kelola Akun
+            </a>
         </div>
     </div>
     

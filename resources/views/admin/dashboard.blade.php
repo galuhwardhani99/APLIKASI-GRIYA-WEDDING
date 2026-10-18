@@ -262,7 +262,13 @@
         </div>
         <div class="admin-sidebar-user">
             <span class="admin-sidebar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-            <div><strong>{{ auth()->user()->name }}</strong><small>Administrator</small></div>
+            <div>
+                <strong>{{ auth()->user()->name }}</strong>
+                {{-- Link cepat Kelola Akun tepat di bawah teks Administrator --}}
+                <a href="{{ route('admin.users.index') }}" style="display: inline-block; font-size: 0.75rem; color: #C58F43; text-decoration: none; font-weight: 600; margin-top: 3px;">
+                    <i class="fa-solid fa-user-gear"></i> Kelola Akun
+                </a>
+            </div>
         </div>
         
         <nav>

@@ -5,21 +5,47 @@
 
 <div class="client-dashboard-shell">
     <aside class="client-sidebar">
-        <a class="client-sidebar-brand" href="{{ route('client.dashboard') }}"><span>GRIYA RIAS</span><strong>Elly Jr.</strong><small>Area Client</small></a>
-        <div class="client-sidebar-user"><span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span><div><strong>{{ auth()->user()->name }}</strong><small>Client</small></div></div>
+        <a class="client-sidebar-brand" href="{{ route('client.dashboard') }}">
+            <span>GRIYA RIAS</span><strong>Elly Jr.</strong><small>Area Client</small>
+        </a>
+        
+        {{-- Area Profil User Client --}}
+        <div class="client-sidebar-user">
+            <span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            <div>
+                <strong>{{ auth()->user()->name }}</strong>
+                <small>Client</small>
+                {{-- Link cepat Edit Profil di bawah teks Client --}}
+                <a href="{{ route('user.profile.edit') }}" style="display: inline-block; font-size: 0.75rem; color: #C58F43; text-decoration: none; font-weight: 600; margin-top: 2px;">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Profil
+                </a>
+            </div>
+        </div>
+
+        {{-- Navigasi Client --}}
         <nav class="client-sidebar-nav" aria-label="Navigasi client">
             <span class="client-nav-label">MENU UTAMA</span>
-            <a class="active" href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a class="{{ request()->routeIs('client.dashboard') ? 'active' : '' }}" href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
             <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
             <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
             <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
-            <span class="client-nav-label client-nav-spaced">AKTIVITAS</span>
+            
+            <span class="client-nav-label client-nav-spaced">AKTIVITAS & AKUN</span>
             <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
             <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
+            
+            {{-- Menu Pengaturan Akun Baru --}}
+            <a class="{{ request()->routeIs('user.profile.*') ? 'active' : '' }}" href="{{ route('user.profile.edit') }}">
+                <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
+            </a>
         </nav>
+
         <div class="client-sidebar-footer">
             <a href="{{ route('home') }}"><i class="fa-solid fa-globe"></i> Halaman Utama</a>
-            <form action="{{ route('logout') }}" method="POST">@csrf<button type="submit"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button></form>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
+            </form>
         </div>
     </aside>
     <div class="client-dashboard-main">
@@ -171,9 +197,153 @@
 </div>
 
 <style>
-    .client-dashboard-page{background:#fdfbf7}.client-dashboard-shell{display:flex;min-height:100vh;background:#fdfbf7;color:#241a16;font-family:'Plus Jakarta Sans',sans-serif}.client-sidebar{width:260px;flex:0 0 260px;background:#fff;border-right:1px solid #efe8de;padding:24px 16px;display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;z-index:20;box-shadow:2px 0 14px #241a1608}.client-sidebar-brand{padding:4px 12px 20px;border-bottom:1px solid #efe8de;text-decoration:none;display:flex;flex-direction:column}.client-sidebar-brand span{font-size:.67rem;letter-spacing:.2em;color:#b9833b;font-weight:700}.client-sidebar-brand strong{font-family:'Playfair Display',serif;color:#3b241c;font-size:1.55rem;line-height:1.2}.client-sidebar-brand small{color:#8c8279;margin-top:4px}.client-sidebar-user{display:flex;align-items:center;gap:11px;padding:20px 8px;border-bottom:1px solid #efe8de}.client-avatar{width:40px;height:40px;border-radius:50%;background:#f4e6d2;color:#93622d;display:grid;place-items:center;font-weight:800}.client-sidebar-user strong,.client-sidebar-user small{display:block}.client-sidebar-user strong{font-size:.86rem;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.client-sidebar-user small{font-size:.72rem;color:#8c8279;margin-top:3px}.client-sidebar-nav{display:flex;flex-direction:column;gap:5px;padding-top:20px}.client-nav-label{font-size:.65rem;letter-spacing:.12em;font-weight:800;color:#a59a8e;padding:0 12px 7px}.client-nav-spaced{padding-top:18px}.client-sidebar-nav a,.client-sidebar-footer>a{display:flex;align-items:center;gap:12px;text-decoration:none;color:#55483f;font-size:.86rem;font-weight:600;padding:11px 12px;border-radius:8px;transition:.2s}.client-sidebar-nav a i,.client-sidebar-footer i{width:18px;text-align:center;color:#9b8877}.client-sidebar-nav a:hover,.client-sidebar-footer>a:hover{background:#fbf5ec;color:#9b672e}.client-sidebar-nav a.active{background:#b9833b;color:#fff}.client-sidebar-nav a.active i{color:#fff}.client-sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid #efe8de;display:grid;gap:7px}.client-sidebar-footer form{margin:0}.client-sidebar-footer button{width:100%;border:1px solid #f1d0d0;background:#fff5f5;color:#b33b3b;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;font:600 .85rem 'Plus Jakarta Sans',sans-serif;cursor:pointer}.client-dashboard-main{min-width:0;flex:1}.client-dashboard-main .hero{min-height:560px}.client-dashboard-main .hero-inner{padding-bottom:70px}.client-dashboard-main .marquee{overflow:hidden}.client-dashboard-main .section{padding-top:76px;padding-bottom:76px}
-    @media(max-width:900px){.client-sidebar{width:220px;flex-basis:220px;padding:20px 12px}}
-    @media(max-width:680px){.client-dashboard-shell{display:block}.client-sidebar{position:relative;top:auto;width:100%;height:auto;min-height:0;padding:12px 14px;border-right:0;border-bottom:1px solid #efe8de}.client-sidebar-brand{padding:2px 4px 12px}.client-sidebar-user{padding:12px 4px}.client-sidebar-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding-top:12px}.client-nav-label{grid-column:1/-1;padding:4px 8px}.client-nav-spaced{padding-top:8px}.client-sidebar-nav a{font-size:.78rem;padding:10px 8px;gap:8px}.client-sidebar-footer{margin-top:12px;padding-top:10px;grid-template-columns:1fr 1fr}.client-sidebar-footer>a,.client-sidebar-footer button{font-size:.78rem;padding:9px 8px;gap:8px}.client-dashboard-main .hero{min-height:460px}.client-dashboard-main .hero-inner{padding:70px 20px}.client-dashboard-main .section{padding-top:52px;padding-bottom:52px}}
+    .client-dashboard-page { background: #fdfbf7; }
+    
+    .client-dashboard-shell {
+        display: flex;
+        min-height: 100vh;
+        background: #fdfbf7;
+        color: #241a16;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* --- SIDEBAR UTAMA --- */
+    .client-sidebar {
+        width: 260px;
+        flex: 0 0 260px;
+        background: #fff;
+        border-right: 1px solid #efe8de;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        box-shadow: 2px 0 14px #241a1608;
+    }
+
+    /* Brand Logo & Header Sidebar */
+    .client-sidebar-brand {
+        padding: 4px 12px 20px;
+        border-bottom: 1px solid #efe8de;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+    }
+    .client-sidebar-brand span { font-size: .67rem; letter-spacing: .2em; color: #b9833b; font-weight: 700; }
+    .client-sidebar-brand strong { font-family: 'Playfair Display', serif; color: #3b241c; font-size: 1.55rem; line-height: 1.2; }
+    .client-sidebar-brand small { color: #8c8279; margin-top: 4px; }
+
+    /* User Profile Section */
+    .client-sidebar-user {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 20px 8px;
+        border-bottom: 1px solid #efe8de;
+    }
+    .client-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f4e6d2;
+        color: #93622d;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+    .client-sidebar-user strong, .client-sidebar-user small { display: block; }
+    .client-sidebar-user strong { font-size: .86rem; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .client-sidebar-user small { font-size: .72rem; color: #8c8279; margin-top: 3px; }
+
+    /* --- NAVIGASI (MEMILIKI SCROLL MANDIRI SUDAH RAPI) --- */
+    .client-sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding-top: 20px;
+        flex: 1;                /* Mengisi sisa area tengah */
+        overflow-y: auto;       /* BISA DI-SCROLL TANPA MERUSAK TAMPILAN */
+        padding-right: 4px;
+        margin-bottom: 12px;
+    }
+    
+    /* Scrollbar halus untuk sidebar */
+    .client-sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .client-sidebar-nav::-webkit-scrollbar-thumb { background-color: #efe8de; border-radius: 4px; }
+    .client-sidebar-nav::-webkit-scrollbar-thumb:hover { background-color: #b9833b; }
+
+    .client-nav-label { font-size: .65rem; letter-spacing: .12em; font-weight: 800; color: #a59a8e; padding: 0 12px 7px; }
+    .client-nav-spaced { padding-top: 18px; }
+
+    /* Item Menu Link */
+    .client-sidebar-nav a, .client-sidebar-footer > a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: #55483f;
+        font-size: .86rem;
+        font-weight: 600;
+        padding: 11px 12px;
+        border-radius: 8px;
+        transition: .2s;
+    }
+    .client-sidebar-nav a i, .client-sidebar-footer i { width: 18px; text-align: center; color: #9b8877; }
+    .client-sidebar-nav a:hover, .client-sidebar-footer > a:hover { background: #fbf5ec; color: #9b672e; }
+    .client-sidebar-nav a.active { background: #b9833b; color: #fff; }
+    .client-sidebar-nav a.active i { color: #fff; }
+
+    /* Footer Sidebar (Kembali Rapi di Bawah) */
+    .client-sidebar-footer {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid #efe8de;
+        display: grid;
+        gap: 7px;
+    }
+    .client-sidebar-footer form { margin: 0; }
+    .client-sidebar-footer button {
+        width: 100%;
+        border: 1px solid #f1d0d0;
+        background: #fff5f5;
+        color: #b33b3b;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font: 600 .85rem 'Plus Jakarta Sans', sans-serif;
+        cursor: pointer;
+    }
+
+    /* Content Area */
+    .client-dashboard-main { min-width: 0; flex: 1; }
+    .client-dashboard-main .hero { min-height: 560px; }
+    .client-dashboard-main .hero-inner { padding-bottom: 70px; }
+    .client-dashboard-main .marquee { overflow: hidden; }
+    .client-dashboard-main .section { padding-top: 76px; padding-bottom: 76px; }
+
+    @media(max-width: 900px) {
+        .client-sidebar { width: 220px; flex-basis: 220px; padding: 20px 12px; }
+    }
+    @media(max-width: 680px) {
+        .client-dashboard-shell { display: block; }
+        .client-sidebar { position: relative; top: auto; width: 100%; height: auto; min-height: 0; padding: 12px 14px; border-right: 0; border-bottom: 1px solid #efe8de; }
+        .client-sidebar-brand { padding: 2px 4px 12px; }
+        .client-sidebar-user { padding: 12px 4px; }
+        .client-sidebar-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-top: 12px; overflow-y: visible; }
+        .client-nav-label { grid-column: 1/-1; padding: 4px 8px; }
+        .client-nav-spaced { padding-top: 8px; }
+        .client-sidebar-nav a { font-size: .78rem; padding: 10px 8px; gap: 8px; }
+        .client-sidebar-footer { margin-top: 12px; padding-top: 10px; grid-template-columns: 1fr 1fr; }
+        .client-sidebar-footer > a, .client-sidebar-footer button { font-size: .78rem; padding: 9px 8px; gap: 8px; }
+        .client-dashboard-main .hero { min-height: 460px; }
+        .client-dashboard-main .hero-inner { padding: 70px 20px; }
+        .client-dashboard-main .section { padding-top: 52px; padding-bottom: 52px; }
+    }
 </style>
 
 <style>

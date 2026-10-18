@@ -26,7 +26,7 @@ class User extends Authenticatable
 
     public function reservasis(): HasMany
     {
-        return $this->hasMany(Reservasi::class, 'id_user');
+        return $this->hasMany(Reservasi::class, 'id_akun');
     }
 
     /** Normalisasi nomor WA: 62812xxx / +62 812xxx / 812xxx => 0812xxx */

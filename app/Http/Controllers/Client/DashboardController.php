@@ -20,7 +20,7 @@ class DashboardController extends Controller
             'layanansCount' => Layanan::where('status', 'Aktif')->count(),
             'pakets' => Paket::with('kategoriPaket')->where('status', 'Aktif')->latest()->take(6)->get(),
             'paketsCount' => Paket::where('status', 'Aktif')->count(),
-            'reservasisCount' => Reservasi::where('id_user', auth()->id())->count(),
+            'reservasisCount' => Reservasi::where('id_akun', auth()->id())->count(),
             'portofolios' => Portofolio::latest()->take(6)->get(),
             'whatsapp' => config('services.griya.whatsapp'),
         ]);
