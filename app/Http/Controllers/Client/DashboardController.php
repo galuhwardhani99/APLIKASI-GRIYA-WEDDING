@@ -78,7 +78,7 @@ class DashboardController extends Controller
     public function riwayatReservasi(): View
     {
         $reservasis = Reservasi::with(['paket', 'jadwal'])
-            ->where('id_user', auth()->id())
+            ->where('id_akun', auth()->id())
             ->latest('id_reservasi')->paginate(10);
 
         return view('client.riwayat-reservasi', compact('reservasis'));
@@ -87,10 +87,28 @@ class DashboardController extends Controller
     public function riwayatTransaksi(): View
     {
         $transaksi = Reservasi::with(['paket', 'layanan'])
-            ->where('id_user', auth()->id())
+            ->where('id_akun', auth()->id())
             ->where(fn ($query) => $query->whereNotNull('id_paket')->orWhereNotNull('id_layanan'))
             ->latest('id_reservasi')->paginate(10);
 
         return view('client.riwayat-transaksi', compact('transaksi'));
+    }
+
+    public function getJadwalTervalidasi()
+    {
+        $jadwals = Reservasi::where('status_reservasi', 'Disetujui')
+            ->orWhereHas('jadwal', function ($query) {
+                $query->where('status_validasi', 'Tervalidasi');
+            })
+            ->pluck('tanggal_acara')
+            ->map(function ($date) {
+                return \Carbon\Carbon::parse($date)->toDateString();
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return response()->json($jadwals);
     }
 }

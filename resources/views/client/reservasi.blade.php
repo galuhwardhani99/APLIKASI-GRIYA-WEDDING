@@ -209,7 +209,21 @@
         const quantity = document.getElementById('summary-quantity');
         const total = document.getElementById('summary-total');
         const itemLabel = document.getElementById('summary-item-label');
+        const tglAcaraInput = document.getElementById('tgl_acara');
         const formatPrice = value => new Intl.NumberFormat('id-ID').format(value);
+
+        // Ambil data tanggal yang sudah tervalidasi oleh admin untuk memblokir tanggal
+        fetch('{{ route("api.jadwal.tervalidasi") }}')
+            .then(response => response.json())
+            .then(bookedDates => {
+                tglAcaraInput.addEventListener('input', function () {
+                    if (bookedDates.includes(this.value)) {
+                        alert('Tanggal ini sudah dibooking dan divalidasi oleh admin. Silakan pilih tanggal lain.');
+                        this.value = '';
+                    }
+                });
+            })
+            .catch(error => console.error('Gagal memuat jadwal tervalidasi:', error));
 
         function showOptions(type) {
             typeInput.value = type;

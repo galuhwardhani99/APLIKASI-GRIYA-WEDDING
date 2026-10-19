@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalAcara;
-use App\Models\Reservasi; // <-- Tambahkan baris ini
+use App\Models\Reservasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,8 +12,8 @@ class JadwalController extends Controller
 {
     public function index()
     {
-        // Ambil reservasi yang sudah memiliki atau belum memiliki jadwal
-        $reservasi = Reservasi::with(['user', 'jadwal'])->latest()->get();
+        // Load relasi jadwal
+        $reservasi = Reservasi::with(['user', 'jadwal'])->latest('id_reservasi')->get();
 
         return view('admin.jadwal.index', compact('reservasi'));
     }
@@ -22,12 +22,12 @@ class JadwalController extends Controller
     {
         $reservasi = Reservasi::findOrFail($id);
         
-        // Update status di reservasi
+        // Update status_reservasi menjadi Disetujui
         $reservasi->update([
             'status_reservasi' => 'Disetujui'
         ]);
 
-        // Simpan atau update ke tabel jadwal_acara
+        // Simpan / update ke jadwal_acaras
         JadwalAcara::updateOrCreate(
             ['id_reservasi' => $reservasi->id_reservasi],
             [
