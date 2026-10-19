@@ -49,12 +49,12 @@ class Reservasi extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_akun');
+        return $this->belongsTo(User::class, 'id_akun', 'id');
     }
 
     public function jadwal()
     {
-        return $this->belongsTo(JadwalAcara::class, 'id_jadwal', 'id_jadwal');
+        return $this->hasOne(JadwalAcara::class, 'id_reservasi', 'id_reservasi');
     }
 
     public function paket()

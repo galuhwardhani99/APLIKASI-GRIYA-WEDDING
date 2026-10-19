@@ -9,23 +9,26 @@ class JadwalAcara extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'id_jadwal';
-    protected $table = 'jadwal_acara';
+    protected $table = 'jadwal_acaras'; // Sesuai nama tabel di database kamu
+    protected $primaryKey = 'id_jadwal'; // Sesuai primary key di ERD
 
     protected $fillable = [
-        'tgl_acara',
+        'divalidasi_oleh',
+        'id_reservasi',
         'waktu_mulai',
         'waktu_selesai',
-        'status_jadwal',
+        'status_validasi',
     ];
 
+    // Relasi ke tabel Reservasi
     public function reservasi()
     {
-        return $this->hasOne(Reservasi::class, 'id_jadwal', 'id_jadwal');
+        return $this->belongsTo(Reservasi::class, 'id_reservasi', 'id_reservasi');
     }
 
-    public function validator()
+    // Relasi ke Admin yang memvalidasi
+    public function admin()
     {
-        return $this->belongsTo(User::class, 'divalidasi_oleh');
+        return $this->belongsTo(User::class, 'divalidasi_oleh', 'id');
     }
 }

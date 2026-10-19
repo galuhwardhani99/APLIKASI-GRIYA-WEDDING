@@ -23,19 +23,32 @@
         </div>
 
         {{-- Navigasi Client --}}
-        <nav class="client-sidebar-nav" aria-label="Navigasi client">
+        <nav class="client-sidebar-nav">
             <span class="client-nav-label">MENU UTAMA</span>
-            <a class="{{ request()->routeIs('client.dashboard') ? 'active' : '' }}" href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
-            <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
-            <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
+            <a href="{{ route('client.dashboard') }}" class="{{ request()->routeIs('client.dashboard*') ? 'active' : '' }}">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </a>
+            <a href="{{ route('client.katalog.layanan') }}" class="{{ request()->routeIs('client.katalog.layanan*') ? 'active' : '' }}">
+                <i class="fa-solid fa-scissors"></i> Katalog Layanan
+            </a>
+            <a href="{{ route('client.katalog.paket') }}" class="{{ request()->routeIs('client.katalog.paket*') ? 'active' : '' }}">
+                <i class="fa-solid fa-box-open"></i> Katalog Paket
+            </a>
+            <a href="{{ route('client.jadwal.index') }}" class="{{ request()->routeIs('client.jadwal.*') ? 'active' : '' }}">
+                <i class="fa-regular fa-calendar-days"></i> Jadwal Acara
+            </a>
+            <a href="{{ route('reservasi.create') }}" class="{{ request()->routeIs('reservasi.create*') ? 'active' : '' }}">
+                <i class="fa-regular fa-calendar-check"></i> Form Reservasi
+            </a>
             
             <span class="client-nav-label client-nav-spaced">AKTIVITAS & AKUN</span>
-            <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
-            <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
-            
-            {{-- Menu Pengaturan Akun Baru --}}
-            <a class="{{ request()->routeIs('user.profile.*') ? 'active' : '' }}" href="{{ route('user.profile.edit') }}">
+            <a href="{{ route('client.riwayat.reservasi') }}" class="{{ request()->routeIs('client.riwayat.reservasi*') ? 'active' : '' }}">
+                <i class="fa-regular fa-calendar"></i> Riwayat Reservasi
+            </a>
+            <a href="{{ route('client.riwayat.transaksi') }}" class="{{ request()->routeIs('client.riwayat.transaksi*') ? 'active' : '' }}">
+                <i class="fa-solid fa-receipt"></i> Riwayat Transaksi
+            </a>
+            <a href="{{ route('user.profile.edit') }}" class="{{ request()->routeIs('user.profile.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
             </a>
         </nav>

@@ -48,7 +48,24 @@
         .main-content { flex: 1; padding: 32px 40px; }
         .layout-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
 
-        .section-title { font-family: 'Playfair Display', serif; color: var(--gold-primary); font-size: 1.35rem; margin-bottom: 20px; }
+        .header-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-family: 'Playfair Display', serif; color: var(--gold-primary); font-size: 1.35rem; margin: 0; }
+        
+        .btn-lihat-kalender {
+            background-color: var(--gold-primary);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-lihat-kalender:hover { background-color: var(--gold-hover); }
 
         /* Card List Jadwal */
         .jadwal-list { display: flex; flex-direction: column; gap: 16px; }
@@ -134,10 +151,27 @@
             text-decoration: none;
         }
 
-        /* Modal Ubah Tanggal */
+        /* Modal Umum */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(36, 26, 22, 0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-overlay.show { display: flex; }
         .modal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 420px; padding: 24px; }
+        .modal-card-calendar { max-width: 650px; padding: 28px; }
+
+        /* Style Kalender Interaktif */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .calendar-nav-btn { background: #f4eee6; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--text-dark); }
+        .calendar-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold-primary); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .calendar-weekday { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); padding-bottom: 8px; text-transform: uppercase; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #faf6f0; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); cursor: default; }
+        .calendar-day.empty { background: transparent; }
+        .calendar-day.booked {
+            background-color: #EF4444 !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -177,7 +211,12 @@
             
             <!-- Kolom Kiri: Daftar Jadwal Acara -->
             <div>
-                <h1 class="section-title">Kelola Jadwal Acara Terdaftar</h1>
+                <div class="header-top-row">
+                    <h1 class="section-title">Kelola Jadwal Acara Terdaftar</h1>
+                    <button class="btn-lihat-kalender" onclick="openModalCalendar()">
+                        <i class="fa-regular fa-calendar-days"></i> Lihat Kalender
+                    </button>
+                </div>
 
                 <div class="jadwal-list">
                     @forelse($reservasi as $item)
@@ -191,19 +230,31 @@
                             </div>
 
                             <div class="card-actions">
-                                <!-- Tombol Pilih untuk WA -->
+                                <!-- Tombol WA -->
                                 <button class="btn-sm" style="background:#10B981; color:#fff;" 
                                     onclick="pilihPelangganWA('{{ $item->user->name ?? 'Pelanggan' }}', '{{ $item->user->no_hp ?? '' }}', '{{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d F Y') }}')">
                                     <i class="fa-brands fa-whatsapp"></i> WA
                                 </button>
 
-                                <form action="{{ route('admin.jadwal.validasi', $item->id_reservasi) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn-validasi">
-                                        {{ ($item->jadwal &&$item->jadwal->status_validasi == 'Tervalidasi') ? 'Tervalidasi' : 'Validasi' }}
+                                <!-- Tombol Validasi / Sudah Tervalidasi -->
+                                @php
+                                    $isTervalidasi = ($item->status_reservasi == 'Disetujui') || ($item->jadwal && $item->jadwal->status_validasi == 'Tervalidasi');
+                                @endphp
+
+                                @if($isTervalidasi)
+                                    <button class="btn-validasi" style="background-color: #6B7280; cursor: not-allowed; opacity: 0.7;" disabled>
+                                        <i class="fa-solid fa-check-double"></i> Tervalidasi
                                     </button>
-                                </form>
-                                <button class="btn-ubah" onclick="openModalUbah({{ $item->id_reservasi }}, '{{$item->tanggal_acara }}')">Ubah Tanggal</button>
+                                @else
+                                    <form action="{{ route('admin.jadwal.validasi', $item->id_reservasi) }}" method="POST" style="margin: 0;">
+                                        @csrf
+                                        <button type="submit" class="btn-validasi">
+                                            Validasi
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <button class="btn-ubah" onclick="openModalUbah({{ $item->id_reservasi }}, '{{ $item->tanggal_acara }}')">Ubah Tanggal</button>
                             </div>
                         </div>
                     @empty
@@ -214,18 +265,16 @@
                 </div>
             </div>
 
-            <!-- Kolom Kanan: Kirim WhatsApp Direct (Sudah Dirapikan & Tunggal) -->
+            <!-- Kolom Kanan: Kirim WhatsApp Direct -->
             <div>
                 <div class="panel-wa">
                     <div class="wa-title"><i class="fa-regular fa-comment-dots"></i> Kirim WhatsApp Direct</div>
                     <p class="wa-desc">Pilih tombol WA pada daftar pelanggan di sebelah kiri untuk mengisi pesan secara otomatis.</p>
 
-                    <!-- Preview Pesan Dinamis -->
                     <div class="wa-box" id="waPreviewBox">
                         Klik tombol WA pada salah satu pelanggan untuk memuat pesan pengingat otomatis.
                     </div>
 
-                    <!-- Tombol Kirim WA -->
                     <a href="#" id="btnKirimWA" target="_blank" class="btn-kirim-wa">
                         <i class="fa-paper-plane"></i> KIRIM WA NOTIFIKASI
                     </a>
@@ -234,6 +283,30 @@
 
         </div>
     </main>
+
+    <!-- Modal Lihat Kalender -->
+    <div class="modal-overlay" id="modalCalendar">
+        <div class="modal-card modal-card-calendar">
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3 class="calendar-title" id="calendarMonthTitle">Oktober 2026</h3>
+                <button class="calendar-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-weekday">Min</div>
+                <div class="calendar-weekday">Sen</div>
+                <div class="calendar-weekday">Sel</div>
+                <div class="calendar-weekday">Rab</div>
+                <div class="calendar-weekday">Kam</div>
+                <div class="calendar-weekday">Jum</div>
+                <div class="calendar-weekday">Sab</div>
+            </div>
+            <div class="calendar-grid" id="calendarDaysGrid" style="margin-top: 8px;"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" onclick="closeModalCalendar()" style="padding: 8px 16px; background: #e8ded1; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Tutup</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Ubah Tanggal -->
     <div class="modal-overlay" id="modalUbah">
@@ -256,6 +329,75 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let bookedDatesList = [];
+
+        function openModalCalendar() {
+            document.getElementById('modalCalendar').classList.add('show');
+            fetch('{{ route("api.jadwal.tervalidasi") }}')
+                .then(res => res.json())
+                .then(data => {
+                    bookedDatesList = data;
+                    renderCalendar(currentMonth, currentYear);
+                })
+                .catch(err => console.error('Gagal mengambil jadwal tervalidasi:', err));
+        }
+
+        function closeModalCalendar() {
+            document.getElementById('modalCalendar').classList.remove('show');
+        }
+
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        function renderCalendar(month, year) {
+            const grid = document.getElementById('calendarDaysGrid');
+            const title = document.getElementById('calendarMonthTitle');
+            grid.innerHTML = '';
+
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            title.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            // Hari kosong sebelum tanggal 1
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-day empty';
+                grid.appendChild(emptyCell);
+            }
+
+            // Loop tanggal 1 - totalHari
+            for (let day = 1; day <= totalDays; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.textContent = day;
+
+                // Pastikan format YYYY-MM-DD persis sama dengan output JSON API (dengan padding zero 01, 02 dst)
+                const formattedMonth = String(month + 1).padStart(2, '0');
+                const formattedDay = String(day).padStart(2, '0');
+                const dateString = `${year}-${formattedMonth}-${formattedDay}`;
+
+                if (bookedDatesList.includes(dateString)) {
+                    dayCell.classList.add('booked');
+                    dayCell.title = "Tanggal Sudah Dibooking / Tervalidasi";
+                }
+
+                grid.appendChild(dayCell);
+            }
+        }
+
         function openModalUbah(id, tanggal) {
             const form = document.getElementById('formUbahTanggal');
             form.action = `/admin/jadwal/update-tanggal/${id}`;

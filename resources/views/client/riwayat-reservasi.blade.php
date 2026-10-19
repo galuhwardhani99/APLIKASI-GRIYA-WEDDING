@@ -3,7 +3,7 @@
 @section('content')
 <section class="section section-sand"><div class="container">
     <div class="section-head"><h2>Riwayat Reservasi</h2><p>Daftar pengajuan booking dan perkembangan jadwal acara Anda.</p></div>
-    <div class="history-actions"><a class="btn btn-gold" href="{{ route('reservasi.create') }}">Buat Reservasi</a><a class="btn btn-outline" href="{{ route('client.riwayat.transaksi') }}">Riwayat Transaksi</a><a class="btn btn-outline" href="{{ route('client.dashboard') }}">Dashboard</a></div>
+    <div class="history-actions"><a class="btn btn-outline" href="{{ route('client.riwayat.transaksi') }}">Riwayat Transaksi</a><a class="btn btn-outline" href="{{ route('client.dashboard') }}">Dashboard</a></div>
     <div class="history-table-wrap"><table class="history-table"><thead><tr><th>Kode</th><th>Paket</th><th>Tanggal Acara</th><th>Waktu</th><th>Jumlah</th><th>Status</th></tr></thead><tbody>
         @forelse($reservasis as $reservasi)
             <tr><td><strong>{{ $reservasi->kode_reservasi }}</strong><small>Diajukan {{ $reservasi->tgl_reservasi?->format('d/m/Y') }}</small></td><td>{{ $reservasi->nama_paket ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—' }}<small>{{ $reservasi->lokasi_acara }}</small></td><td>{{ \Carbon\Carbon::parse($reservasi->tgl_acara)->translatedFormat('d F Y') }}</td><td>{{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '—' }}–{{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '—' }}</td><td>{{ $reservasi->jumlah_pesanan }}</td><td><span class="history-status">{{ $reservasi->status_reservasi }}</span></td></tr>
