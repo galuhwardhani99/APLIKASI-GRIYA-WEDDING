@@ -36,6 +36,26 @@
             min-height: 100vh;
         }
 
+        .client-shell { display: flex; min-height: 100vh; }
+        .client-sidebar { width: 260px; min-width: 260px; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; padding: 24px 15px; background: #fff; border-right: 1px solid var(--border-color); }
+        .client-sidebar-brand { display: block; padding: 4px 12px 20px; border-bottom: 1px solid var(--border-color); text-decoration: none; }
+        .client-sidebar-brand span { display: block; font-size: .67rem; letter-spacing: .2em; color: var(--gold-primary); font-weight: 700; text-transform: uppercase; }
+        .client-sidebar-brand strong { display: block; font-family: 'Playfair Display', serif; color: var(--text-dark); font-size: 1.55rem; line-height: 1.2; }
+        .client-sidebar-brand small { display: block; color: var(--text-muted); margin-top: 4px; }
+        .client-sidebar-user { display: flex; align-items: center; gap: 12px; padding: 16px 12px; margin: 16px 0; border: 1px solid var(--border-color); border-radius: 12px; }
+        .client-avatar { width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center; border-radius: 50%; background: #F5E8D5; color: var(--gold-hover); font-weight: 800; }
+        .client-sidebar-user strong { display: block; color: var(--text-dark); font-size: .88rem; }
+        .client-sidebar-user small { display: block; color: var(--text-muted); font-size: .75rem; }
+        .client-sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+        .client-nav-label { display: block; padding: 10px 12px 4px; color: #A59A8E; font-size: .65rem; letter-spacing: .12em; font-weight: 800; }
+        .client-sidebar-nav a, .client-sidebar-footer a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #62564D; text-decoration: none; font-weight: 600; font-size: .86rem; }
+        .client-sidebar-nav a i, .client-sidebar-footer a i { width: 18px; text-align: center; color: var(--text-muted); }
+        .client-sidebar-nav a:hover, .client-sidebar-footer a:hover { background: #FBF5EC; color: var(--gold-hover); }
+        .client-sidebar-nav a.active { background: var(--gold-primary); color: #fff; }
+        .client-sidebar-nav a.active i { color: #fff; }
+        .client-sidebar-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .client-main { flex: 1; min-width: 0; }
+
         .wrap { max-width: 1240px; margin: auto; padding: 40px 22px; }
         
         .header, .tools, .tools form, .actions { display: flex; align-items: center; gap: 12px; }
@@ -242,10 +262,39 @@
             .tools form { align-items: stretch; flex-direction: column; }
             .tools input, .tools select { width: 100%; }
         }
+        @media(max-width: 850px) {
+            .client-shell { flex-direction: column; }
+            .client-sidebar { width: 100%; min-width: 0; height: auto; position: relative; border-right: 0; border-bottom: 1px solid var(--border-color); }
+            .client-sidebar-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .client-nav-label { grid-column: 1 / -1; }
+            .client-sidebar-footer { margin-top: 16px; }
+        }
     </style>
 </head>
 <body>
 
+<div class="client-shell">
+    <aside class="client-sidebar">
+        <a class="client-sidebar-brand" href="{{ route('client.dashboard') }}"><span>Griya Rias</span><strong>Elly Jr.</strong><small>Area Client</small></a>
+        <div class="client-sidebar-user">
+            <span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            <div><strong>{{ auth()->user()->name }}</strong><small>Client</small></div>
+        </div>
+        <nav class="client-sidebar-nav">
+            <span class="client-nav-label">MENU UTAMA</span>
+            <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
+            <a href="{{ route('client.katalog.paket') }}" class="{{ request()->routeIs('client.katalog.paket*') ? 'active' : '' }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
+            <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
+            <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
+            <span class="client-nav-label" style="margin-top:12px">AKTIVITAS &amp; AKUN</span>
+            <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
+            <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
+            <a href="{{ route('user.profile.edit') }}"><i class="fa-solid fa-user-gear"></i> Pengaturan Akun</a>
+        </nav>
+        <div class="client-sidebar-footer"><a href="{{ route('client.home') }}"><i class="fa-solid fa-globe"></i> Halaman Client</a></div>
+    </aside>
+    <div class="client-main">
 <main class="wrap">
     <header class="header">
         <div>
@@ -254,7 +303,6 @@
             <p class="subtitle">Temukan paket berdasarkan nama, kategori, atau kisaran harga.</p>
         </div>
         <div class="actions">
-            <a class="btn btn-light" href="{{ route('client.dashboard') }}"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</a>
             <a class="btn" href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Lihat Katalog Layanan</a>
         </div>
     </header>
@@ -319,6 +367,8 @@
         {{ $pakets->links() }}
     </div>
 </main>
+    </div>
+</div>
 
 <!-- JS Fancybox (Fitur Zoom In & Out) -->
 <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>

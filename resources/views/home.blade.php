@@ -1,7 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Beranda')
+@section('title', !empty($clientPage) ? 'Halaman Client' : 'Beranda')
 
 @section('content')
+
+@if (!empty($clientPage))
+    <style>
+        .client-home-dashboard-action { display: flex; justify-content: center; margin-top: 30px; }
+        .client-home-dashboard-button { min-width: 210px; padding: 14px 32px; font-size: 0.9rem; }
+    </style>
+@endif
 
 {{-- ================= HERO ================= --}}
 <section class="hero" id="beranda">
@@ -10,17 +17,28 @@
     <div class="orb o3" data-speed="0.10"><i></i></div>
 
     <div class="hero-inner">
-        <span class="badge fu" style="--d:50ms">Elegansi &amp; Keanggunan Acara Spesial</span>
+        <span class="badge fu" style="--d:50ms">{{ !empty($clientPage) ? 'Ruang Istimewa Anda di Griya Rias Elly Jr.' : 'Elegansi & Keanggunan Acara Spesial' }}</span>
 
         <h1 class="hero-title">
-            @foreach (explode(' ', 'Tampil Mempesona di Hari Paling Bahagia Anda') as $i => $kata)
+            @php($judulHero = !empty($clientPage) ? 'Selamat Datang, ' . explode(' ', trim(auth()->user()->name))[0] : 'Tampil Mempesona di Hari Paling Bahagia Anda')
+            @foreach (explode(' ', $judulHero) as $i => $kata)
                 <span class="w"><span style="--i:{{ $i }}">{{ $kata }}</span></span>
             @endforeach
         </h1>
 
         <p class="hero-sub fu" style="--d:900ms">
-            Melayani jasa tata rias pengantin tradisional/modern, acara resmi, hingga perencanaan lengkap Wedding &amp; Event Organizer.
+            @if (!empty($clientPage))
+                Senang melihat Anda kembali. Temukan inspirasi, layanan, dan paket terbaik untuk membantu merencanakan momen istimewa Anda bersama kami.
+            @else
+                Melayani jasa tata rias pengantin tradisional/modern, acara resmi, hingga perencanaan lengkap Wedding &amp; Event Organizer.
+            @endif
         </p>
+
+        @if (!empty($clientPage))
+            <div class="client-home-dashboard-action fu" style="--d:1100ms">
+                <a href="{{ route('client.dashboard') }}" class="btn-pill-center client-home-dashboard-button">DASHBOARD<br>CLIENT</a>
+            </div>
+        @endif
 
     </div>
 </section>

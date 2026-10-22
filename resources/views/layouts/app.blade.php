@@ -61,6 +61,15 @@
             align-items: center;
         }
 
+        .client-home-page .nav-inner {
+            grid-template-columns: auto auto auto;
+            justify-content: center;
+            column-gap: 36px;
+        }
+
+        .client-home-page .nav-left { justify-content: flex-end; }
+        .client-home-page .nav-right { justify-content: flex-start; }
+
         /* Styling Tombol Utama (Dashboard Admin / Pesan Jadwal) */
         .btn-pill-center {
             display: inline-flex;
@@ -88,7 +97,7 @@
         }
     </style>
 </head>
-<body class="{{ request()->routeIs('client.dashboard') ? 'client-dashboard-page' : '' }}">
+<body class="{{ request()->routeIs('client.dashboard') ? 'client-dashboard-page' : '' }} {{ request()->routeIs('client.home') ? 'client-home-page' : '' }}">
     <div class="progress" id="progress"></div>
 
     @unless(request()->routeIs('client.dashboard'))
@@ -98,12 +107,14 @@
             <span style="text-align: center;">✨ Welcome to Griya Rias Elly Jr. - Spesialis Tata Rias Pengantin, Wedding &amp; Event Organizer</span>
             
             @auth
+                @if (!request()->routeIs('client.home'))
                 <form method="POST" action="{{ route('logout') }}" class="topbar-logout-form" style="margin:0;">
                     @csrf
                     <button type="submit" class="topbar-logout-btn">
                         <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
                     </button>
                 </form>
+                @endif
             @endauth
         </div>
     </div>
@@ -112,9 +123,13 @@
     <header class="nav" id="nav">
         <div class="nav-inner">
             <nav class="nav-side nav-left">
+                @unless(request()->routeIs('client.home'))
                 <a href="{{ request()->routeIs('home') ? '#beranda' : route('home') . '#beranda' }}" class="nav-link{{ request()->routeIs('home') ? ' active' : '' }}">Beranda</a>
+                @endunless
                 <button type="button" class="nav-link location-trigger" data-location-open aria-haspopup="dialog" aria-controls="location-modal">LOKASI</button>
+                @unless(request()->routeIs('client.home'))
                 <a href="{{ request()->routeIs('home') ? '#katalog' : route('home') . '#katalog' }}" class="nav-link">Katalog WO/EO</a>
+                @endunless
                 <a href="{{ request()->routeIs('home') ? '#tentang' : route('home') . '#tentang' }}" class="nav-link">Tentang Kami</a>
             </nav>
 
@@ -131,6 +146,7 @@
                 
                 @auth
                     <!-- Bersih tanpa tulisan 'LOGIN: ADMIN Administrator' -->
+                    @unless(request()->routeIs('client.home'))
                     <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('client.dashboard') }}" class="btn-pill-center">
                         @if(auth()->user()->isAdmin())
                             DASHBOARD<br>ADMIN
@@ -138,6 +154,7 @@
                             DASHBOARD<br>CLIENT
                         @endif
                     </a>
+                    @endunless
                 @else
                     <a href="{{ route('login') }}" class="btn-link">Masuk</a>
                     <a href="{{ route('register') }}" class="btn-pill-center">DAFTAR</a>
@@ -150,9 +167,13 @@
 
     <!-- Mobile Drawer Sidebar -->
     <aside class="drawer" id="drawer">
+        @unless(request()->routeIs('client.home'))
         <a href="{{ request()->routeIs('home') ? '#beranda' : route('home') . '#beranda' }}">Beranda</a>
+        @endunless
         <button type="button" class="drawer-location-trigger" data-location-open aria-haspopup="dialog" aria-controls="location-modal">LOKASI</button>
+        @unless(request()->routeIs('client.home'))
         <a href="{{ request()->routeIs('home') ? '#katalog' : route('home') . '#katalog' }}">Katalog WO/EO</a>
+        @endunless
         <a href="{{ request()->routeIs('home') ? '#tentang' : route('home') . '#tentang' }}">Tentang Kami</a>
         <a href="{{ request()->routeIs('home') ? '#galeri' : route('home') . '#galeri' }}">Galeri Portofolio</a>
         <a href="{{ request()->routeIs('home') ? '#kontak' : route('home') . '#kontak' }}">Kontak</a>
@@ -160,15 +181,19 @@
         @auth
             <div style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <strong style="font-size: 0.95rem; color: #333;">{{ auth()->user()->name }}</strong>
+                @unless(request()->routeIs('client.home'))
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" style="background: none; border: none; color: #A33B3B; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Keluar</button>
                 </form>
+                @endunless
             </div>
 
+            @unless(request()->routeIs('client.home'))
             <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('client.dashboard') }}" class="btn-pill-center" style="width: 100%; text-align: center;">
                 {{ auth()->user()->isAdmin() ? 'DASHBOARD ADMIN' : 'DASHBOARD CLIENT' }}
             </a>
+            @endunless
         @else
             <a href="{{ route('login') }}" class="btn-link light">Masuk</a>
             <a href="{{ route('register') }}" class="btn-pill-center" style="width: 100%; text-align: center;">DAFTAR</a>

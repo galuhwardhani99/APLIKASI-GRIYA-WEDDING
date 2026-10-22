@@ -236,7 +236,7 @@
         </nav>
 
         <div class="client-sidebar-footer">
-    <a href="{{ route('home') }}"><i class="fa-solid fa-globe"></i> Halaman Utama</a>
+    <a href="{{ route('client.home') }}"><i class="fa-solid fa-globe"></i> Halaman Client</a>
     <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
         @csrf
         <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
