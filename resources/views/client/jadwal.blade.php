@@ -190,9 +190,6 @@
             <div>
                 <strong>{{ auth()->user()->name }}</strong>
                 <small>Client</small>
-                <a href="{{ route('user.profile.edit') }}" style="display: inline-block; font-size: 0.75rem; color: #C58F43; text-decoration: none; font-weight: 600; margin-top: 2px;">
-                    <i class="fa-solid fa-pen-to-square"></i> Edit Profil
-                </a>
             </div>
         </div>
 
@@ -212,13 +209,13 @@
             </a>
         </nav>
 
-        <div class="client-sidebar-footer" style="padding-top: 16px; border-top: 1px solid var(--border-color); display: grid; gap: 7px;">
-            <a href="{{ route('home') }}" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: #55483f; font-size: .86rem; font-weight: 600; padding: 11px 12px; border-radius: 8px;"><i class="fa-solid fa-globe"></i> Halaman Utama</a>
-            <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                @csrf
-                <button type="submit" style="width: 100%; border: 1px solid #f1d0d0; background: #fff5f5; color: #b33b3b; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; font: 600 .85rem 'Plus Jakarta Sans', sans-serif; cursor: pointer;"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
-            </form>
-        </div>
+        <div class="client-sidebar-footer">
+    <a href="{{ route('home') }}"><i class="fa-solid fa-globe"></i> Halaman Utama</a>
+    <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
+        @csrf
+        <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
+    </form>
+</div>
     </aside>
 
     <!-- Main Content -->
@@ -281,4 +278,25 @@
         });
     </script>
 </body>
+<!-- SweetAlert2 CDN & Script Konfirmasi -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmLogoutClient() {
+        Swal.fire({
+            title: 'Keluar dari Akun?',
+            text: 'Anda harus masuk kembali untuk membuat atau melihat reservasi.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#C58F43',
+            cancelButtonColor: '#8C8279',
+            confirmButtonText: 'Ya, Keluar',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logout-form-client').submit();
+            }
+        });
+    }
+</script>
 </html>

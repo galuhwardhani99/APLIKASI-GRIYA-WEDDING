@@ -38,17 +38,23 @@
         }
 
         /* Styling Kunci Sidebar */
-        .sidebar { 
-            width: 260px; 
-            min-width: 260px; /* Kunci lebar agar tidak menciut/melar */
-            background-color: var(--bg-card); 
-            border-right: 1px solid var(--border-color); 
-            padding: 24px 16px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.02); 
-        }
+        /* Styling Kunci Sidebar agar Sticky/Freeze */
+.sidebar { 
+    width: 260px; 
+    min-width: 260px; /* Kunci lebar agar tidak menciut/melar */
+    height: 100vh; /* Kunci tinggi seukuran layar browser */
+    position: sticky; /* Kunci posisi agar tetap diam saat konten kanan di-scroll */
+    top: 0; 
+    background-color: var(--bg-card); 
+    border-right: 1px solid var(--border-color); 
+    padding: 24px 16px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    box-shadow: 2px 0 10px rgba(0,0,0,0.02); 
+    z-index: 99;
+    overflow-y: auto; /* Memungkinkan scroll internal jika layar laptop sangat pendek */
+}
 
         .sidebar-brand { 
             display: flex; 
@@ -58,7 +64,6 @@
             border-bottom: 1px solid var(--border-color); 
         }
 
-        /* PEMBATASAN UKURAN LOGO (Mencegah Gambar Raksasa) */
         .sidebar-logo-img { 
             width: 42px !important; 
             height: 42px !important; 
@@ -127,7 +132,7 @@
 <body>
 
     <!-- Include Sidebar Terpusat -->
-    @include('partials.sidebar') <!-- Sesuaikan dengan nama path file sidebar kamu (misal: 'admin.partials.sidebar' atau 'partials.sidebar') -->
+    @include('partials.sidebar')
 
     <!-- Main Content -->
     <main class="main-content">

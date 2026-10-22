@@ -125,7 +125,7 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <div>
         <h1 style="font-family: 'Playfair Display', serif; color: #241A16; font-size: 1.6rem; font-weight: 700;">Kelola Akun Pengguna</h1>
-        <p style="font-size: 0.85rem; color: #8C8279; margin-top: 4px;">Daftar seluruh akun admin dan pelanggan yang terdaftar.</p>
+        <p style="font-size: 0.85rem; color: #8C8279; margin-top: 4px;">Daftar seluruh akun admin dan client yang terdaftar.</p>
 
 <!-- Container Tabel Bergaya Card -->
 <div class="user-card-section">

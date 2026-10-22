@@ -233,7 +233,7 @@
     <main class="main-content">
         <div class="form-card">
             <h1 class="form-header">Edit Data Pengguna</h1>
-            <p class="form-subtitle">Perbarui informasi akun pelanggan atau administrator sistem.</p>
+            <p class="form-subtitle">Perbarui informasi akun client atau administrator sistem.</p>
 
             <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
                 @csrf

@@ -286,19 +286,19 @@
             </ul>
         </nav>
         
-        <!-- Bottom Actions -->
-        <div class="sidebar-footer">
-             <a href="{{ route('home') }}" class="btn-sidebar-home">
-                 <i class="fa-solid fa-globe"></i> Halaman Utama
-             </a>
-             
-             <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                 @csrf
-                 <button type="submit" class="btn-sidebar-logout">
-                     <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
-                 </button>
-             </form>
-        </div>
+        <!-- Bottom Actions Admin -->
+<div class="sidebar-footer">
+     <a href="{{ route('home') }}" class="btn-sidebar-home">
+         <i class="fa-solid fa-globe"></i> Halaman Utama
+     </a>
+     
+     <form id="logout-form-admin" action="{{ route('logout') }}" method="POST" style="margin: 0;">
+         @csrf
+         <button type="button" class="btn-sidebar-logout" onclick="confirmLogout('logout-form-admin')">
+             <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
+         </button>
+     </form>
+</div>
     </aside>
 
     <!-- Main Content -->
@@ -320,7 +320,7 @@
                 <div class="stat-value">18 Acara</div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Pelanggan Aktif</div>
+                <div class="stat-title">Client Aktif</div>
                 <div class="stat-value">124 User</div>
             </div>
         </div>
@@ -332,7 +332,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Pelanggan</th>
+                        <th>Client</th>
                         <th>Layanan</th>
                         <th>Tgl Acara</th>
                         <th>Status</th>
@@ -359,20 +359,41 @@
     </main>
 
     <!-- Script SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil Login',
-                    text: '{{ session('success') }}',
-                    confirmButtonColor: '#C58F43',
-                    background: '#FFFFFF',
-                    color: '#241A16'
-                });
-            @endif
+    <!-- Script SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmLogout(formId) {
+        Swal.fire({
+            title: 'Konfirmasi Keluar',
+            text: 'Apakah Anda yakin ingin keluar dari akun ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#C58F43', // Warna Gold Utama
+            cancelButtonColor: '#8C8279',  // Warna Muted
+            confirmButtonText: 'Ya, Keluar',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            background: '#FFFFFF',
+            color: '#241A16'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(formId).submit();
+            }
         });
-    </script>
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#C58F43',
+                background: '#FFFFFF',
+                color: '#241A16'
+            });
+        @endif
+    });
+</script>
 </body>
 </html>

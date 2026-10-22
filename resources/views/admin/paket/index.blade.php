@@ -248,7 +248,7 @@
                                         data-category="{{ $paket->kategori_paket_id }}" 
                                         data-price="{{ $paket->harga }}" 
                                         data-status="{{ $paket->status }}" 
-                                        data-featured="{{ $paket->unggulan ? 1 : 0 }}" 
+                                        data-featured="{{ $paket->unggulan ? '1' : '0' }}" 
                                         data-photo="{{ $paket->foto ? asset('storage/' . $paket->foto) : '' }}" 
                                         data-description="{{ $paket->deskripsi }}">
                                     <i class="fa-solid fa-pen-to-square"></i> Edit
@@ -295,7 +295,7 @@
                         <select name="kategori_paket_id" required>
                             <option value="">Pilih kategori</option>
                             @foreach($kategoriPakets as $kategori)
-                                <option value="{{ $kategori->id }}" @selected(old('kategori_paket_id') == $kategori->id)>{{ $kategori->nama_kategori }}</option>
+                                <option value="{{ $kategori->id }}" @selected(old('kategori_paket_id') == $kategori->id)>{{$kategori->nama_kategori }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -403,11 +403,19 @@
 @endsection
 
 @push('scripts')
+<!-- Library SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     // Format Angka Rupiah Real-time
     function formatHarga(value){
         const digits = String(value ?? '').replace(/\D/g, '');
         return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Unformat Rupiah menjadi angka murni
+    function cleanHarga(value){
+        return String(value ?? '').replace(/\D/g, '');
     }
 
     document.querySelectorAll('[data-price-format]').forEach(input => {
@@ -429,9 +437,10 @@
         document.getElementById('edit-category').value = d.category;
         document.getElementById('edit-price').value = formatHarga(d.price);
         document.getElementById('edit-status').value = d.status;
-        document.getElementById('edit-description').value = d.description;
+        document.getElementById('edit-description').value = d.description || '';
         
-        document.querySelector('#edit-form input[name="unggulan"][value="'+d.featured+'"]').checked = true;
+        const featuredRadio = f.querySelector(`input[name="unggulan"][value="${d.featured}"]`);
+        if(featuredRadio) featuredRadio.checked = true;
         
         const preview = document.getElementById('edit-photo-preview');
         preview.src = d.photo;
@@ -446,8 +455,22 @@
 
     // ================= SWEETALERT2 CONFIRMATIONS =================
 
+    function submitFormClean(form) {
+        // Hilangkan titik pada input harga sebelum dikirim ke backend
+        const priceInput = form.querySelector('[data-price-format]');
+        if(priceInput) {
+            priceInput.value = cleanHarga(priceInput.value);
+        }
+        form.submit();
+    }
+
     function confirmCreate(event, form) {
-        event.preventDefault();
+    event.preventDefault();
+    
+    // Sembunyikan modal form terlebih dahulu
+    closeModal('create-modal');
+
+    if (typeof Swal !== 'undefined') {
         Swal.fire({
             title: 'Simpan Paket Baru?',
             text: "Pastikan rincian data paket yang diinputkan sudah sesuai.",
@@ -461,13 +484,24 @@
             color: '#241A16'
         }).then((result) => {
             if (result.isConfirmed) {
-                form.submit();
+                submitFormClean(form);
+            } else {
+                // Jika batal, tampilkan kembali modal form
+                openModal('create-modal');
             }
         });
+    } else {
+        submitFormClean(form);
     }
+}
 
-    function confirmUpdate(event, form) {
-        event.preventDefault();
+function confirmUpdate(event, form) {
+    event.preventDefault();
+
+    // Sembunyikan modal form edit terlebih dahulu agar SweetAlert2 berada di depan
+    closeModal('edit-modal');
+
+    if (typeof Swal !== 'undefined') {
         Swal.fire({
             title: 'Simpan Perubahan?',
             text: "Data paket layanan akan diperbarui di sistem.",
@@ -481,29 +515,41 @@
             color: '#241A16'
         }).then((result) => {
             if (result.isConfirmed) {
-                form.submit();
+                submitFormClean(form);
+            } else {
+                // Jika batal, tampilkan kembali modal form edit
+                openModal('edit-modal');
             }
         });
+    } else {
+        submitFormClean(form);
     }
+}
 
     function confirmDelete(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Hapus Paket Ini?',
-            text: "Data paket yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#EF4444',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Paket Ini?',
+                text: "Data paket yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        } else {
+            if (confirm('Apakah Anda yakin ingin menghapus paket ini?')) {
                 form.submit();
             }
-        });
+        }
     }
 </script>
 @endpush

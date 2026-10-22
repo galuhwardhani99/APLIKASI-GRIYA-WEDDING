@@ -48,6 +48,11 @@
     .btn-cancel:hover { background-color: #EFE8DE; color: var(--text-dark); }
     .btn-save { flex: 1; background: var(--gold-primary); color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     .btn-save:hover { background-color: var(--gold-hover); }
+
+    /* Memastikan Popup SweetAlert2 Selalu Muncul di Depan Modal */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
 </style>
 @endpush
 
@@ -146,6 +151,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 <script>
     Fancybox.bind('[data-fancybox="gallery"]', {
@@ -206,38 +212,56 @@
         event.preventDefault();
         const isEdit = methodField.value === "PUT";
 
-        Swal.fire({
-            title: isEdit ? 'Simpan Perubahan?' : 'Upload Foto Baru?',
-            text: isEdit ? "Data portofolio akan diperbarui di sistem." : "Foto portofolio baru akan ditampilkan di galeri.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: isEdit ? 'Ya, Perbarui!' : 'Ya, Upload!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) { form.submit(); }
-        });
+        // Sembunyikan modal form terlebih dahulu
+        closeModal();
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: isEdit ? 'Simpan Perubahan?' : 'Upload Foto Baru?',
+                text: isEdit ? "Data portofolio akan diperbarui di sistem." : "Foto portofolio baru akan ditampilkan di galeri.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: isEdit ? 'Ya, Perbarui!' : 'Ya, Upload!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) { 
+                    form.submit(); 
+                } else {
+                    // Tampilkan kembali modal jika batal
+                    modal.classList.add('show');
+                }
+            });
+        } else {
+            form.submit();
+        }
     }
 
     function confirmDelete(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Hapus Foto Portofolio?',
-            text: "Foto yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#EF4444',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) { form.submit(); }
-        });
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Foto Portofolio?',
+                text: "Foto yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) { form.submit(); }
+            });
+        } else {
+            if (confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+                form.submit();
+            }
+        }
     }
 </script>
 @endpush

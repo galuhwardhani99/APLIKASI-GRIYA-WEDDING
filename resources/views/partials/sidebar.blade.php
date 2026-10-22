@@ -1,82 +1,105 @@
-<!-- Sidebar Admin Panel -->
 <aside class="sidebar">
-    <!-- Brand Sidebar -->
     <div class="sidebar-brand">
-        <img src="{{ asset('images/logo.jpeg') }}" alt="Logo Griya Rias Elly Jr." class="sidebar-logo-img">
+        <img src="{{ asset('images/logo.jpeg') }}" alt="Logo" class="sidebar-logo-img">
         <div class="brand-text">
             <h2>GRIYA RIAS</h2>
-            <p class="brand-title">Elly Jr.</p>
+            <h1 class="brand-title">Elly Jr.</h1>
             <p class="brand-sub">Area Admin</p>
         </div>
     </div>
 
-    <!-- Informasi User Admin -->
-    <div class="admin-sidebar-user">
-        <span class="admin-sidebar-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</span>
-        <div>
-            <strong>{{ auth()->user()->name ?? 'Administrator' }}</strong>
-            <!-- Tambahan Link Kelola Akun -->
-            <a href="{{ route('admin.users.index') }}" style="display:inline-block; margin-top: 4px; font-size: 0.75rem; color: var(--gold-primary); text-decoration: none; font-weight: 600;">
-                <i class="fa-solid fa-user-gear"></i> Kelola Akun
-            </a>
+    @auth
+        <div class="admin-sidebar-user">
+            <span class="admin-sidebar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            <div style="min-width: 0;">
+                <strong>{{ auth()->user()->name }}</strong>
+                <small>Administrator</small>
+            </div>
         </div>
-    </div>
-    
-    <nav>
-        <ul class="nav-menu">
-            <li class="admin-nav-label">MENU UTAMA</li>
-            
-            <li>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="fa-solid fa-shapes"></i> Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.layanan.index') }}" class="nav-item {{ request()->routeIs('admin.layanan.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-scissors"></i> Kelola Layanan
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.paket.index') }}" class="nav-item {{ request()->routeIs('admin.paket.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-box-open"></i> Kelola Paket
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.kategori-paket.index') }}" class="nav-item {{ request()->routeIs('admin.kategori-paket.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-tags"></i> Kategori Paket
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.portofolio.index') }}" class="nav-item {{ request()->routeIs('admin.portofolio.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-images"></i> Galeri Portofolio
-                </a>
-            </li>
-            
-            <li class="admin-nav-label" style="padding-top:14px;">AKTIVITAS</li>
-            <li>
-                <a href="#" class="nav-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
-                    <i class="fa-regular fa-calendar"></i> Jadwal Acara
-                </a>
-            </li>
-            <li>
-                <a href="#" class="nav-item">
+    @endauth
+
+    <ul class="nav-menu">
+        <li class="admin-nav-label">MENU UTAMA</li>
+        <li>
+            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}">
+                <i class="fa-solid fa-shapes"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.layanan.index') }}" class="nav-item {{ request()->routeIs('admin.layanan.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-scissors"></i> Kelola Layanan
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.paket.index') }}" class="nav-item {{ request()->routeIs('admin.paket.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-box-open"></i> Kelola Paket
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.kategori-paket.index') }}" class="nav-item {{ request()->routeIs('admin.kategori-paket.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-tags"></i> Kategori Paket
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.portofolio.index') }}" class="nav-item {{ request()->routeIs('admin.portofolio.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-images"></i> Galeri Portofolio
+            </a>
+        </li>
+
+        <li class="admin-nav-label" style="margin-top: 12px;">AKTIVITAS</li>
+        <li>
+            <a href="{{ route('admin.jadwal.index') }}" class="nav-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                <i class="fa-regular fa-calendar"></i> Jadwal Acara
+            </a>
+        </li>
+        <li>
+            <!-- Dihubungkan ke route transaksi jika ada, atau gunakan route('admin.dashboard') / '#' tanpa memicu void -->
+            @if(Route::has('admin.transaksi.index'))
+                <a href="{{ route('admin.transaksi.index') }}" class="nav-item {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
                 </a>
-            </li>
-        </ul>
-    </nav>
-    
-    <!-- Bottom Actions -->
+            @else
+                <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}" onclick="alert('Fitur Laporan Transaksi sedang dalam pengembangan.'); return false;">
+                    <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+                </a>
+            @endif
+        </li>
+    </ul>
+
     <div class="sidebar-footer">
-        <a href="{{ route('home') }}" class="btn-sidebar-home">
-            <i class="fa-solid fa-globe"></i> Halaman Utama
-        </a>
-        
-        <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+        <a href="{{ route('home') }}" class="btn-sidebar-home"><i class="fa-solid fa-globe"></i> Halaman Utama</a>
+        <form id="logout-form-admin" action="{{ route('logout') }}" method="POST" style="margin: 0;">
             @csrf
-            <button type="submit" class="btn-sidebar-logout">
+            <button type="button" class="btn-sidebar-logout" onclick="confirmLogoutAdmin()">
                 <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
             </button>
         </form>
     </div>
 </aside>
+
+<script>
+    function confirmLogoutAdmin() {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Keluar dari Panel Admin?',
+                text: "Sesi admin Anda akan diakhiri.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form-admin').submit();
+                }
+            });
+        } else {
+            if (confirm('Apakah Anda yakin ingin keluar dari akun admin?')) {
+                document.getElementById('logout-form-admin').submit();
+            }
+        }
+    }
+</script>

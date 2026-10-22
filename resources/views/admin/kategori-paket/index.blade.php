@@ -148,6 +148,11 @@
     .field input:focus { border-color: var(--gold-primary); background: #fff; }
     .hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
 
+    /* Memastikan Popup SweetAlert2 Selalu Berada di Paling Depan */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
+
     @media(max-width:680px){
         .top { align-items: flex-start; flex-direction: column; }
     }
@@ -274,6 +279,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function openModal(id){ document.getElementById(id).classList.add('show'); }
     function closeModal(id){ document.getElementById(id).classList.remove('show'); }
@@ -293,62 +299,85 @@
 
     function confirmCreate(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Simpan Kategori Baru?',
-            text: "Pastikan nama kategori yang dimasukkan sudah sesuai.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Simpan!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
+        closeModal('create-modal');
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Simpan Kategori Baru?',
+                text: "Pastikan nama kategori yang dimasukkan sudah sesuai.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                } else {
+                    openModal('create-modal');
+                }
+            });
+        } else {
+            form.submit();
+        }
     }
 
     function confirmUpdate(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Simpan Perubahan?',
-            text: "Nama kategori akan diperbarui di seluruh paket yang terhubung.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Perbarui!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
+        closeModal('edit-modal');
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Simpan Perubahan?',
+                text: "Nama kategori akan diperbarui di seluruh paket yang terhubung.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Perbarui!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                } else {
+                    openModal('edit-modal');
+                }
+            });
+        } else {
+            form.submit();
+        }
     }
 
     function confirmDelete(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Hapus Kategori Ini?',
-            text: "Kategori ini akan dihapus permanen dari sistem.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#EF4444',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Kategori Ini?',
+                text: "Kategori ini akan dihapus permanen dari sistem.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        } else {
+            if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
                 form.submit();
             }
-        });
+        }
     }
 </script>
 @endpush

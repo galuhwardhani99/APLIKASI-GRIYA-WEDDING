@@ -26,7 +26,7 @@ class RegisterTest extends TestCase
         $this->assertDatabaseHas('users', [
             'name' => 'Siti Aminah',
             'email' => 'siti@example.com',
-            'phone' => '081234567890',
+            'phone' => '087847604348',
             'address' => 'Jl. Melati No. 10, Bandung',
             'role' => 'client',
         ]);
@@ -49,7 +49,7 @@ class RegisterTest extends TestCase
         User::create([
             'name' => 'Pengguna Lama',
             'email' => 'lama@example.com',
-            'phone' => '081234567890',
+            'phone' => '087847604348',
             'address' => 'Jl. Lama No. 1',
             'password' => 'password123',
         ]);

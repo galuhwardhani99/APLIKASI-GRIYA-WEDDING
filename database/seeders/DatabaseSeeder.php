@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@griyaelly.com'],
             [
                 'name'     => 'Administrator',
-                'phone'    => '081234567890',
+                'phone'    => '087850875676',
                 'password' => 'password123', // otomatis di-hash oleh casts
                 'role'     => 'admin',
             ]

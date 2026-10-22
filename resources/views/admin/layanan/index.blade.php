@@ -160,6 +160,11 @@
     .featured-choice label { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--text-dark); font-weight: 500; }
     .field small { display: block; margin-top: 6px; color: var(--text-muted); font-size: 12px; }
 
+    /* Memastikan Popup SweetAlert2 Selalu Berada di Paling Depan */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
+
     @media(max-width:760px){
         .top, .toolbar { align-items: flex-start; flex-direction: column; }
         .search, .search input { width: 100%; }
@@ -245,7 +250,7 @@
                                         data-variation="{{ $layanan->variasi }}" 
                                         data-price="{{ $layanan->harga }}" 
                                         data-status="{{ $layanan->status }}" 
-                                        data-featured="{{ $layanan->unggulan ? 1 : 0 }}" 
+                                        data-featured="{{ $layanan->unggulan ? '1' : '0' }}" 
                                         data-photo="{{ $layanan->foto ? asset('storage/' . $layanan->foto) : '' }}" 
                                         data-description="{{ $layanan->deskripsi }}">
                                     <i class="fa-solid fa-pen-to-square"></i> Edit
@@ -388,11 +393,18 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     // Format Angka Rupiah Real-time
     function formatHarga(value){
         const digits = String(value ?? '').replace(/\D/g, '');
         return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Unformat Rupiah menjadi angka murni
+    function cleanHarga(value){
+        return String(value ?? '').replace(/\D/g, '');
     }
 
     document.querySelectorAll('[data-price-format]').forEach(input => {
@@ -408,14 +420,16 @@
 
     function editLayanan(b){
         const d = b.dataset;
-        document.getElementById('edit-form').action = d.action;
+        const f = document.getElementById('edit-form');
+        f.action = d.action;
         document.getElementById('edit-name').value = d.name;
-        document.getElementById('edit-variation').value = d.variation;
+        document.getElementById('edit-variation').value = d.variation || '';
         document.getElementById('edit-price').value = formatHarga(d.price);
         document.getElementById('edit-status').value = d.status;
-        document.getElementById('edit-description').value = d.description;
+        document.getElementById('edit-description').value = d.description || '';
         
-        document.querySelector('#edit-form input[name="unggulan"][value="'+d.featured+'"]').checked = true;
+        const featuredRadio = f.querySelector(`input[name="unggulan"][value="${d.featured}"]`);
+        if(featuredRadio) featuredRadio.checked = true;
         
         const preview = document.getElementById('edit-photo-preview');
         preview.src = d.photo;
@@ -430,64 +444,95 @@
 
     // ================= SWEETALERT2 CONFIRMATIONS =================
 
+    function submitFormClean(form) {
+        // Hilangkan titik pada input harga sebelum dikirim ke backend
+        const priceInput = form.querySelector('[data-price-format]');
+        if(priceInput) {
+            priceInput.value = cleanHarga(priceInput.value);
+        }
+        form.submit();
+    }
+
     function confirmCreate(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Simpan Layanan Baru?',
-            text: "Pastikan data layanan yang diinputkan sudah benar.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Simpan!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
+        closeModal('create-modal');
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Simpan Layanan Baru?',
+                text: "Pastikan data layanan yang diinputkan sudah benar.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitFormClean(form);
+                } else {
+                    openModal('create-modal');
+                }
+            });
+        } else {
+            submitFormClean(form);
+        }
     }
 
     function confirmUpdate(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Simpan Perubahan?',
-            text: "Data layanan akan diperbarui di sistem.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Perbarui!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
+        closeModal('edit-modal');
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Simpan Perubahan?',
+                text: "Data layanan akan diperbarui di sistem.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Perbarui!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitFormClean(form);
+                } else {
+                    openModal('edit-modal');
+                }
+            });
+        } else {
+            submitFormClean(form);
+        }
     }
 
     function confirmDelete(event, form) {
         event.preventDefault();
-        Swal.fire({
-            title: 'Hapus Layanan Ini?',
-            text: "Data layanan yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#EF4444',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Layanan Ini?',
+                text: "Data layanan yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#FFFFFF',
+                color: '#241A16'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        } else {
+            if (confirm('Apakah Anda yakin ingin menghapus layanan ini?')) {
                 form.submit();
             }
-        });
+        }
     }
 </script>
 @endpush
