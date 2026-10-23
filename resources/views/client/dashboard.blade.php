@@ -287,7 +287,7 @@
         <!-- HERO -->
         <section class="client-hero">
             <span class="badge-client">Dashboard Client</span>
-            <h1 class="client-hero-title">Selamat Datang, {{ $namaDepan }}</h1>
+            <h1 class="client-hero-title">Halo! Selamat Datang, {{ $namaDepan }}</h1>
             <p class="client-hero-sub">
                 Temukan layanan tata rias terbaik untuk momen istimewa Anda. Jelajahi paket penawaran, cek ketersediaan jadwal, dan ajukan reservasi dengan mudah.
             </p>
