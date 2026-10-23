@@ -272,8 +272,9 @@
                 <tbody>
                     @forelse($transaksi as $item)
                         <tr>
+                            @php($namaLayananTerpilih = $item->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
                             <td><strong>{{ $item->kode_reservasi }}</strong></td>
-                            <td>{{ $item->nama_paket ?: $item->nama_layanan ?: $item->paket?->nama_paket ?: $item->layanan?->nama_layanan ?: $item->detail_acara ?: '—' }}</td>
+                            <td>{{ $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: $item->paket?->nama_paket ?: $item->layanan?->nama_layanan ?: $item->detail_acara ?: '—') }}</td>
                             <td>{{ $item->tgl_reservasi ? \Carbon\Carbon::parse($item->tgl_reservasi)->translatedFormat('d F Y') : '—' }}</td>
                             <td>{{ $item->jumlah_pesanan }}</td>
                             <td><strong>Rp {{ number_format($item->biaya_sewa ?: (($item->harga_paket ?? $item->harga_layanan ?? 0) * $item->jumlah_pesanan), 0, ',', '.') }}</strong></td>

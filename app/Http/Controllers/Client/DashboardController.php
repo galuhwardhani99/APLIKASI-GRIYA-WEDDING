@@ -8,6 +8,7 @@ use App\Models\Layanan;
 use App\Models\KategoriPaket;
 use App\Models\Portofolio;
 use App\Models\Reservasi;
+use App\Support\BookingAvailability;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -77,7 +78,7 @@ class DashboardController extends Controller
 
     public function riwayatReservasi(): View
     {
-        $reservasis = Reservasi::with(['paket', 'jadwal'])
+        $reservasis = Reservasi::with(['paket', 'layanans', 'jadwal'])
             ->where('id_akun', auth()->id())
             ->latest('id_reservasi')->paginate(10);
 
@@ -86,7 +87,7 @@ class DashboardController extends Controller
 
     public function riwayatTransaksi(): View
     {
-        $transaksi = Reservasi::with(['paket', 'layanan'])
+        $transaksi = Reservasi::with(['paket', 'layanan', 'layanans'])
             ->where('id_akun', auth()->id())
             ->where(fn ($query) => $query->whereNotNull('id_paket')->orWhereNotNull('id_layanan'))
             ->latest('id_reservasi')->paginate(10);
@@ -96,18 +97,19 @@ class DashboardController extends Controller
 
     public function getJadwalTervalidasi()
     {
-        $jadwals = Reservasi::where('status_reservasi', 'Disetujui')
-            ->orWhereHas('jadwal', function ($query) {
-                $query->where('status_validasi', 'Tervalidasi');
+        $jadwals = BookingAvailability::activeBookings()
+            ->filter(fn (Reservasi $reservasi) => $reservasi->tanggal_acara)
+            ->map(function (Reservasi $reservasi) {
+                [$start, $end] = BookingAvailability::interval($reservasi);
+
+                return [
+                    'date' => $reservasi->tanggal_acara->toDateString(),
+                    'start' => substr($start, 0, 5),
+                    'end' => substr($end, 0, 5),
+                    'full_day' => BookingAvailability::isFullDay($start, $end),
+                ];
             })
-            ->pluck('tanggal_acara')
-            ->map(function ($date) {
-                return \Carbon\Carbon::parse($date)->toDateString();
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            ->values();
 
         return response()->json($jadwals);
     }

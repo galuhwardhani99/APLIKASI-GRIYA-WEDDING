@@ -229,12 +229,9 @@
             <!-- Indikator Warna (Hanya Tanggal Terisi) -->
             <div class="legend-box">
                 <div class="legend-item">
-                    <span class="dot dot-red"></span> Tanggal Terisi (Sudah Dibooking)
+                    <span class="dot dot-red"></span> Merah: full day; keterangan jam: booking sebagian
                 </div>
             </div>
-
-            <!-- Elemen Kalender -->
-            <div id="calendar"></div>
 
             <!-- Elemen Kalender -->
             <div id="calendar"></div>
@@ -259,6 +256,7 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek'
                 },
+                displayEventTime: false,
                 // Mengambil event dari endpoint JSON yang sudah diset merah
                 events: '{{ route("client.jadwal.json") }}',
                 dayCellDidMount: function(info) {
@@ -266,11 +264,10 @@
                     info.el.style.backgroundColor = '#F4FAF6'; 
                 },
                 eventDidMount: function(info) {
-                    // Memastikan kotak tanggal pada event yang dibooking otomatis ikut berubah merah
-                    let dateStr = info.event.startStr.split('T')[0];
-                    let cellEl = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
-                    if (cellEl) {
-                        cellEl.style.backgroundColor = '#FEE2E2'; // Merah lembut latar kotak
+                    if (info.event.extendedProps.fullDay) {
+                        let dateStr = info.event.startStr.split('T')[0];
+                        let cellEl = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
+                        if (cellEl) cellEl.style.backgroundColor = '#FEE2E2';
                     }
                 }
             });

@@ -273,15 +273,16 @@
                 <tbody>
                     @forelse($reservasis as $reservasi)
                         <tr>
+                            @php($namaLayananTerpilih = $reservasi->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
                             <td>
                                 <strong>{{ $reservasi->kode_reservasi }}</strong>
                                 <small>Diajukan {{ $reservasi->tgl_reservasi?->format('d/m/Y') }}</small>
                             </td>
                             <td>
-                                {{ $reservasi->nama_paket ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—' }}
+                                {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—') }}
                                 <small>{{ $reservasi->lokasi_acara }}</small>
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($reservasi->tgl_acara)->translatedFormat('d F Y') }}</td>
+                            <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? '—' }}</td>
                             <td>{{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '—' }} – {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '—' }}</td>
                             <td>{{ $reservasi->jumlah_pesanan }}</td>
                             <td>

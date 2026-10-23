@@ -1,12 +1,11 @@
 <aside class="sidebar">
-    <div class="sidebar-brand">
-        <img src="{{ asset('images/logo.jpeg') }}" alt="Logo" class="sidebar-logo-img">
+    <a class="sidebar-brand" href="{{ route('admin.dashboard') }}">
         <div class="brand-text">
             <h2>GRIYA RIAS</h2>
             <h1 class="brand-title">Elly Jr.</h1>
             <p class="brand-sub">Area Admin</p>
         </div>
-    </div>
+    </a>
 
     @auth
         <div class="admin-sidebar-user">
@@ -27,12 +26,12 @@
         </li>
         <li>
             <a href="{{ route('admin.layanan.index') }}" class="nav-item {{ request()->routeIs('admin.layanan.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-scissors"></i> Kelola Layanan
+                <i class="fa-solid fa-scissors"></i> Katalog Layanan
             </a>
         </li>
         <li>
             <a href="{{ route('admin.paket.index') }}" class="nav-item {{ request()->routeIs('admin.paket.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-box-open"></i> Kelola Paket
+                <i class="fa-solid fa-box-open"></i> Katalog Paket
             </a>
         </li>
         <li>
@@ -46,7 +45,7 @@
             </a>
         </li>
 
-        <li class="admin-nav-label" style="margin-top: 12px;">AKTIVITAS</li>
+        <li class="admin-nav-label admin-nav-spaced">AKTIVITAS &amp; AKUN</li>
         <li>
             <a href="{{ route('admin.jadwal.index') }}" class="nav-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
                 <i class="fa-regular fa-calendar"></i> Jadwal Acara
@@ -63,6 +62,16 @@
                     <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
                 </a>
             @endif
+        </li>
+        <li>
+            <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-users-gear"></i> Kelola Akun
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('user.profile.edit') }}" class="nav-item {{ request()->routeIs('user.profile.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
+            </a>
         </li>
     </ul>
 

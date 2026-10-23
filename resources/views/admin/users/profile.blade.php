@@ -137,6 +137,13 @@
 
         /* Main Content */
         .main-content { flex: 1; padding: 40px; min-width: 0; }
+        .profile-content { width: min(720px, 100%); margin: 0 auto; }
+        @media(max-width:768px) {
+            body { display:block; }
+            .client-sidebar { width:100%; height:auto; position:relative; border-right:0; border-bottom:1px solid var(--border-color); }
+            .client-sidebar-nav { max-height:360px; }
+            .main-content { padding:24px 18px; }
+        }
         .page-header { margin-bottom: 24px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 6px; }
         .page-sub { color: var(--text-muted); font-size: 0.9rem; }
@@ -192,53 +199,63 @@
 </head>
 <body>
 
-    <!-- Sidebar Client -->
+    <!-- Sidebar Admin -->
     <aside class="client-sidebar">
-        <a class="client-sidebar-brand" href="{{ route('client.dashboard') }}">
-            <span>GRIYA RIAS</span><strong>Elly Jr.</strong><small>Area Client</small>
+        <a class="client-sidebar-brand" href="{{ route('admin.dashboard') }}">
+            <span>GRIYA RIAS</span><strong>Elly Jr.</strong><small>Area Admin</small>
         </a>
         
         <div class="client-sidebar-user">
             <span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
             <div style="min-width: 0;">
                 <strong>{{ auth()->user()->name }}</strong>
-                <small>Client</small>
+            <small>{{ auth()->user()->role === 'admin' ? 'Administrator' : 'Client' }}</small>
             </div>
         </div>
 
         <nav class="client-sidebar-nav">
-            <span class="client-nav-label">MENU UTAMA</span>
-            <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
-            <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
-            <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
-            <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
-            
-            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
-            <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
-            <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
-            <a href="{{ route('user.profile.edit') }}" class="active">
-                <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
-            </a>
+            @if(auth()->user()->role === 'admin')
+                <span class="client-nav-label">MENU UTAMA</span>
+                <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="{{ route('admin.layanan.index') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
+                <a href="{{ route('admin.paket.index') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
+                <a href="{{ route('admin.kategori-paket.index') }}"><i class="fa-solid fa-tags"></i> Kategori Paket</a>
+                <a href="{{ route('admin.portofolio.index') }}"><i class="fa-solid fa-images"></i> Galeri Portofolio</a>
+                <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
+                <a href="{{ route('admin.jadwal.index') }}"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a>
+                <a href="{{ route('admin.users.index') }}"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a>
+            @else
+                <span class="client-nav-label">MENU UTAMA</span>
+                <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
+                <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
+                <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
+                <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
+                <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
+                <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
+                <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
+            @endif
+            <a href="{{ route('user.profile.edit') }}" class="active"><i class="fa-solid fa-user-gear"></i> Pengaturan Akun</a>
         </nav>
 
         <div class="client-sidebar-footer">
-    <a href="{{ auth()->user()->role === 'client' ? route('client.home') : route('home') }}"><i class="fa-solid fa-globe"></i> {{ auth()->user()->role === 'client' ? 'Halaman Client' : 'Halaman Utama' }}</a>
-    <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
+    <a href="{{ auth()->user()->role === 'admin' ? route('home') : route('client.home') }}"><i class="fa-solid fa-globe"></i> {{ auth()->user()->role === 'admin' ? 'Halaman Utama' : 'Halaman Client' }}</a>
+    <form id="logout-form-profile" action="{{ route('logout') }}" method="POST" style="margin: 0;">
         @csrf
-        <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
+        <button type="button" onclick="confirmLogoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
     </form>
 </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Pengaturan Akun</h1>
-            <p class="page-sub">Kelola data diri dan kata sandi akun Anda.</p>
-        </div>
+        <div class="profile-content">
+            <div class="page-header">
+                <h1 class="page-title">Pengaturan Akun</h1>
+                <p class="page-sub">Kelola data diri dan kata sandi akun Anda.</p>
+            </div>
 
-        <div class="profile-card">
+            <div class="profile-card">
             @if(session('success'))
                 <div class="alert-success-custom">
                     <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
@@ -298,6 +315,7 @@
                     <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
                 </button>
             </form>
+            </div>
         </div>
     </main>
 
@@ -305,10 +323,11 @@
 <!-- SweetAlert2 CDN & Script Konfirmasi -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmLogoutClient() {
+    function confirmLogoutProfile() {
+        const isAdmin = @json(auth()->user()->role === 'admin');
         Swal.fire({
-            title: 'Keluar dari Akun?',
-            text: 'Anda harus masuk kembali untuk membuat atau melihat reservasi.',
+            title: isAdmin ? 'Keluar dari Panel Admin?' : 'Keluar dari Akun?',
+            text: isAdmin ? 'Sesi admin Anda akan diakhiri.' : 'Anda harus masuk kembali untuk melihat reservasi.',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#C58F43',
@@ -318,7 +337,7 @@
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('logout-form-client').submit();
+                document.getElementById('logout-form-profile').submit();
             }
         });
     }
