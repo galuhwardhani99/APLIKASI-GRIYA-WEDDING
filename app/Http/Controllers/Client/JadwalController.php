@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservasi;
+use App\Support\BookingAvailability;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller
@@ -16,23 +17,27 @@ class JadwalController extends Controller
     // Endpoint JSON untuk mengambil data tanggal yang sudah dibooking (Merah)
     public function getJadwalJson()
     {
-        // Ambil data reservasi yang sudah divalidasi / disetujui
-        $reservasis = Reservasi::where('status_reservasi', 'Disetujui')
-            ->orWhereHas('jadwal', function ($query) {
-                $query->where('status_validasi', 'Tervalidasi');
-            })
-            ->get();
+        $reservasis = BookingAvailability::activeBookings()
+            ->filter(fn (Reservasi $reservasi) => $reservasi->tanggal_acara);
 
         $events = [];
 
         foreach ($reservasis as $item) {
+            [$start, $end] = BookingAvailability::interval($item);
+            $isFullDay = BookingAvailability::isFullDay($start, $end);
+            $date = $item->tanggal_acara->toDateString();
+
             $events[] = [
-                'title'           => 'Sudah Dibooking',
-                'start'           => \Carbon\Carbon::parse($item->tanggal_acara)->toDateString(),
+                'title'           => $isFullDay
+                    ? 'Sudah Dibooking · Full day'
+                    : 'Sudah Dibooking · ' . substr($start, 0, 5) . '–' . substr($end, 0, 5),
+                'start'           => $isFullDay ? $date : $date . 'T' . substr($start, 0, 8),
+                'end'             => $isFullDay ? null : $date . 'T' . substr($end, 0, 8),
                 'backgroundColor' => '#DC2626', // Warna merah
                 'borderColor'     => '#DC2626',
                 'textColor'       => '#FFFFFF',
-                'allDay'          => true,
+                'allDay'          => $isFullDay,
+                'extendedProps'   => ['fullDay' => $isFullDay],
             ];
         }
 

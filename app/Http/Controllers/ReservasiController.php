@@ -6,6 +6,7 @@ use App\Models\Reservasi;
 use App\Models\Paket;
 use App\Models\JadwalAcara;
 use App\Models\Layanan;
+use App\Support\BookingAvailability;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -47,24 +48,61 @@ class ReservasiController extends Controller
         if (! $request->expectsJson()) {
             $validated = $request->validate([
                 'jenis_pesanan' => ['required', 'in:paket,layanan'],
-                'id_item' => ['required', 'regex:/^(paket|layanan):[0-9]+$/'],
+                'id_item' => ['nullable', 'required_if:jenis_pesanan,paket', 'regex:/^paket:[0-9]+$/'],
+                'id_items' => ['nullable', 'required_if:jenis_pesanan,layanan', 'array', 'min:1'],
+                'id_items.*' => ['required', 'integer', 'distinct', 'exists:layanans,id_layanan'],
                 'tgl_acara' => ['required', 'date', 'after_or_equal:today'],
-                'jumlah_pesanan' => ['required', 'integer', 'min:1', 'max:20'],
-                'waktu_mulai' => ['required', 'date_format:H:i'],
-                'waktu_selesai' => ['required', 'date_format:H:i', 'after:waktu_mulai'],
+                'full_day' => ['nullable', 'boolean'],
+                'waktu_mulai' => ['required_unless:full_day,1', 'nullable', 'date_format:H:i'],
+                'waktu_selesai' => ['required_unless:full_day,1', 'nullable', 'date_format:H:i', 'after:waktu_mulai'],
                 'lokasi_acara' => ['required', 'string', 'max:255'],
                 'catatan' => ['nullable', 'string', 'max:2000'],
             ]);
 
-            abort_unless(str_starts_with($validated['id_item'], $validated['jenis_pesanan'] . ':'), 422, 'Pilihan tidak sesuai dengan jenis item.');
-            $itemId = (int) substr($validated['id_item'], strpos($validated['id_item'], ':') + 1);
-            $item = $validated['jenis_pesanan'] === 'paket'
-                ? Paket::where('status', 'Aktif')->findOrFail($itemId)
-                : Layanan::where('status', 'Aktif')->findOrFail($itemId);
-            
-            $isPaket = $validated['jenis_pesanan'] === 'paket';
+            if ($request->boolean('full_day')) {
+                $validated['waktu_mulai'] = '00:00';
+                $validated['waktu_selesai'] = '23:59';
+            }
 
-            $reservasi = DB::transaction(function () use ($validated, $item, $isPaket) {
+            $bookingsForDate = BookingAvailability::forDate($validated['tgl_acara']);
+            $hasConflict = $bookingsForDate->contains(fn (Reservasi $booking) => BookingAvailability::overlaps(
+                $validated['waktu_mulai'],
+                $validated['waktu_selesai'],
+                $booking
+            ));
+
+            if ($hasConflict) {
+                $freeSlots = BookingAvailability::freeSlots($bookingsForDate);
+
+                return back()->withInput()->with('booking_conflict', [
+                    'date' => $validated['tgl_acara'],
+                    'free_slots' => $freeSlots,
+                ]);
+            }
+
+            $isPaket = $validated['jenis_pesanan'] === 'paket';
+            $item = null;
+            $selectedLayanans = collect();
+
+            if ($isPaket) {
+                $itemId = (int) substr($validated['id_item'], strlen('paket:'));
+                $item = Paket::where('status', 'Aktif')->findOrFail($itemId);
+            } else {
+                $selectedLayanans = Layanan::where('status', 'Aktif')
+                    ->whereIn('id_layanan', $validated['id_items'])
+                    ->get();
+
+                if ($selectedLayanans->count() !== count($validated['id_items'])) {
+                    return back()->withInput()->withErrors([
+                        'id_items' => 'Satu atau beberapa layanan sudah tidak tersedia. Silakan pilih kembali.',
+                    ]);
+                }
+            }
+
+            $reservasi = DB::transaction(function () use ($validated, $item, $selectedLayanans, $isPaket) {
+                $layananPertama = $selectedLayanans->first();
+                $hargaLayanan = $selectedLayanans->sum('harga');
+
                 // 1. Simpan Reservasi sesuai nama kolom di phpMyAdmin
                 $reservasiBaru = Reservasi::create([
                     'kode_reservasi'    => 'RSV-' . strtoupper(Str::random(8)),
@@ -77,14 +115,23 @@ class ReservasiController extends Controller
                     'id_paket'          => $isPaket ? $item->id : null,
                     'nama_paket'        => $isPaket ? $item->nama_paket : null,
                     'harga_paket'       => $isPaket ? $item->harga : null,
-                    'id_layanan'        => $isPaket ? null : $item->id_layanan,
-                    'nama_layanan'      => $isPaket ? null : $item->nama_layanan,
-                    'harga_layanan'     => $isPaket ? null : $item->harga,
-                    'jumlah_pesanan'    => $validated['jumlah_pesanan'],
+                    'id_layanan'        => $isPaket ? null : $layananPertama->id_layanan,
+                    'nama_layanan'      => $isPaket ? null : $layananPertama->nama_layanan,
+                    'harga_layanan'     => $isPaket ? null : $hargaLayanan,
+                    'jumlah_pesanan'    => 1,
                     'waktu_mulai'       => $validated['waktu_mulai'],
                     'waktu_selesai'     => $validated['waktu_selesai'],
                     'detail_acara'      => $validated['catatan'] ?? null, // Sesuai kolom detail_acara
                 ]);
+
+                if (! $isPaket) {
+                    $reservasiBaru->layanans()->attach($selectedLayanans->mapWithKeys(fn (Layanan $layanan) => [
+                        $layanan->id_layanan => [
+                            'nama_layanan' => $layanan->nama_layanan,
+                            'harga_layanan' => $layanan->harga,
+                        ],
+                    ])->all());
+                }
 
                 // 2. Buat Jadwal Acara di tabel jadwal_acaras
                 JadwalAcara::create([

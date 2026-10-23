@@ -99,7 +99,6 @@
     .btn-sm:hover { opacity: 0.88; }
 
     .btn-validasi { background-color: #4E9F70; color: #fff; }
-    .btn-ubah { background-color: #3B82F6; color: #fff; }
 
     /* Panel WA Direct */
     .panel-wa {
@@ -178,6 +177,11 @@
         border-radius: 8px;
         box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
     }
+    .calendar-day.has-bookings { aspect-ratio:auto; min-height:72px; flex-direction:column; gap:3px; padding:5px 2px; line-height:1.1; }
+    .calendar-day-number { font-size:.85rem; }
+    .calendar-booking-time { font-size:.57rem; font-weight:600; text-align:center; }
+    .calendar-day.partial-booking { background:#FDE2E2; color:#7F1D1D; box-shadow:inset 0 0 0 1px #FCA5A5; }
+    .calendar-day.full-day-booking { background:#EF4444; color:#FFF; }
 
     /* Memastikan SweetAlert2 Berada di Depan Modal */
     .swal2-container {
@@ -214,7 +218,11 @@
                     <div class="jadwal-card">
                         <div>
                             <span class="badge-date">
-                                {{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d F Y') }} • {{ strtoupper($item->jenis_acara ?? 'FULL DAY') }}
+                                @php
+                                    [$waktuBookingMulai, $waktuBookingSelesai] = \App\Support\BookingAvailability::interval($item);
+                                    $bookingSeharian = \App\Support\BookingAvailability::isFullDay($waktuBookingMulai, $waktuBookingSelesai);
+                                @endphp
+                                {{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d F Y') }} | {{ $bookingSeharian ? 'FULL DAY' : substr($waktuBookingMulai, 0, 5) . ' - ' . substr($waktuBookingSelesai, 0, 5) }}
                             </span>
                             <div class="client-name">{{ $item->user->name ?? 'Pelanggan' }} ({{ $item->detail_acara ?? 'Rias Pengantin' }})</div>
                             <div class="location-info">Lokasi: {{ $item->lokasi ?? 'Lokasi Klien' }}</div>
@@ -245,9 +253,6 @@
                                 </form>
                             @endif
 
-                            <button class="btn-sm btn-ubah" onclick="openModalUbah({{ $item->id_reservasi }}, '{{$item->tanggal_acara }}')">
-                                <i class="fa-solid fa-calendar-pen"></i> Ubah Tanggal
-                            </button>
                         </div>
                     </div>
                 @empty
@@ -300,24 +305,6 @@
     </div>
 </div>
 
-<!-- Modal Ubah Tanggal -->
-<div class="modal-overlay" id="modalUbah" onclick="backdropClose(event, this)">
-    <div class="modal-card">
-        <h3 style="font-family:'Playfair Display', serif; margin-bottom:16px; color:var(--text-dark);">Ubah Tanggal Acara</h3>
-        <form id="formUbahTanggal" method="POST" onsubmit="confirmUbahTanggal(event, this)">
-            @csrf
-            @method('PUT')
-            <div style="margin-bottom:20px;">
-                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:6px; color:var(--text-dark);">Tanggal Acara Baru</label>
-                <input type="date" name="tanggal_acara" id="tanggal_acara" required style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; outline:none;">
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button type="button" class="btn btn-light" style="flex:1;" onclick="closeModalUbah()">Batal</button>
-                <button type="submit" class="btn" style="flex:1;">Simpan</button>
-            </div>
-        </form>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -325,7 +312,7 @@
 <script>
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
-    let bookedDatesList = [];
+    let bookedSchedulesList = [];
 
     function backdropClose(e, el) { if(e.target === el) el.classList.remove('show'); }
 
@@ -334,7 +321,7 @@
         fetch('{{ route("api.jadwal.tervalidasi") }}')
             .then(res => res.json())
             .then(data => {
-                bookedDatesList = data;
+                bookedSchedulesList = data;
                 renderCalendar(currentMonth, currentYear);
             })
             .catch(err => console.error('Gagal mengambil jadwal tervalidasi:', err));
@@ -376,30 +363,34 @@
         for (let day = 1; day <= totalDays; day++) {
             const dayCell = document.createElement('div');
             dayCell.className = 'calendar-day';
-            dayCell.textContent = day;
+            const dayNumber = document.createElement('span');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = day;
+            dayCell.appendChild(dayNumber);
 
             const formattedMonth = String(month + 1).padStart(2, '0');
             const formattedDay = String(day).padStart(2, '0');
             const dateString = `${year}-${formattedMonth}-${formattedDay}`;
 
-            if (bookedDatesList.includes(dateString)) {
-                dayCell.classList.add('booked');
-                dayCell.title = "Tanggal Sudah Dibooking / Tervalidasi";
+            const bookings = bookedSchedulesList.filter(schedule => schedule.date === dateString);
+            if (bookings.length) {
+                dayCell.classList.add('has-bookings');
+                const fullDayBooking = bookings.some(schedule => schedule.full_day);
+                const bookingTimes = [...new Set(bookings.map(schedule => schedule.full_day
+                    ? 'Full day'
+                    : `${schedule.start}–${schedule.end}`))];
+                dayCell.classList.add(fullDayBooking ? 'full-day-booking' : 'partial-booking');
+                dayCell.title = fullDayBooking ? 'Sudah dibooking seharian' : `Sudah dibooking: ${bookingTimes.join(', ')}`;
+                bookingTimes.forEach(time => {
+                    const timeLabel = document.createElement('span');
+                    timeLabel.className = 'calendar-booking-time';
+                    timeLabel.textContent = time;
+                    dayCell.appendChild(timeLabel);
+                });
             }
 
             grid.appendChild(dayCell);
         }
-    }
-
-    function openModalUbah(id, tanggal) {
-        const form = document.getElementById('formUbahTanggal');
-        form.action = `/admin/jadwal/update-tanggal/${id}`;
-        document.getElementById('tanggal_acara').value = tanggal;
-        document.getElementById('modalUbah').classList.add('show');
-    }
-
-    function closeModalUbah() {
-        document.getElementById('modalUbah').classList.remove('show');
     }
 
     function pilihPelangganWA(nama, noHp, tanggal) {
@@ -430,30 +421,6 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 form.submit();
-            }
-        });
-    }
-
-    function confirmUbahTanggal(event, form) {
-        event.preventDefault();
-        closeModalUbah();
-
-        Swal.fire({
-            title: 'Simpan Perubahan Tanggal?',
-            text: "Jadwal acara pelanggan akan diperbarui ke tanggal baru.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Perbarui!',
-            cancelButtonText: 'Batal',
-            background: '#FFFFFF',
-            color: '#241A16'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            } else {
-                document.getElementById('modalUbah').classList.add('show');
             }
         });
     }

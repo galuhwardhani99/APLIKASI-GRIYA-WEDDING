@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Reservasi extends Model
 {
@@ -65,5 +66,12 @@ class Reservasi extends Model
     public function layanan()
     {
         return $this->belongsTo(Layanan::class, 'id_layanan', 'id_layanan');
+    }
+
+    public function layanans(): BelongsToMany
+    {
+        return $this->belongsToMany(Layanan::class, 'reservasi_layanans', 'id_reservasi', 'id_layanan', 'id_reservasi', 'id_layanan')
+            ->withPivot(['nama_layanan', 'harga_layanan'])
+            ->withTimestamps();
     }
 }

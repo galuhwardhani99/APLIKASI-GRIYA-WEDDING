@@ -144,7 +144,7 @@
         .page-sub { color: var(--text-muted); font-size: 0.9rem; }
 
         /* Form Layout Grid */
-        .reservation-layout { display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start; }
+        .reservation-layout { display: grid; grid-template-columns: 1fr; gap: 28px; align-items: start; }
         .reservation-main { display: flex; flex-direction: column; gap: 24px; }
         
         .reservation-panel {
@@ -164,6 +164,9 @@
 
         .reservation-fields { display: grid; gap: 16px; }
         .reservation-fields-two { grid-template-columns: 1fr 1fr; }
+        .reservation-field-event-date { grid-column: 1; grid-row: 1; }
+        .reservation-field-event-start { grid-column: 1; grid-row: 2; }
+        .reservation-field-event-end { grid-column: 2; grid-row: 2; }
         .reservation-field-full { grid-column: 1 / -1; }
         
         .reservation-field label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
@@ -193,19 +196,44 @@
             display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--border-color);
             border-radius: 10px; background: #FFF; cursor: pointer; transition: .2s;
         }
-        .reservation-package-option:hover { border-color: var(--gold-primary); }
+        .reservation-package-option:hover, .reservation-package-option.selected { border-color: var(--gold-primary); background: #FDF8EF; }
+        .reservation-package-option input[type="radio"], .reservation-package-option input[type="checkbox"] {
+            appearance:none; width:20px; height:20px; flex:0 0 20px; margin:1px 0 0; position:relative;
+            border:2px solid #CFC4B8; border-radius:5px; background:#FFF; cursor:pointer;
+        }
+        .reservation-package-option input[type="radio"]:checked, .reservation-package-option input[type="checkbox"]:checked {
+            border-color:var(--gold-primary); background:var(--gold-primary); box-shadow:0 0 0 3px rgba(197,143,67,.14);
+        }
+        .reservation-package-option input[type="radio"]:checked::after, .reservation-package-option input[type="checkbox"]:checked::after {
+            content:"✓"; position:absolute; inset:0; display:grid; place-items:center; color:#FFF; font-size:.8rem; font-weight:800;
+        }
+        .reservation-package-option input:focus-visible { outline:3px solid rgba(197,143,67,.3); outline-offset:2px; }
         .reservation-package-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
         .reservation-package-info strong { color: var(--text-dark); font-size: 0.88rem; }
         .reservation-package-info small { color: var(--gold-primary); font-weight: 600; font-size: 0.78rem; }
         .reservation-package-info span { color: var(--text-muted); font-size: 0.8rem; }
         .reservation-package-price { font-weight: 800; color: var(--gold-primary); font-size: 0.95rem; }
 
-        /* Summary Sticky Card */
-        .reservation-summary {
-            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px;
-            padding: 24px; position: sticky; top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        /* Floating reservation summary */
+        .reservation-summary-trigger {
+            position: fixed; z-index: 1000; left: 50%; bottom: 20px; transform: translateX(-50%);
+            display: flex; align-items: center; justify-content: space-between; gap: 24px;
+            width: min(420px, calc(100% - 32px)); padding: 15px 20px; border: 0; border-radius: 12px;
+            background: var(--gold-primary); color: #FFF; box-shadow: 0 8px 28px rgba(36,26,22,.22);
+            font: 700 .95rem 'Plus Jakarta Sans', sans-serif; cursor: pointer;
         }
+        .reservation-summary-trigger:hover { background: var(--gold-hover); }
+        .reservation-summary-trigger strong { white-space: nowrap; }
+        .reservation-summary {
+            position: fixed; z-index: 1001; left: 50%; bottom: 82px; transform: translateX(-50%);
+            width: min(420px, calc(100% - 32px)); max-height: min(70vh, 560px); overflow-y: auto;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 24px; box-shadow: 0 12px 40px rgba(36,26,22,.2);
+        }
+        .reservation-summary[hidden] { display: none !important; }
+        .reservation-summary-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
         .reservation-summary-heading h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text-dark); margin-bottom: 16px; }
+        .reservation-summary-close { border:0; background:transparent; color:var(--text-muted); font-size:1.1rem; cursor:pointer; padding:6px; }
         .reservation-summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.88rem; color: var(--text-muted); }
         .reservation-summary-row strong { color: var(--text-dark); }
         .reservation-summary-total {
@@ -227,6 +255,9 @@
         @media(max-width: 992px) {
             .reservation-layout { grid-template-columns: 1fr; }
             .reservation-fields-two { grid-template-columns: 1fr; }
+            .reservation-field-event-date,
+            .reservation-field-event-start,
+            .reservation-field-event-end { grid-column: 1; grid-row: auto; }
         }
     </style>
 </head>
@@ -328,25 +359,29 @@
                             </div>
                         </div>
                         <div class="reservation-fields reservation-fields-two">
-                            <div class="reservation-field">
+                            <div class="reservation-field reservation-field-event-date">
                                 <label for="tgl_acara">Tanggal Acara <span>*</span></label>
                                 <input id="tgl_acara" name="tgl_acara" type="date" min="{{ now()->toDateString() }}" value="{{ old('tgl_acara') }}" required>
                                 @error('tgl_acara') <small class="reservation-error">{{ $message }}</small> @enderror
                             </div>
-                            <div class="reservation-field">
-                                <label for="jumlah_pesanan">Jumlah Pilihan <span>*</span></label>
-                                <input id="jumlah_pesanan" name="jumlah_pesanan" type="number" min="1" max="20" value="{{ old('jumlah_pesanan', 1) }}" required>
-                                @error('jumlah_pesanan') <small class="reservation-error">{{ $message }}</small> @enderror
-                            </div>
-                            <div class="reservation-field">
+                            <div class="reservation-field reservation-field-event-start">
                                 <label for="waktu_mulai">Waktu Mulai <span>*</span></label>
                                 <input id="waktu_mulai" name="waktu_mulai" type="time" value="{{ old('waktu_mulai') }}" required>
                                 @error('waktu_mulai') <small class="reservation-error">{{ $message }}</small> @enderror
                             </div>
-                            <div class="reservation-field">
+                            <div class="reservation-field reservation-field-event-end">
                                 <label for="waktu_selesai">Waktu Selesai <span>*</span></label>
                                 <input id="waktu_selesai" name="waktu_selesai" type="time" value="{{ old('waktu_selesai') }}" required>
                                 @error('waktu_selesai') <small class="reservation-error">{{ $message }}</small> @enderror
+                            </div>
+                            <div class="reservation-field reservation-field-full">
+                                <label style="display:flex;align-items:center;gap:9px;cursor:pointer;">
+                                    <input id="full_day_booking" name="full_day" type="checkbox" value="1" @checked(old('full_day')) style="width:16px;height:16px;accent-color:var(--gold-primary);">
+                                    Booking seharian (Full day)
+                                </label>
+                            </div>
+                            <div id="availability-hint" class="reservation-field reservation-field-full" aria-live="polite" style="color:var(--text-muted);font-size:.82rem;">
+                                Pilih tanggal untuk melihat jam yang masih kosong.
                             </div>
                             <div class="reservation-field reservation-field-full">
                                 <label for="lokasi_acara">Lokasi Acara <span>*</span></label>
@@ -367,7 +402,7 @@
                             <span class="reservation-step">03</span>
                             <div>
                                 <h2>Pilih Layanan atau Paket</h2>
-                                <p>Tentukan kategori pilihan yang diinginkan.</p>
+                                <p>Pilih satu paket atau satu maupun beberapa layanan.</p>
                             </div>
                         </div>
                         @php($jenisDipilih = old('jenis_pesanan',$selectedPackageId ? 'paket' : ''))
@@ -391,6 +426,7 @@
                         </div>
                         @error('jenis_pesanan') <small class="reservation-error">{{ $message }}</small> @enderror
                         @error('id_item') <small class="reservation-error">{{ $message }}</small> @enderror
+                        @error('id_items') <small class="reservation-error">{{ $message }}</small> @enderror
 
                         <!-- LIST PAKET -->
                         <div class="reservation-choice-list" id="paket-options" data-options="paket" @if($jenisDipilih !== 'paket') hidden @endif>
@@ -413,7 +449,7 @@
                         <div class="reservation-choice-list" id="layanan-options" data-options="layanan" @if($jenisDipilih !== 'layanan') hidden @endif>
                             @forelse ($layanans as $layanan)
                                 <label class="reservation-package-option">
-                                    <input type="radio" name="id_item" value="layanan:{{ $layanan->id_layanan }}" data-name="{{ $layanan->nama_layanan }}" data-price="{{ $layanan->harga }}" @checked(old('id_item') === 'layanan:' . $layanan->id_layanan &&$jenisDipilih === 'layanan')>
+                                    <input type="checkbox" name="id_items[]" value="{{ $layanan->id_layanan }}" data-name="{{ $layanan->nama_layanan }}" data-price="{{ $layanan->harga }}" @checked(in_array((string) $layanan->id_layanan, array_map('strval', (array) old('id_items', [])), true) && $jenisDipilih === 'layanan')>
                                     <div class="reservation-package-info">
                                         <strong>{{ $layanan->nama_layanan }}</strong>
                                         @if($layanan->variasi)<small>{{$layanan->variasi }}</small>@endif
@@ -428,22 +464,24 @@
                     </section>
                 </div>
 
-                <!-- STICKY SUMMARY -->
-                <aside class="reservation-summary">
+                <button class="reservation-summary-trigger" type="button" id="summary-trigger" aria-expanded="false" aria-controls="reservation-summary">
+                    <span>Rincian Reservasi</span>
+                    <strong id="summary-trigger-total">Rp 0 <i class="fa-solid fa-chevron-up" style="margin-left:6px;"></i></strong>
+                </button>
+
+                <!-- RINCIAN RESERVASI POPUP -->
+                <aside class="reservation-summary" id="reservation-summary" aria-labelledby="summary-heading" hidden>
                     <div class="reservation-summary-heading">
-                        <h2>Rincian Reservasi</h2>
+                        <h2 id="summary-heading">Rincian Reservasi</h2>
+                        <button class="reservation-summary-close" type="button" id="summary-close" aria-label="Tutup rincian reservasi"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="reservation-summary-row">
                         <span id="summary-item-label">Pilihan</span>
                         <strong id="summary-package-name">Belum ada pilihan</strong>
                     </div>
                     <div class="reservation-summary-row">
-                        <span>Harga Satuan</span>
+                        <span>Harga Pilihan</span>
                         <strong id="summary-unit-price">Rp 0</strong>
-                    </div>
-                    <div class="reservation-summary-row">
-                        <span>Jumlah Pilihan</span>
-                        <strong id="summary-quantity">{{ old('jumlah_pesanan', 1) }}</strong>
                     </div>
                     <div class="reservation-summary-total">
                         <span>Estimasi Total</span>
@@ -468,14 +506,110 @@
             const typeInput = document.getElementById('jenis_pesanan');
             const typeButtons = document.querySelectorAll('[data-type-choice]');
             const optionGroups = document.querySelectorAll('[data-options]');
-            const quantityInput = document.getElementById('jumlah_pesanan');
             const packageName = document.getElementById('summary-package-name');
             const unitPrice = document.getElementById('summary-unit-price');
-            const quantity = document.getElementById('summary-quantity');
             const total = document.getElementById('summary-total');
             const itemLabel = document.getElementById('summary-item-label');
+            const summaryPopup = document.getElementById('reservation-summary');
+            const summaryTrigger = document.getElementById('summary-trigger');
+            const summaryClose = document.getElementById('summary-close');
+            const summaryTriggerTotal = document.getElementById('summary-trigger-total');
             const tglAcaraInput = document.getElementById('tgl_acara');
+            const waktuMulaiInput = document.getElementById('waktu_mulai');
+            const waktuSelesaiInput = document.getElementById('waktu_selesai');
+            const fullDayInput = document.getElementById('full_day_booking');
+            const availabilityHint = document.getElementById('availability-hint');
+            let bookedSchedules = [];
+            let lastConflictKey = '';
+            let previousTimes = null;
             const formatPrice = value => new Intl.NumberFormat('id-ID').format(value);
+
+            const timeToMinutes = time => {
+                const [hours, minutes] = (time || '00:00').slice(0, 5).split(':').map(Number);
+                return (hours * 60) + minutes;
+            };
+            const minutesToTime = minutes => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+            const schedulesForDate = date => bookedSchedules.filter(schedule => schedule.date === date);
+            const isScheduleFullDay = schedule => schedule.full_day || (!schedule.start && !schedule.end);
+
+            function getFreeSlots(date) {
+                const busy = schedulesForDate(date).map(schedule => ({
+                    start: isScheduleFullDay(schedule) ? 0 : timeToMinutes(schedule.start),
+                    end: isScheduleFullDay(schedule) ? 1440 : timeToMinutes(schedule.end)
+                })).sort((a, b) => a.start - b.start);
+                const slots = [];
+                let cursor = 0;
+                busy.forEach(interval => {
+                    if (interval.start > cursor) slots.push([minutesToTime(cursor), minutesToTime(interval.start)]);
+                    cursor = Math.max(cursor, interval.end);
+                });
+                if (cursor < 1440) slots.push([minutesToTime(cursor), '23:59']);
+                return slots.filter(slot => timeToMinutes(slot[1]) > timeToMinutes(slot[0]));
+            }
+
+            function updateAvailabilityHint() {
+                if (!tglAcaraInput.value) {
+                    availabilityHint.textContent = 'Pilih tanggal untuk melihat jam yang masih kosong.';
+                    return;
+                }
+                const slots = getFreeSlots(tglAcaraInput.value);
+                availabilityHint.textContent = slots.length
+                    ? `Jam yang masih kosong: ${slots.map(slot => `${slot[0]}–${slot[1]}`).join(', ')}`
+                    : 'Tidak ada jam kosong pada tanggal ini.';
+            }
+
+            function hasTimeConflict(showPopup = false) {
+                const date = tglAcaraInput.value;
+                const start = fullDayInput.checked ? '00:00' : waktuMulaiInput.value;
+                const end = fullDayInput.checked ? '23:59' : waktuSelesaiInput.value;
+                if (!date || !start || !end || timeToMinutes(end) <= timeToMinutes(start)) return false;
+
+                const requestedFullDay = fullDayInput.checked || (start === '00:00' && end === '23:59');
+                const conflict = schedulesForDate(date).find(schedule => {
+                    if (requestedFullDay || isScheduleFullDay(schedule)) return true;
+                    return timeToMinutes(start) < timeToMinutes(schedule.end)
+                        && timeToMinutes(end) > timeToMinutes(schedule.start);
+                });
+                if (!conflict) {
+                    lastConflictKey = '';
+                    return false;
+                }
+
+                const conflictKey = `${date}-${start}-${end}`;
+                if (showPopup && lastConflictKey !== conflictKey) {
+                    const slots = getFreeSlots(date);
+                    const freeHours = slots.length ? slots.map(slot => `${slot[0]}–${slot[1]}`).join(', ') : 'Tidak ada jam kosong.';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Jam Tidak Tersedia',
+                        html: `Waktu yang dipilih sudah berbenturan dengan booking lain.<br><strong>Jam yang masih kosong:</strong> ${freeHours}`,
+                        confirmButtonColor: '#EF4444',
+                        background: '#FFFFFF',
+                        color: '#241A16'
+                    });
+                    lastConflictKey = conflictKey;
+                }
+                return true;
+            }
+
+            function syncFullDayInputs() {
+                if (fullDayInput.checked) {
+                    if (!previousTimes) previousTimes = [waktuMulaiInput.value, waktuSelesaiInput.value];
+                    waktuMulaiInput.value = '00:00';
+                    waktuSelesaiInput.value = '23:59';
+                    waktuMulaiInput.readOnly = true;
+                    waktuSelesaiInput.readOnly = true;
+                } else {
+                    waktuMulaiInput.readOnly = false;
+                    waktuSelesaiInput.readOnly = false;
+                    if (waktuMulaiInput.value === '00:00' && waktuSelesaiInput.value === '23:59' && previousTimes) {
+                        [waktuMulaiInput.value, waktuSelesaiInput.value] = previousTimes;
+                    }
+                    previousTimes = null;
+                }
+                updateAvailabilityHint();
+                hasTimeConflict(true);
+            }
 
             // Flash Message Notifikasi SweetAlert2 dari Session Controller
             @if(session('success'))
@@ -500,13 +634,32 @@
                 });
             @endif
 
+            @if(session('booking_conflict'))
+                const bookingConflict = @json(session('booking_conflict'));
+                const freeHoursAfterConflict = bookingConflict.free_slots?.length
+                    ? bookingConflict.free_slots.map(slot => `${slot[0]}–${slot[1]}`).join(', ')
+                    : 'Tidak ada jam kosong.';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Jam Tidak Tersedia',
+                    html: `Waktu yang dipilih sudah dibooking client lain.<br><strong>Jam yang masih kosong:</strong> ${freeHoursAfterConflict}`,
+                    confirmButtonColor: '#EF4444',
+                    background: '#FFFFFF',
+                    color: '#241A16'
+                });
+            @endif
+
             // Intercept Submit Formulir Reservasi dengan Popup Konfirmasi
             if (reservationForm) {
                 reservationForm.addEventListener('submit', function (e) {
                     e.preventDefault();
 
-                    const selectedItem = document.querySelector('input[name="id_item"]:checked');
-                    if (!selectedItem) {
+                    if (hasTimeConflict(true)) return;
+
+                    const selectedItems = typeInput.value === 'layanan'
+                        ? [...document.querySelectorAll('input[name="id_items[]"]:checked:not(:disabled)')]
+                        : [document.querySelector('input[name="id_item"]:checked:not(:disabled)')].filter(Boolean);
+                    if (!selectedItems.length) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'Pilihan Belum Lengkap',
@@ -518,7 +671,7 @@
                         return;
                     }
 
-                    const itemName = selectedItem.dataset.name || 'Pilihan Rias';
+                    const itemName = selectedItems.map(item => item.dataset.name || 'Pilihan Rias').join(', ');
                     const eventDate = tglAcaraInput.value || '-';
 
                     Swal.fire({
@@ -549,25 +702,24 @@
                 });
             }
 
-            // Pengecekan Tanggal yang Sudah Dibooking Admin
+            // Ambil rentang booking agar tanggal yang masih memiliki jam kosong tetap dapat dipilih.
             fetch('{{ route("api.jadwal.tervalidasi") }}')
                 .then(response => response.json())
-                .then(bookedDates => {
-                    tglAcaraInput.addEventListener('input', function () {
-                        if (bookedDates.includes(this.value)) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Tanggal Tidak Tersedia',
-                                text: 'Tanggal ini sudah dibooking dan divalidasi oleh admin. Silakan pilih tanggal lain.',
-                                confirmButtonColor: '#EF4444',
-                                background: '#FFFFFF',
-                                color: '#241A16'
-                            });
-                            this.value = '';
-                        }
-                    });
+                .then(schedules => {
+                    bookedSchedules = schedules;
+                    updateAvailabilityHint();
+                    hasTimeConflict(false);
                 })
-                .catch(error => console.error('Gagal memuat jadwal tervalidasi:', error));
+                .catch(error => console.error('Gagal memuat jadwal booking:', error));
+
+            tglAcaraInput.addEventListener('change', () => {
+                lastConflictKey = '';
+                updateAvailabilityHint();
+                hasTimeConflict(true);
+            });
+            [waktuMulaiInput, waktuSelesaiInput].forEach(input => input.addEventListener('change', () => hasTimeConflict(true)));
+            fullDayInput.addEventListener('change', syncFullDayInputs);
+            syncFullDayInputs();
 
             function showOptions(type) {
                 typeInput.value = type;
@@ -578,32 +730,55 @@
                 optionGroups.forEach(group => {
                     const active = group.dataset.options === type;
                     group.hidden = !active;
-                    const radios = [...group.querySelectorAll('input[name="id_item"]')];
-                    radios.forEach(radio => {
-                        radio.disabled = !active;
-                        radio.required = active && radios[0] === radio;
-                        if (!active) radio.checked = false;
+                    const inputs = [...group.querySelectorAll('input')];
+                    inputs.forEach((input, index) => {
+                        input.disabled = !active;
+                        input.required = active && type === 'paket' && index === 0;
+                        if (!active) input.checked = false;
                     });
                 });
+                updateOptionButtonStyles();
                 updateSummary();
             }
 
-            function updateSummary() {
-                const selectedItem = document.querySelector('input[name="id_item"]:checked');
-                const selectedQuantity = Math.max(1, Number(quantityInput.value) || 1);
-                const selected = selectedItem && !selectedItem.disabled ? selectedItem : null;
-                const price = selected ? Number(selected.dataset.price) : 0;
-
-                itemLabel.textContent = typeInput.value === 'paket' ? 'Paket dipilih' : (typeInput.value === 'layanan' ? 'Layanan dipilih' : 'Pilihan');
-                packageName.textContent = selected ? selected.dataset.name : 'Belum ada pilihan';
-                unitPrice.textContent = 'Rp ' + formatPrice(price);
-                quantity.textContent = selectedQuantity;
-                total.textContent = 'Rp ' + formatPrice(price * selectedQuantity);
+            function updateOptionButtonStyles() {
+                document.querySelectorAll('.reservation-package-option').forEach(label => {
+                    label.classList.toggle('selected', Boolean(label.querySelector('input:checked')));
+                });
             }
 
+            function updateSummary() {
+                const selectedItems = typeInput.value === 'layanan'
+                    ? [...document.querySelectorAll('input[name="id_items[]"]:checked:not(:disabled)')]
+                    : [document.querySelector('input[name="id_item"]:checked:not(:disabled)')].filter(Boolean);
+                const price = selectedItems.reduce((sum, item) => sum + Number(item.dataset.price || 0), 0);
+                const names = selectedItems.map(item => item.dataset.name);
+
+                itemLabel.textContent = typeInput.value === 'paket' ? 'Paket dipilih' : (typeInput.value === 'layanan' ? 'Layanan dipilih' : 'Pilihan');
+                packageName.textContent = names.length ? names.join(', ') : 'Belum ada pilihan';
+                unitPrice.textContent = 'Rp ' + formatPrice(price);
+                total.textContent = 'Rp ' + formatPrice(price);
+                summaryTriggerTotal.innerHTML = 'Rp ' + formatPrice(price) + ' <i class="fa-solid fa-chevron-up" style="margin-left:6px;"></i>';
+            }
+
+            function setSummaryOpen(open) {
+                summaryPopup.hidden = !open;
+                summaryTrigger.setAttribute('aria-expanded', String(open));
+                if (open) summaryClose.focus();
+                else summaryTrigger.focus();
+            }
+
+            summaryTrigger.addEventListener('click', () => setSummaryOpen(summaryPopup.hidden));
+            summaryClose.addEventListener('click', () => setSummaryOpen(false));
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !summaryPopup.hidden) setSummaryOpen(false);
+            });
+
             typeButtons.forEach(button => button.addEventListener('click', () => showOptions(button.dataset.typeChoice)));
-            document.querySelectorAll('input[name="id_item"]').forEach(input => input.addEventListener('change', updateSummary));
-            quantityInput.addEventListener('input', updateSummary);
+            document.querySelectorAll('input[name="id_item"], input[name="id_items[]"]').forEach(input => input.addEventListener('change', () => {
+                updateOptionButtonStyles();
+                updateSummary();
+            }));
             if (typeInput.value) showOptions(typeInput.value);
             else updateSummary();
         });
