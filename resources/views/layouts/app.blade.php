@@ -22,6 +22,9 @@
     <!-- CSS SweetAlert2 untuk Popup -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
+    <!-- PERBAIKAN: Memuat CSS dari @push('styles') di home.blade.php -->
+    @stack('styles')
+
     <style>
         /* ================= UI SHARPNESS & CONTRAST ENHANCEMENT ================= */
         :root {
@@ -394,5 +397,8 @@
             @endif
         });
     </script>
+
+    <!-- PERBAIKAN: Memuat JS dari @push('scripts') di home.blade.php -->
+    @stack('scripts')
 </body>
 </html>

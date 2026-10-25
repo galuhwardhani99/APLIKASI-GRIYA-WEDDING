@@ -1,14 +1,71 @@
 @extends('layouts.app')
 @section('title', !empty($clientPage) ? 'Halaman Client' : 'Beranda')
 
-@section('content')
-
-@if (!empty($clientPage))
-    <style>
+@push('styles')
+<!-- CSS Fancybox untuk Zoom In/Out & Galeri -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+<style>
+    @if (!empty($clientPage))
         .client-home-dashboard-action { display: flex; justify-content: center; margin-top: 30px; }
         .client-home-dashboard-button { min-width: 210px; padding: 14px 32px; font-size: 0.9rem; }
-    </style>
-@endif
+    @endif
+
+    /* Styles Kartu Gambar dengan Overlay Icon Kaca Pembesar */
+    .card-img-wrapper {
+        position: relative;
+        display: block;
+        cursor: pointer;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+    .card-img-wrapper img {
+        transition: transform 0.3s ease;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .card-img-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(24, 18, 15, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-size: 1.5rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 2;
+    }
+    .card-img-wrapper:hover img {
+        transform: scale(1.05);
+    }
+    .card-img-wrapper:hover .card-img-overlay {
+        opacity: 1;
+    }
+
+    .about-img-wrapper {
+        position: relative;
+        display: block;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+    .about-img-wrapper img {
+        transition: transform 0.3s ease;
+    }
+    .about-img-wrapper:hover img {
+        transform: scale(1.03);
+    }
+    .about-img-wrapper:hover .card-img-overlay {
+        opacity: 1;
+    }
+</style>
+@endpush
+
+@section('content')
 
 {{-- ================= HERO ================= --}}
 <section class="hero" id="beranda">
@@ -70,7 +127,15 @@
                     <article class="card tilt">
                         <div class="card-img {{ $i % 2 ? 'sand' : 'rose' }}">
                             @if ($layanan->foto)
-                                <img src="{{ asset('storage/' . $layanan->foto) }}" alt="{{ $layanan->nama_layanan }}">
+                                <a href="{{ asset('storage/' . $layanan->foto) }}" 
+                                   data-fancybox="gallery" 
+                                   data-caption="<strong>{{ $layanan->nama_layanan }}</strong><br>Rp {{ number_format($layanan->harga, 0, ',', '.') }}"
+                                   class="card-img-wrapper">
+                                    <img src="{{ asset('storage/' . $layanan->foto) }}" alt="{{ $layanan->nama_layanan }}">
+                                    <div class="card-img-overlay">
+                                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                    </div>
+                                </a>
                             @else
                                 <span>{{ $layanan->nama_layanan }}</span>
                             @endif
@@ -101,7 +166,15 @@
                     <article class="card tilt">
                         <div class="card-img {{ $i % 2 ? 'rose' : 'sand' }}">
                             @if ($paket->foto)
-                                <img src="{{ asset('storage/' . $paket->foto) }}" alt="{{ $paket->nama_paket }}">
+                                <a href="{{ asset('storage/' . $paket->foto) }}" 
+                                   data-fancybox="gallery" 
+                                   data-caption="<strong>{{ $paket->nama_paket }}</strong><br>Rp {{ number_format($paket->harga, 0, ',', '.') }}"
+                                   class="card-img-wrapper">
+                                    <img src="{{ asset('storage/' . $paket->foto) }}" alt="{{ $paket->nama_paket }}">
+                                    <div class="card-img-overlay">
+                                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                    </div>
+                                </a>
                             @else
                                 <span>{{ $paket->kategoriPaket?->nama_kategori ?? $paket->nama_paket }}</span>
                             @endif
@@ -122,19 +195,25 @@
 <section class="section section-sand" id="tentang">
     <div class="container about">
         <div class="about-img reveal">
-        <img src="{{ asset('images/logo.jpg') }}" alt="Griya Rias Elly Jr." style="width: 100%; border-radius: 10px;">            
-        <div class="about-badge">Make Up &amp; Event Organizer</div>
+            <a href="{{ asset('images/logo.jpg') }}" 
+               data-fancybox="gallery" 
+               data-caption="<strong>Griya Rias Elly Jr.</strong><br>Make Up &amp; Event Organizer" 
+               class="about-img-wrapper">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Griya Rias Elly Jr." style="width: 100%; border-radius: 10px;">
+                <div class="card-img-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </div>
+            </a>
+            <div class="about-badge">Make Up &amp; Event Organizer</div>
         </div>
 
         <div class="about-text">
             <h2 class="reveal">Tentang Griya Rias Elly Jr.</h2>
             <p class="reveal" style="--d:100ms">
-                {{-- GANTI dengan profil asli Griya Rias Elly Jr. --}}
                 Griya Rias Elly Jr. melayani tata rias pengantin tradisional maupun modern, rias acara resmi, hingga perencanaan lengkap Wedding &amp; Event Organizer. Kami membantu setiap momen spesial tampil elegan dan berjalan lancar.
             </p>
 
             <div class="stats reveal" style="--d:200ms">
-                {{-- GANTI angka berikut dengan data asli --}}
                 <div><strong data-count="10" data-suffix="+">0</strong><span>Tahun Pengalaman</span></div>
                 <div><strong data-count="500" data-suffix="+">0</strong><span>Klien Dilayani</span></div>
                 <div><strong data-count="100" data-suffix="+">0</strong><span>Acara Terlaksana</span></div>
@@ -161,12 +240,32 @@
         </div>
 
         <div class="contact-info reveal" style="--d:300ms">
-            {{-- GANTI dengan data asli --}}
             <div><b>Alamat</b><span>{{ config('services.griya.location') }}</span></div>
-            <div><b>Jam Layanan</b><span>[Senin - Minggu, 08.00 - 20.00]</span></div>
+            <div><b>Jam Layanan</b><span>Senin - Minggu, 08.00 - 20.00</span></div>
             <div><b>WhatsApp</b><span>+{{ $whatsapp }}</span></div>
         </div>
     </div>
 </section>
-
 @endsection
+
+@push('scripts')
+<!-- JS Fancybox -->
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<script>
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        compact: false,
+        idle: false,
+        animated: true,
+        showClass: "f-fadeIn",
+        hideClass: "f-fadeOut",
+        Images: { zoom: true },
+        Toolbar: {
+            display: {
+                left: ["infobar"],
+                middle: ["zoomIn", "zoomOut", "toggle1to1", "rotateCCW", "rotateCW"],
+                right: ["slideshow", "fullscreen", "close"],
+            },
+        },
+    });
+</script>
+@endpush

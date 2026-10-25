@@ -9,7 +9,15 @@
             @forelse ($portofolios as $portofolio)
                 <article class="card">
                     <div class="card-img rose">
-                        <img src="{{ asset('storage/' . $portofolio->gambar) }}" alt="{{ $portofolio->judul }}">
+                        <a href="{{ asset('storage/' . $portofolio->gambar) }}" 
+                           data-fancybox="gallery" 
+                           data-caption="<strong>{{ $portofolio->judul }}</strong><br>{{ $portofolio->deskripsi }}" 
+                           class="card-img-wrapper">
+                            <img src="{{ asset('storage/' . $portofolio->gambar) }}" alt="{{ $portofolio->judul }}">
+                            <div class="card-img-overlay">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i>
+                            </div>
+                        </a>
                     </div>
                     <h3>{{ $portofolio->judul }}</h3>
                     <p>{{ $portofolio->deskripsi }}</p>
