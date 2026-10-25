@@ -13,55 +13,61 @@
     .eyebrow { 
         color: var(--gold-primary); 
         text-transform: uppercase; 
-        letter-spacing: .12em; 
+        letter-spacing: .15em; 
         font-size: 11px; 
-        font-weight: 700; 
+        font-weight: 800; 
     }
 
     h1 { 
-        margin: 5px 0; 
+        margin: 4px 0; 
         color: var(--text-dark); 
         font-family: 'Playfair Display', serif; 
         font-size: 28px; 
+        font-weight: 700;
     }
 
-    p { color: var(--text-muted); margin: 5px 0; font-size: 0.9rem; }
+    p { color: var(--text-muted); margin: 4px 0; font-size: 0.9rem; font-weight: 500; }
 
-    /* Custom Button Styles */
+    /* Button Custom Styles Tajam */
     .btn { 
-        border: 0; 
+        border: 1px solid #A06F2D; 
         border-radius: 8px; 
-        padding: 10px 16px; 
+        padding: 10px 18px; 
         background: var(--gold-primary); 
         color: #fff; 
         cursor: pointer; 
         text-decoration: none; 
-        font-weight: 600; 
+        font-weight: 700; 
         font-size: 14px; 
         display: inline-flex; 
         align-items: center; 
         justify-content: center; 
-        gap: 7px; 
+        gap: 8px; 
         white-space: nowrap; 
-        transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(197, 143, 67, 0.15);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(197, 143, 67, 0.2);
     }
-    .btn:hover { background: var(--gold-hover); }
+    .btn:hover { background: var(--gold-hover); border-color: #835B25; transform: translateY(-1px); }
 
-    .btn-light { background: #fff; color: var(--text-dark); border: 1px solid var(--border-color); box-shadow: none; }
-    .btn-light:hover { background: #f5eee7; }
+    .btn-light { 
+        background: #fff; 
+        color: var(--text-dark); 
+        border: 1px solid #D8CEC0; 
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+    }
+    .btn-light:hover { background: #FBF5EC; border-color: var(--gold-primary); color: var(--gold-hover); }
 
-    /* Panel Table Styling */
+    /* Panel Table Styling Bergaris Tegas */
     .panel { 
         background: var(--bg-card); 
-        border: 1px solid var(--border-color); 
+        border: 1px solid #D8CEC0; 
         border-radius: 12px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.02); 
+        box-shadow: 0 4px 14px rgba(36, 26, 22, 0.03); 
         overflow: hidden; 
     }
 
-    .toolbar { padding: 18px 20px; border-bottom: 1px solid var(--border-color); }
-    .toolbar h2 { margin: 0; font-size: 17px; color: var(--text-dark); font-family: 'Playfair Display', serif; }
+    .toolbar { padding: 18px 20px; border-bottom: 1px solid var(--border-color); background: #FAF9F6; }
+    .toolbar h2 { margin: 0; font-size: 18px; color: var(--text-dark); font-family: 'Playfair Display', serif; font-weight: 700; }
 
     .table-wrap { overflow: auto; }
     table { width: 100%; border-collapse: collapse; min-width: 650px; }
@@ -70,54 +76,57 @@
         text-align: left; 
         color: var(--gold-primary); 
         background: #FAFAFA; 
-        padding: 13px 16px; 
+        padding: 14px 16px; 
         font-size: 11px; 
         letter-spacing: .08em; 
         text-transform: uppercase; 
+        font-weight: 800;
         border-bottom: 2px solid var(--border-color); 
     }
 
     td { padding: 15px 16px; border-top: 1px solid var(--border-color); vertical-align: middle; font-size: 0.9rem; }
-    tbody tr:hover { background: #FDFBF9; }
+    tbody tr:hover { background: #FDFBF7; }
 
-    .subtle { color: var(--text-muted); font-size: 13px; }
+    .subtle { color: var(--text-muted); font-size: 13px; font-weight: 500; }
 
     .count { 
         display: inline-flex; 
+        align-items: center;
+        gap: 6px;
         padding: 5px 12px; 
         border-radius: 20px; 
-        background: #F6F0E9; 
-        color: #775B3D; 
+        background: #FBF5EC; 
+        color: #835B25; 
         font-size: 12px; 
         font-weight: 700; 
-        border: 1px solid var(--border-color);
+        border: 1px solid #EAD8BF;
     }
 
     .row-actions { display: flex; gap: 8px; }
     .icon-btn { 
         border: none; 
         border-radius: 6px; 
-        padding: 6px 12px; 
+        padding: 7px 12px; 
         cursor: pointer; 
-        font-weight: 600; 
+        font-weight: 700; 
         font-size: 0.8rem; 
         color: #fff; 
         display: inline-flex; 
         align-items: center; 
         gap: 6px; 
-        transition: opacity 0.2s;
+        transition: all 0.2s ease;
     }
-    .icon-btn:hover { opacity: 0.88; }
-    .icon-btn.btn-edit { background: #3B82F6; }
-    .icon-btn.btn-danger { background: #EF4444; }
-    .icon-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .icon-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .icon-btn.btn-edit { background: #2563EB; box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2); }
+    .icon-btn.btn-danger { background: #DC2626; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2); }
+    .icon-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 
-    .empty { text-align: center; color: var(--text-muted); padding: 36px; }
+    .empty { text-align: center; color: var(--text-muted); padding: 36px; font-weight: 600; }
 
-    /* Modal Custom Styles */
+    /* Modal Custom Styles Tajam */
     .modal-backdrop { 
         position: fixed; inset: 0; 
-        background: rgba(36, 26, 22, 0.6); 
+        background: rgba(24, 18, 15, 0.65); 
         display: none; align-items: center; justify-content: center; 
         padding: 18px; z-index: 9999; backdrop-filter: blur(4px);
     }
@@ -126,29 +135,31 @@
     .modal { 
         width: min(480px, 100%); 
         background: #fff; border-radius: 12px; 
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid var(--border-color);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid #D8CEC0;
     }
 
     .modal-head, .modal-foot { 
-        padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; 
-        border-bottom: 1px solid var(--border-color); 
+        padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; 
+        border-bottom: 1px solid var(--border-color); background: #FAF9F6;
     }
-    .modal-foot { border: 0; border-top: 1px solid var(--border-color); justify-content: flex-end; gap: 10px; }
+    .modal-foot { border: 0; border-top: 1px solid var(--border-color); justify-content: flex-end; gap: 10px; background: #FFF; }
     
-    .modal-head h2 { margin: 0; color: var(--text-dark); font-family: 'Playfair Display', serif; font-size: 19px; }
-    .close { border: 0; background: transparent; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+    .modal-head h2 { margin: 0; color: var(--text-dark); font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+    .close { border: 0; background: transparent; font-size: 24px; color: var(--text-muted); cursor: pointer; font-weight: 700; }
+    .close:hover { color: #DC2626; }
 
-    .modal-body { padding: 22px; }
+    .modal-body { padding: 24px; }
     .field label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; color: var(--text-dark); }
     .field input { 
         width: 100%; font-family: inherit; color: var(--text-dark); 
-        padding: 11px 12px; border: 1px solid var(--border-color); 
+        padding: 10px 14px; border: 1px solid #D8CEC0; 
         border-radius: 8px; outline: none; background: #FAFAFA;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
     }
-    .field input:focus { border-color: var(--gold-primary); background: #fff; }
-    .hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+    .field input:focus { border-color: var(--gold-primary); background: #FFF; box-shadow: 0 0 0 3px rgba(197, 143, 67, 0.15); }
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
 
-    /* Memastikan Popup SweetAlert2 Selalu Berada di Paling Depan */
     .swal2-container {
         z-index: 10000 !important;
     }
@@ -195,7 +206,7 @@
                             <div class="subtle">Kategori #{{ $kategori->id }}</div>
                         </td>
                         <td>
-                            <span class="count"><i class="fa-solid fa-box-open me-1" style="font-size:10px;"></i> {{ $kategori->pakets_count }} paket</span>
+                            <span class="count"><i class="fa-solid fa-box-open" style="font-size:11px;"></i> {{ $kategori->pakets_count }} paket</span>
                         </td>
                         <td>
                             <div class="row-actions">
@@ -295,8 +306,6 @@
         if(e.key === 'Escape') document.querySelectorAll('.modal-backdrop.show').forEach(m => m.classList.remove('show'));
     });
 
-    // ================= SWEETALERT2 CONFIRMATIONS =================
-
     function confirmCreate(event, form) {
         event.preventDefault();
         closeModal('create-modal');
@@ -362,7 +371,7 @@
                 text: "Kategori ini akan dihapus permanen dari sistem.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#EF4444',
+                confirmButtonColor: '#DC2626',
                 cancelButtonColor: '#8C8279',
                 confirmButtonText: 'Ya, Hapus!',
                 cancelButtonText: 'Batal',
@@ -371,6 +380,8 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
+                } else {
+                    // Do nothing
                 }
             });
         } else {

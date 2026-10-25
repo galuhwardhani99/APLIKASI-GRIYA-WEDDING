@@ -16,30 +16,56 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- CSS SweetAlert2 untuk Popup -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
-        /* Flex Topbar dengan Teks di Tengah & Tombol Keluar di Kanan Atas */
+        /* ================= UI SHARPNESS & CONTRAST ENHANCEMENT ================= */
+        :root {
+            --gold-primary: #B9833B;
+            --gold-dark: #9C6F32;
+            --text-main: #1A1A1A;
+            --border-crisp: #E2D9CC;
+            --border-dark: #2A2421;
+        }
+
+        body {
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Topbar Tajam & Kontras Tinggi */
+        .topbar {
+            background-color: #1F1916;
+            border-bottom: 2px solid var(--gold-primary);
+        }
+
         .topbar-container {
             display: flex;
-            justify-content: center; /* Membuat teks berada tepat di tengah */
+            justify-content: center;
             align-items: center;
-            padding: 0 32px;
+            padding: 6px 32px;
             width: 100%;
-            position: relative; /* Mengunci posisi tombol di dalam topbar */
+            position: relative;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #FDFBF7;
         }
 
         .topbar-logout-form {
             position: absolute;
-            right: 32px; /* Mengunci tombol keluar di pojok kanan */
+            right: 32px;
         }
 
         .topbar-logout-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #FFFFFF;
-            padding: 3px 12px;
+            background: #2A221E;
+            border: 1px solid #C58F43;
+            color: #FDFBF7;
+            padding: 4px 14px;
             border-radius: 4px;
             font-size: 0.72rem;
             font-weight: 700;
@@ -51,13 +77,21 @@
         }
 
         .topbar-logout-btn:hover {
-            background: #EF4444;
-            border-color: #EF4444;
+            background: #DC2626;
+            border-color: #DC2626;
             color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Header Navigation Tajam */
+        header.nav {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-crisp);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         .nav-side.nav-right {
-            gap: 24px !important;
+            gap: 20px !important;
             align-items: center;
         }
 
@@ -70,7 +104,40 @@
         .client-home-page .nav-left { justify-content: flex-end; }
         .client-home-page .nav-right { justify-content: flex-start; }
 
-        /* Styling Tombol Utama (Dashboard Admin / Pesan Jadwal) */
+        /* Teks Navigasi Lebih Jelas */
+        .nav-link {
+            font-weight: 700 !important;
+            color: #2D2622 !important;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--gold-primary) !important;
+        }
+
+        /* Brand Logo Tajam */
+        .brand {
+            border-left: 2px solid var(--gold-primary);
+            padding-left: 14px;
+            padding-right: 12px;
+        }
+
+        .brand small {
+            font-weight: 800;
+            color: var(--gold-primary);
+            letter-spacing: 0.25em;
+        }
+
+        .brand strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: #1A1A1A;
+            font-weight: 700;
+        }
+
+        /* Tombol Utama Tajam & Solid */
         .btn-pill-center {
             display: inline-flex;
             flex-direction: column;
@@ -78,22 +145,73 @@
             justify-content: center;
             text-align: center;
             line-height: 1.2;
-            padding: 10px 22px;
+            padding: 8px 24px;
             border-radius: 50px;
-            background-color: #B9833B;
-            color: #FFFFFF;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
+            background: var(--gold-primary);
+            border: 1px solid #A06F2D;
+            color: #FFFFFF !important;
+            font-weight: 800;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
             text-decoration: none;
-            box-shadow: 0 4px 12px rgba(185, 131, 59, 0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(185, 131, 59, 0.25);
+            transition: all 0.2s ease;
             white-space: nowrap;
         }
 
         .btn-pill-center:hover {
-            background-color: #9C6F32;
+            background-color: var(--gold-dark);
+            border-color: #835B25;
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(185, 131, 59, 0.35);
+        }
+
+        .btn-link {
+            font-weight: 700;
+            color: #2D2622;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-crisp);
+            transition: all 0.2s ease;
+        }
+
+        .btn-link:hover {
+            border-color: var(--gold-primary);
+            color: var(--gold-primary);
+            background: #FAF7F2;
+        }
+
+        /* Footer Tajam */
+        .footer {
+            background: #171311;
+            border-top: 3px solid var(--gold-primary);
+            color: #E5DFD7;
+        }
+
+        .footer-brand {
+            font-family: 'Playfair Display', serif;
+            color: #FFFFFF;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .footer-brand small {
+            color: var(--gold-primary);
+            font-weight: 800;
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* Location Modal Penegasan Border */
+        .location-modal-card {
+            border: 1px solid var(--border-crisp);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+
+        .location-modal-header {
+            border-bottom: 2px solid var(--border-crisp);
         }
     </style>
 </head>
@@ -134,7 +252,7 @@
             </nav>
 
             <!-- Teks Logo Susun di Tengah -->
-            <a href="{{ route('home') }}" class="brand" style="padding-right: 12px;">
+            <a href="{{ route('home') }}" class="brand">
                 <small>GRIYA RIAS</small>
                 <strong>Elly Jr.</strong>
                 <em style="padding-right: 6px; display: inline-block;">Make Up &amp; Event Organizer</em>
@@ -145,7 +263,6 @@
                 <a href="{{ request()->routeIs('home') ? '#kontak' : route('home') . '#kontak' }}" class="nav-link">Kontak</a>
                 
                 @auth
-                    <!-- Bersih tanpa tulisan 'LOGIN: ADMIN Administrator' -->
                     @unless(request()->routeIs('client.home'))
                     <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('client.dashboard') }}" class="btn-pill-center">
                         @if(auth()->user()->isAdmin())
@@ -179,12 +296,12 @@
         <a href="{{ request()->routeIs('home') ? '#kontak' : route('home') . '#kontak' }}">Kontak</a>
         
         @auth
-            <div style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <strong style="font-size: 0.95rem; color: #333;">{{ auth()->user()->name }}</strong>
+            <div style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.12); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="font-size: 0.95rem; color: #1A1A1A;">{{ auth()->user()->name }}</strong>
                 @unless(request()->routeIs('client.home'))
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" style="background: none; border: none; color: #A33B3B; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Keluar</button>
+                    <button type="submit" style="background: none; border: none; color: #DC2626; font-weight: 700; font-size: 0.85rem; cursor: pointer;">Keluar</button>
                 </form>
                 @endunless
             </div>

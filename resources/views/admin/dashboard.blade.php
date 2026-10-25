@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Admin Griya Rias Elly Jr.</title>
     
-    <!-- FAVICON (Logo di Tab Browser) -->
+    <!-- FAVICON -->
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS SweetAlert2 untuk Popup -->
+    <!-- CSS SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
         :root {
-            /* Tema Cerah / Light Theme sesuai Figma Client */
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
             --gold-primary: #C58F43;
@@ -24,8 +23,7 @@
             --text-dark: #241A16; 
             --text-muted: #8C8279; 
             --border-color: #EFE8DE;
-            --success-color: #2e7d32;
-            --warning-color: #b9770e;
+            --border-dark: #D8CEC0;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -34,9 +32,10 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             display: flex; 
             min-height: 100vh; 
+            -webkit-font-smoothing: antialiased;
         }
         
-        /* Sidebar Styles Tema Cerah */
+        /* Sidebar Freeze & Sharpened Borders */
         .sidebar { 
             width: 260px; 
             min-width: 260px;
@@ -45,107 +44,114 @@
             position: sticky;
             top: 0;
             background-color: var(--bg-card); 
-            border-right: 1px solid var(--border-color); 
+            border-right: 1px solid var(--border-dark); 
             padding: 24px 16px; 
             display: flex; 
             flex-direction: column; 
             gap: 0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+            box-shadow: 2px 0 12px rgba(36, 26, 22, 0.04);
             overflow: hidden;
         }
 
-        /* Header Brand dengan Logo + Teks Flex */
         .sidebar-brand { 
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             padding-bottom: 20px; 
             border-bottom: 1px solid var(--border-color); 
-            padding-left: 12px;
+            padding-left: 8px;
             text-decoration: none;
-        }
-
-        .sidebar-brand img { display:none; }
-        .sidebar-brand { align-items:flex-start; padding-left:12px; }
-
-        .sidebar-brand img {
-            width: 42px;
-            height: 42px;
-            object-fit: cover;
-            border-radius: 6px;
+            border-left: 3px solid var(--gold-primary);
         }
 
         .brand-text h2 { 
             font-family: 'Playfair Display', serif; 
             color: var(--gold-primary); 
             font-size: 0.67rem; 
-            letter-spacing: .2em;
+            letter-spacing: .25em;
             line-height: 1.2;
             margin-bottom: 2px;
+            font-weight: 800;
         }
 
-        .brand-text p { 
-            font-size: 0.78rem; 
-            color: var(--text-muted); 
-        }
-        .brand-title { font-family:'Playfair Display',serif; color:var(--text-dark); font-size:1.55rem; line-height:1.2; margin:0; }
-        .brand-sub { margin-top:4px; }
+        .brand-title { font-family:'Playfair Display',serif; color:var(--text-dark); font-size:1.55rem; line-height:1.2; margin:0; font-weight:700; }
+        .brand-sub { margin-top:2px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
-        .admin-sidebar-user { display:flex; align-items:center; gap:12px; padding:14px 10px; margin:16px 0; background:#FAFAFA; border:1px solid var(--border-color); border-radius:10px; }
-        .admin-sidebar-avatar { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:#f4e6d2; color:#93622d; font-weight:800; }
-        .admin-sidebar-user strong,.admin-sidebar-user small { display:block; }
-        .admin-sidebar-user strong { font-size:.86rem; }
-        .admin-sidebar-user small { color:var(--text-muted); font-size:.72rem; margin-top:3px; }
-        .admin-nav-label { list-style:none; font-size:.65rem; letter-spacing:.12em; font-weight:800; color:#a59a8e; padding:2px 12px 4px; }
+        .admin-sidebar-user { 
+            display:flex; 
+            align-items:center; 
+            gap:12px; 
+            padding:14px 12px; 
+            margin:16px 0; 
+            background:#FAFAFA; 
+            border:1px solid var(--border-color); 
+            border-radius:10px; 
+        }
+        .admin-sidebar-avatar { 
+            width:40px; 
+            height:40px; 
+            border-radius:50%; 
+            display:grid; 
+            place-items:center; 
+            background:#F4E6D2; 
+            color:#93622D; 
+            font-weight:800; 
+            border: 1px solid #EAD8BF;
+        }
+        .admin-sidebar-user strong { font-size:.86rem; color: var(--text-dark); }
+        .admin-sidebar-user small { color:var(--text-muted); font-size:.72rem; margin-top:2px; font-weight:600; }
 
         .sidebar > nav { display:flex; flex:1; min-height:0; }
         .nav-menu { list-style:none; display:flex; flex:1; min-height:0; flex-direction:column; gap:4px; overflow-y:auto; padding-right:4px; }
         .nav-menu::-webkit-scrollbar { width:4px; }
         .nav-menu::-webkit-scrollbar-thumb { background:#EFE8DE; border-radius:4px; }
-        .admin-nav-label { padding:10px 12px 4px; }
+        
+        .admin-nav-label { font-size:.65rem; letter-spacing:.15em; font-weight:800; color:#A59A8E; padding:10px 12px 4px; }
         .admin-nav-spaced { margin-top:12px; }
+        
         .nav-item { 
-            padding: 11px 12px; 
+            padding: 10px 12px; 
             border-radius: 8px; 
             color: #55483F;
             text-decoration: none; 
-            font-size: 0.88rem; 
+            font-size: 0.86rem; 
             display: flex; 
             align-items: center; 
             gap: 12px; 
-            transition: all 0.2s; 
+            transition: all 0.2s ease; 
             font-weight: 600;
         }
         .nav-item i { width: 18px; text-align: center; font-size: 1rem; color: #9B8877; }
         .nav-item:hover { background-color: #FBF5EC; color: var(--gold-hover); }
-        .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
-        .nav-item.active i { color: #fff; }
+        .nav-item.active { background-color: var(--gold-primary); color: #FFF; font-weight: 700; box-shadow: 0 4px 10px rgba(197, 143, 67, 0.25); }
+        .nav-item.active i { color: #FFF; }
 
-        /* ================= SIDEBAR BOTTOM ACTIONS ================= */
         .sidebar-footer {
             margin-top: auto;
             padding-top: 16px;
             border-top: 1px solid var(--border-color);
             display: grid;
-            gap: 7px;
+            gap: 8px;
         }
 
         .btn-sidebar-home {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 11px 12px;
+            padding: 10px 12px;
             border-radius: 8px;
             color: #55483F;
             text-decoration: none;
             font-size: 0.86rem;
             font-weight: 600;
+            border: 1px solid var(--border-color);
             transition: all 0.2s ease;
         }
 
         .btn-sidebar-home:hover {
             background-color: #FBF5EC;
             color: var(--gold-hover);
+            border-color: var(--gold-primary);
         }
 
         .btn-sidebar-logout {
@@ -159,74 +165,95 @@
             background-color: #FFF5F5;
             border: 1px solid #F1D0D0;
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-family: inherit;
         }
-
-        .btn-sidebar-logout:hover { background-color:#FDE8E8; }
+        .btn-sidebar-logout:hover { background-color:#FDE8E8; border-color: #E6B2B2; }
         
-        /* Main Content */
+        /* Main Content Container */
         .main-content { flex: 1; min-width:0; padding: 40px; }
-        @media(max-width:768px) {
-            body { display:block; }
-            .sidebar { width:100%; min-width:0; height:auto; position:relative; border-right:0; border-bottom:1px solid var(--border-color); }
-            .sidebar > nav { flex:none; }
-            .nav-menu { max-height:360px; }
-            .main-content { padding:24px 18px; }
-        }
         
-        /* Header Dashboard */
+        /* Dashboard Header Bar */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 28px;
         }
+        .dashboard-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--text-dark);
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
 
-        /* Stats Grid Tema Cerah */
+        /* Stats Grid (Visual Crisp Improvement) */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 20px;
             margin-bottom: 32px;
         }
         .stat-card {
             background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-dark);
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            padding: 22px 24px;
+            box-shadow: 0 4px 14px rgba(36, 26, 22, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .stat-card:hover {
+            border-color: var(--gold-primary);
+            transform: translateY(-2px);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(197, 143, 67, 0.12);
+            color: var(--gold-primary);
+            display: grid;
+            place-items: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(197, 143, 67, 0.25);
         }
         .stat-title {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 700;
-            margin-bottom: 8px;
+            letter-spacing: 0.06em;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
         .stat-value {
             font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            font-size: 1.65rem;
             color: var(--text-dark);
             font-weight: 700;
+            line-height: 1.1;
         }
 
-        /* Table Section Tema Cerah */
+        /* Table Section Tajam & Jelas */
         .table-section {
             background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-dark);
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            padding: 26px;
+            box-shadow: 0 4px 14px rgba(36, 26, 22, 0.03);
         }
         .table-header {
             font-family: 'Playfair Display', serif;
             color: var(--text-dark);
-            font-size: 1.25rem;
+            font-size: 1.3rem;
+            font-weight: 700;
             margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
         }
         .data-table {
             width: 100%;
@@ -234,38 +261,43 @@
         }
         .data-table th {
             text-align: left;
-            padding: 12px;
+            padding: 12px 14px;
             font-size: 0.75rem;
             color: var(--gold-primary);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
+            font-weight: 800;
             border-bottom: 2px solid var(--border-color);
             background-color: #FAFAFA;
         }
         .data-table td {
-            padding: 16px 12px;
+            padding: 16px 14px;
             font-size: 0.9rem;
             border-bottom: 1px solid var(--border-color);
             color: var(--text-dark);
+            vertical-align: middle;
+        }
+        .data-table tbody tr:hover {
+            background-color: #FDFBF7;
         }
         .data-table tr:last-child td { border-bottom: none; }
         
-        /* Status Badges */
+        /* Status Badges Berkontras Tinggi */
         .status-badge {
-            padding: 4px 10px;
-            border-radius: 4px;
+            padding: 5px 12px;
+            border-radius: 6px;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
+            display: inline-block;
         }
-        .status-dp { background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
-        .status-lunas { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+        .status-dp { background-color: #FFF3E0; color: #D97706; border: 1px solid #FDE68A; }
+        .status-lunas { background-color: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
     </style>
 </head>
 <body>
 
     <!-- Sidebar Admin -->
     <aside class="sidebar">
-        <!-- Brand + Logo Sidebar -->
         <a class="sidebar-brand" href="{{ route('admin.dashboard') }}">
             <div class="brand-text">
                 <h2>GRIYA RIAS</h2>
@@ -298,42 +330,48 @@
             </ul>
         </nav>
         
-        <!-- Bottom Actions Admin -->
-<div class="sidebar-footer">
-     <a href="{{ route('home') }}" class="btn-sidebar-home">
-         <i class="fa-solid fa-globe"></i> Halaman Utama
-     </a>
-     
-     <form id="logout-form-admin" action="{{ route('logout') }}" method="POST" style="margin: 0;">
-         @csrf
-         <button type="button" class="btn-sidebar-logout" onclick="confirmLogout('logout-form-admin')">
-             <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
-         </button>
-     </form>
-</div>
+        <div class="sidebar-footer">
+             <a href="{{ route('home') }}" class="btn-sidebar-home">
+                 <i class="fa-solid fa-globe"></i> Halaman Utama
+             </a>
+             
+             <form id="logout-form-admin" action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                 @csrf
+                 <button type="button" class="btn-sidebar-logout" onclick="confirmLogout('logout-form-admin')">
+                     <i class="fa-solid fa-right-from-bracket"></i> Keluar Akun
+                 </button>
+             </form>
+        </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
-
-        <!-- Dashboard Header Bar -->
         <div class="dashboard-header">
-            <h1 style="font-family: 'Playfair Display', serif; color: var(--text-dark); font-size: 1.5rem;">Dashboard Overview</h1>
+            <h1 class="dashboard-title">Dashboard Overview</h1>
         </div>
 
-        <!-- Stats Grid -->
+        <!-- Stats Grid Berbingkai Ikon -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-title">Total Pendapatan Bulan Ini</div>
-                <div class="stat-value">Rp 48.500.000</div>
+                <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+                <div>
+                    <div class="stat-title">Total Pendapatan Bulan Ini</div>
+                    <div class="stat-value">Rp 48.500.000</div>
+                </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Total Reservasi</div>
-                <div class="stat-value">18 Acara</div>
+                <div class="stat-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                <div>
+                    <div class="stat-title">Total Reservasi</div>
+                    <div class="stat-value">18 Acara</div>
+                </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Client Aktif</div>
-                <div class="stat-value">124 User</div>
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <div class="stat-title">Client Aktif</div>
+                    <div class="stat-value">124 User</div>
+                </div>
             </div>
         </div>
 
@@ -352,15 +390,15 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="color: var(--text-muted);">#GR-0892</td>
-                        <td>Siti Rahmawati</td>
-                        <td>Rias Akad & Resepsi Gold</td>
+                        <td style="color: var(--text-muted); font-weight: 700;">#GR-0892</td>
+                        <td><strong>Siti Rahmawati</strong></td>
+                        <td>Rias Akad &amp; Resepsi Gold</td>
                         <td>06 Oct 2026</td>
                         <td><span class="status-badge status-dp">DP Verified</span></td>
                     </tr>
                     <tr>
-                        <td style="color: var(--text-muted);">#GR-0891</td>
-                        <td>Anisa Putri</td>
+                        <td style="color: var(--text-muted); font-weight: 700;">#GR-0891</td>
+                        <td><strong>Anisa Putri</strong></td>
                         <td>WO Package Intimate</td>
                         <td>12 Oct 2026</td>
                         <td><span class="status-badge status-lunas">Lunas 100%</span></td>
@@ -370,8 +408,6 @@
         </div>
     </main>
 
-    <!-- Script SweetAlert2 -->
-    <!-- Script SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function confirmLogout(formId) {
@@ -380,8 +416,8 @@
             text: 'Apakah Anda yakin ingin keluar dari akun ini?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#C58F43', // Warna Gold Utama
-            cancelButtonColor: '#8C8279',  // Warna Muted
+            confirmButtonColor: '#C58F43',
+            cancelButtonColor: '#8C8279',
             confirmButtonText: 'Ya, Keluar',
             cancelButtonText: 'Batal',
             reverseButtons: true,
