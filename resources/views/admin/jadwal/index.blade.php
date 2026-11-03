@@ -224,8 +224,26 @@
                                 @endphp
                                 {{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d F Y') }} | {{ $bookingSeharian ? 'FULL DAY' : substr($waktuBookingMulai, 0, 5) . ' - ' . substr($waktuBookingSelesai, 0, 5) }}
                             </span>
-                            <div class="client-name">{{ $item->user->name ?? 'Pelanggan' }} ({{ $item->detail_acara ?? 'Rias Pengantin' }})</div>
+                            @php
+                                $namaLayananTerpilih = $item->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan ?: $layanan->nama_layanan)->filter()->implode(', ');
+                                $namaPesanan = $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: 'Rias Pengantin');
+                            @endphp
+                            <div class="client-name">{{ $item->user->name ?? 'Pelanggan' }} ({{ $namaPesanan }})</div>
                             <div class="location-info">Lokasi: {{ $item->lokasi ?? 'Lokasi Klien' }}</div>
+                            <div style="margin-top:8px;font-size:.78rem;color:#6B7280;">
+                                Pembayaran: <strong>{{ ucfirst($item->payment_status ?? 'unpaid') }}</strong>
+                                @if($item->bukti_transfer)
+                                    · <a href="{{ asset('storage/' . $item->bukti_transfer) }}" target="_blank" rel="noopener" style="color:#A87632;">Lihat bukti</a>
+                                    @if(($item->payment_status ?? 'unpaid') !== 'proof_verified' && ($item->payment_status ?? 'unpaid') !== 'paid')
+                                        <form action="{{ route('admin.jadwal.verifyPaymentProof', $item->id_reservasi) }}" method="POST" style="display:inline;margin-left:6px;" onsubmit="return confirm('Terima bukti pembayaran ini? Client tidak dapat melakukan pembayaran ulang setelah diterima.')">
+                                            @csrf
+                                            <button type="submit" style="border:0;background:#15803D;color:#fff;border-radius:5px;padding:3px 7px;font-size:.7rem;cursor:pointer;">Terima Bukti</button>
+                                        </form>
+                                    @else
+                                        <span style="color:#15803D;">· Bukti diterima</span>
+                                    @endif
+                                @endif
+                            </div>
                         </div>
 
                         <div class="card-actions">

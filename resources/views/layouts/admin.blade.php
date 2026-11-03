@@ -111,7 +111,9 @@
 
         .nav-menu { list-style:none; display:flex; flex:1; min-height:0; flex-direction:column; gap:4px; overflow-y:auto; padding-right:4px; }
         .nav-menu::-webkit-scrollbar { width:4px; }
+        .nav-menu::-webkit-scrollbar-track { background:transparent; }
         .nav-menu::-webkit-scrollbar-thumb { background-color:#EFE8DE; border-radius:4px; }
+        .nav-menu { scrollbar-width:thin; scrollbar-color:#EFE8DE transparent; overscroll-behavior:contain; }
         .nav-item { padding:11px 12px; border-radius:8px; color:#55483F; text-decoration:none; font-size:.86rem; display:flex; align-items:center; gap:12px; transition:all .2s; font-weight:600; }
         .nav-item i { width:18px; text-align:center; color:#9B8877; }
         .nav-item:hover { background-color:#FBF5EC; color:var(--gold-hover); }

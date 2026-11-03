@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Riwayat Reservasi - Griya Rias Elly Jr.</title>
     
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
@@ -197,6 +198,10 @@
         .history-empty a:hover { text-decoration: underline; }
 
         .history-pagination { display: flex; justify-content: center; margin-top: 24px; }
+        .payment-method-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:8px; }
+        .payment-method-card { display:flex; align-items:center; gap:6px; padding:7px; border:1px solid #E8DDCF; border-radius:7px; font-size:.68rem; color:#5E5149; cursor:pointer; background:#FFF; }
+        .payment-method-card:has(input:checked) { border-color:#C58F43; background:#FDF8EF; box-shadow:0 0 0 1px #C58F43; }
+        .payment-method-card input { accent-color:#C58F43; }
     </style>
 </head>
 <body>
@@ -258,6 +263,10 @@
             </div>
         </div>
 
+        @if (session('success'))
+            <div class="history-status has-proof" style="display:block;margin-bottom:18px;padding:12px 16px;">{{ session('success') }}</div>
+        @endif
+
         <div class="history-table-wrap">
             <table class="history-table">
                 <thead>
@@ -268,6 +277,7 @@
                         <th>Waktu</th>
                         <th>Jumlah</th>
                         <th>Status</th>
+                        <th>Pembayaran</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -276,11 +286,11 @@
                             @php($namaLayananTerpilih = $reservasi->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
                             <td>
                                 <strong>{{ $reservasi->kode_reservasi }}</strong>
-                                <small>Diajukan {{ $reservasi->tgl_reservasi?->format('d/m/Y') }}</small>
+                                <small>Diajukan {{ ($reservasi->tanggal_pengajuan ?? $reservasi->tgl_reservasi)?->format('d/m/Y') }}</small>
                             </td>
                             <td>
                                 {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—') }}
-                                <small>{{ $reservasi->lokasi_acara }}</small>
+                                <small>{{ $reservasi->lokasi_acara ?: $reservasi->lokasi }}</small>
                             </td>
                             <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? '—' }}</td>
                             <td>{{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '—' }} – {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '—' }}</td>
@@ -288,10 +298,37 @@
                             <td>
                                 <span class="history-status">{{ $reservasi->status_reservasi }}</span>
                             </td>
+                            <td style="min-width:220px;">
+                                @php($totalPembayaran = (int) (($reservasi->harga_paket ?: $reservasi->harga_layanan ?: 0) * ($reservasi->jumlah_pesanan ?: 1)))
+                                <strong>Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</strong>
+                                @if(in_array($reservasi->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
+                                    <small style="display:block;color:#15803D;margin-top:4px;"><i class="fa-solid fa-circle-check"></i> Pembayaran berhasil</small>
+                                @else
+                                    @if($reservasi->status_reservasi === 'Disetujui' && config('services.midtrans.client_key') && $totalPembayaran > 0)
+                                        <a class="btn-gold" href="{{ route('client.payment.show', $reservasi) }}" style="display:inline-block;text-decoration:none;margin-top:8px;padding:8px 11px;font-size:.75rem;">
+                                            <i class="fa-solid fa-credit-card"></i> Lanjut ke Pembayaran
+                                        </a>
+                                    @elseif($reservasi->status_reservasi !== 'Disetujui')
+                                        <small style="display:block;color:#8C8279;margin-top:4px;"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
+                                    @else
+                                        <small style="display:block;color:#B45309;margin-top:4px;">Gateway belum dikonfigurasi</small>
+                                    @endif
+                                @endif
+                                <form action="{{ route('reservasi.payment.proof', $reservasi) }}" method="POST" enctype="multipart/form-data" style="margin-top:9px;">
+                                    @csrf
+                                    <input type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required style="width:100%;font-size:.72rem;">
+                                    <button type="submit" style="margin-top:5px;border:1px solid #C58F43;background:#fff;color:#9A6B2F;border-radius:7px;padding:6px 9px;font-size:.72rem;cursor:pointer;">
+                                        <i class="fa-solid fa-upload"></i> {{ $reservasi->bukti_transfer ? 'Ganti Bukti' : 'Upload Bukti' }}
+                                    </button>
+                                    @if($reservasi->bukti_transfer)
+                                        <small style="display:block;color:#15803D;margin-top:3px;">Bukti sudah diunggah</small>
+                                    @endif
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="history-empty">
+                            <td colspan="7" class="history-empty">
                                 <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
                                 Belum ada pengajuan reservasi. <a href="{{ route('reservasi.create') }}">Buat reservasi pertama Anda.</a>
                             </td>
@@ -309,7 +346,41 @@
 </body>
 <!-- SweetAlert2 CDN & Script Konfirmasi -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if(config('services.midtrans.client_key'))
+    <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+@endif
 <script>
+    document.querySelectorAll('.js-pay-button').forEach((button) => {
+        button.addEventListener('click', async () => {
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memuat...';
+            try {
+                const method = button.parentElement.querySelector('input[name^="payment_method_"]:checked')?.value || '';
+                const response = await fetch(button.dataset.url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ payment_method: method }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Transaksi gagal dibuat.');
+                window.snap.pay(data.token, {
+                    onSuccess: () => window.location.reload(),
+                    onPending: () => window.location.reload(),
+                    onError: () => Swal.fire('Pembayaran gagal', 'Silakan coba lagi.', 'error'),
+                    onClose: () => { button.disabled = false; button.innerHTML = '<i class="fa-solid fa-credit-card"></i> Bayar Sekarang'; },
+                });
+            } catch (error) {
+                Swal.fire('Tidak dapat memproses pembayaran', error.message, 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="fa-solid fa-credit-card"></i> Bayar Sekarang';
+            }
+        });
+    });
+
     function confirmLogoutClient() {
         Swal.fire({
             title: 'Keluar dari Akun?',

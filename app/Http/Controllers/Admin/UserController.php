@@ -42,11 +42,15 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        abort_if($user->role === 'client', 403, 'Akun client hanya dapat dihapus.');
+
         return view('admin.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
+        abort_if($user->role === 'client', 403, 'Akun client hanya dapat dihapus.');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,

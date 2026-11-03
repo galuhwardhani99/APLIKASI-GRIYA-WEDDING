@@ -101,7 +101,9 @@
         .sidebar > nav { display:flex; flex:1; min-height:0; }
         .nav-menu { list-style:none; display:flex; flex:1; min-height:0; flex-direction:column; gap:4px; overflow-y:auto; padding-right:4px; }
         .nav-menu::-webkit-scrollbar { width:4px; }
+        .nav-menu::-webkit-scrollbar-track { background:transparent; }
         .nav-menu::-webkit-scrollbar-thumb { background:#EFE8DE; border-radius:4px; }
+        .nav-menu { scrollbar-width:thin; scrollbar-color:#EFE8DE transparent; overscroll-behavior:contain; }
         .admin-nav-label { padding:10px 12px 4px; }
         .admin-nav-spaced { margin-top:12px; }
         .nav-item { 

@@ -12,6 +12,7 @@ use App\Http\Controllers\Client\DashboardController as ClientDashboardController
 use App\Http\Controllers\Client\JadwalController as ClientJadwalController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
+use App\Http\Controllers\Client\PaymentController;
 use App\Http\Controllers\UserProfileController;
 use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/jadwal', [AdminJadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/jadwal/json', [ClientJadwalController::class, 'getJadwalJson'])->name('jadwal.json');
     Route::post('/jadwal/validasi/{id}', [AdminJadwalController::class, 'validasi'])->name('jadwal.validasi');
+    Route::post('/jadwal/verifikasi-bukti/{id}', [AdminJadwalController::class, 'verifyPaymentProof'])->name('jadwal.verifyPaymentProof');
     Route::put('/jadwal/update-tanggal/{id}', [AdminJadwalController::class, 'updateTanggal'])->name('admin.jadwal.updateTanggal');
 });
 
@@ -81,10 +83,16 @@ Route::middleware(['auth', 'role:client'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [UserProfileController::class, 'edit'])->name('user.profile.edit');
     Route::put('/profil', [UserProfileController::class, 'update'])->name('user.profile.update');
+    Route::delete('/profil', [UserProfileController::class, 'destroy'])->name('user.profile.destroy');
 
     // Endpoint API untuk mengecek tanggal yang sudah tervalidasi di form reservasi
     Route::get('/api/jadwal-tervalidasi', [ClientDashboardController::class, 'getJadwalTervalidasi'])->name('api.jadwal.tervalidasi');
 
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi.create');
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
+    Route::post('/reservasi/{reservasi}/payment', [PaymentController::class, 'create'])->name('reservasi.payment.create');
+    Route::post('/reservasi/{reservasi}/bukti-pembayaran', [PaymentController::class, 'uploadProof'])->name('reservasi.payment.proof');
+    Route::get('/transaksi/{reservasi}/pembayaran', [PaymentController::class, 'show'])->name('client.payment.show');
 });
+
+Route::post('/payment/midtrans/notification', [PaymentController::class, 'notification'])->name('payment.midtrans.notification');

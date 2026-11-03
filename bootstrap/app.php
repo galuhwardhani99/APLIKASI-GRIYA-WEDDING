@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('login'));
 
         $middleware->redirectUsersTo(fn () => route('home'));
+
+        // Notifikasi pembayaran dikirim server-to-server oleh Midtrans, tanpa token CSRF browser.
+        $middleware->validateCsrfTokens(except: [
+            'payment/midtrans/notification',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
