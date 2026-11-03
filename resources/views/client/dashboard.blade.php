@@ -30,6 +30,7 @@
         position: sticky;
         top: 0;
         z-index: 20;
+        overflow: hidden;
         box-shadow: 2px 0 14px rgba(36,26,22,0.03);
     }
 
@@ -74,10 +75,15 @@
         flex-direction: column;
         gap: 4px;
         flex: 1;
+        min-height: 0;
         overflow-y: auto;
         padding-right: 4px;
+        scrollbar-width: thin;
+        scrollbar-color: #EFE8DE transparent;
+        overscroll-behavior: contain;
     }
     .client-sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .client-sidebar-nav::-webkit-scrollbar-track { background: transparent; }
     .client-sidebar-nav::-webkit-scrollbar-thumb { background-color: #EFE8DE; border-radius: 4px; }
 
     .client-nav-label { font-size: .65rem; letter-spacing: .12em; font-weight: 800; color: #A59A8E; padding: 10px 12px 4px; }
@@ -201,6 +207,7 @@
     @media(max-width: 768px) {
         .client-dashboard-shell { flex-direction: column; }
         .client-sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #EFE8DE; }
+        .client-sidebar-nav { max-height: 280px; }
         .cards-grid { grid-template-columns: 1fr; }
         .client-hero, .client-section, .client-overview-stats { padding: 24px 20px; }
         .contact-box { margin: 0 20px; padding: 24px; }

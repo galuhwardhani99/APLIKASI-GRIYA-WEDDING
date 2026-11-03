@@ -40,4 +40,10 @@ return [
         'whatsapp' => env('GRIYA_WHATSAPP', '087850875676'),
     ],
 
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'is_production' => (bool) env('MIDTRANS_IS_PRODUCTION', false),
+    ],
+
 ];

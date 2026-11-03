@@ -38,4 +38,18 @@ class UserProfileController extends Controller
 
         return redirect()->back()->with('success', 'Profil akun Anda berhasil diperbarui!');
     }
+
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+
+        abort_if($user->isAdmin(), 403, 'Akun admin tidak dapat dihapus dari halaman ini.');
+
+        Auth::logout();
+        $user->delete();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')->with('success', 'Akun Anda berhasil dihapus.');
+    }
 }

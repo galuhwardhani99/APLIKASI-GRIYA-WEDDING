@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Riwayat Transaksi - Griya Rias Elly Jr.</title>
     
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
@@ -198,6 +199,22 @@
         .history-empty { text-align: center; color: var(--text-muted); padding: 48px !important; }
 
         .history-pagination { display: flex; justify-content: center; margin-top: 24px; }
+        .payment-modal[hidden] { display:none; }
+        .payment-modal { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:20px; background:rgba(36,26,22,.42); backdrop-filter:blur(6px); }
+        .payment-modal-card { width:min(720px,100%); max-height:calc(100vh - 40px); overflow:auto; background:#fff; border-radius:24px; padding:28px; box-shadow:0 24px 80px rgba(36,26,22,.28); animation:paymentModalIn .2s ease-out; }
+        @keyframes paymentModalIn { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
+        .payment-modal-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:16px; border-bottom:1px solid var(--border-color); }
+        .payment-modal-head h2 { font-family:'Playfair Display',serif; font-size:1.5rem; }
+        .payment-modal-close { width:36px; height:36px; border:1px solid var(--border-color); background:#fff; border-radius:50%; cursor:pointer; color:var(--text-muted); }
+        .payment-modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px; }
+        .payment-modal-section { border:1px solid var(--border-color); border-radius:16px; padding:20px; }
+        .payment-modal-section h3 { font-size:.95rem; margin-bottom:14px; }
+        .payment-methods-modal { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .payment-method-modal { border:1px solid var(--border-color); border-radius:10px; padding:11px; font-size:.75rem; cursor:pointer; }
+        .payment-method-modal:has(input:checked) { border-color:var(--gold-primary); background:#FDF8EF; box-shadow:0 0 0 1px var(--gold-primary); }
+        .payment-method-modal input { accent-color:var(--gold-primary); margin-right:5px; }
+        .payment-modal-pay { width:100%; margin-top:16px; padding:13px; border:0; border-radius:10px; color:#fff; background:var(--gold-primary); font-weight:700; cursor:pointer; }
+        @media(max-width:680px) { .payment-modal-card { padding:20px; border-radius:18px; } .payment-modal-grid { grid-template-columns:1fr; } }
     </style>
 </head>
 <body>
@@ -287,6 +304,13 @@
                                     @endif
                                 </span>
                                 <small class="history-note">Status Reservasi: {{ ucfirst($item->status_reservasi) }}</small>
+                                @if($item->status_reservasi === 'Disetujui' && !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
+                                    <button type="button" class="btn-gold js-open-payment-modal" data-modal="payment-modal-{{ $item->id_reservasi }}" style="border:0;margin-top:8px;padding:7px 10px;font-size:.72rem;cursor:pointer;">
+                                        <i class="fa-solid fa-arrow-right"></i> Lanjutkan Pembayaran
+                                    </button>
+                                @elseif($item->status_reservasi !== 'Disetujui')
+                                    <small class="history-note"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -306,10 +330,73 @@
         </div>
     </main>
 
+    @foreach($transaksi as $item)
+        @if($item->status_reservasi === 'Disetujui' && !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
+            @php($totalModal = (int) (($item->biaya_sewa ?: ($item->harga_paket ?? $item->harga_layanan ?? 0)) * ($item->jumlah_pesanan ?: 1)))
+            <div class="payment-modal" id="payment-modal-{{ $item->id_reservasi }}" hidden>
+                <div class="payment-modal-card" role="dialog" aria-modal="true" aria-labelledby="payment-title-{{ $item->id_reservasi }}">
+                    <div class="payment-modal-head">
+                        <div><h2 id="payment-title-{{ $item->id_reservasi }}">Lanjutkan Pembayaran</h2><small style="color:var(--text-muted);">{{ $item->kode_reservasi }} · Reservasi disetujui admin</small></div>
+                        <button type="button" class="payment-modal-close js-close-payment-modal" data-modal="payment-modal-{{ $item->id_reservasi }}" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="payment-modal-grid">
+                        <section class="payment-modal-section">
+                            <h3><i class="fa-solid fa-wallet" style="color:var(--gold-primary)"></i> Pilih metode pembayaran</h3>
+                            <div class="payment-methods-modal">
+                                <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="bank_transfer"> Bank / VA</label>
+                                <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="qris"> QRIS</label>
+                                <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="gopay"> GoPay</label>
+                                <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="shopeepay"> ShopeePay</label>
+                                <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="credit_card"> Kartu Kredit</label>
+                            </div>
+                            <button type="button" class="payment-modal-pay js-midtrans-pay" data-url="{{ route('reservasi.payment.create', $item) }}" data-modal="payment-modal-{{ $item->id_reservasi }}"><i class="fa-solid fa-lock"></i> Bayar Sekarang</button>
+                        </section>
+                        <section class="payment-modal-section">
+                            <h3>Ringkasan Transaksi</h3>
+                            <div style="display:flex;justify-content:space-between;gap:12px;font-size:.82rem;padding:10px 0;border-bottom:1px solid var(--border-color);"><span style="color:var(--text-muted)">Paket / layanan</span><strong>{{ $item->nama_paket ?: ($item->nama_layanan ?: $item->detail_acara) }}</strong></div>
+                            <div style="display:flex;justify-content:space-between;font-size:.82rem;padding:14px 0 0;"><span style="color:var(--text-muted)">Total</span><strong style="color:var(--gold-primary);font-size:1.15rem;">Rp {{ number_format($totalModal, 0, ',', '.') }}</strong></div>
+                            <form action="{{ route('reservasi.payment.proof', $item) }}" method="POST" enctype="multipart/form-data" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border-color);">
+                                @csrf
+                                <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:7px;">Upload bukti pembayaran</label>
+                                <input type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required style="width:100%;font-size:.75rem;">
+                                <button type="submit" style="margin-top:10px;border:1px solid var(--gold-primary);background:#fff;color:var(--gold-hover);border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:.75rem;"><i class="fa-solid fa-upload"></i> Upload Bukti</button>
+                            </form>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
 </body>
 <!-- SweetAlert2 CDN & Script Konfirmasi -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 <script>
+    document.querySelectorAll('.js-open-payment-modal').forEach(button => button.addEventListener('click', () => {
+        document.getElementById(button.dataset.modal).hidden = false;
+    }));
+    document.querySelectorAll('.js-close-payment-modal').forEach(button => button.addEventListener('click', () => {
+        document.getElementById(button.dataset.modal).hidden = true;
+    }));
+    document.querySelectorAll('.payment-modal').forEach(modal => modal.addEventListener('click', event => {
+        if (event.target === modal) modal.hidden = true;
+    }));
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') document.querySelectorAll('.payment-modal:not([hidden])').forEach(modal => modal.hidden = true);
+    });
+    document.querySelectorAll('.js-midtrans-pay').forEach(button => button.addEventListener('click', async () => {
+        const modal = document.getElementById(button.dataset.modal);
+        const method = modal.querySelector('input[type="radio"]:checked')?.value;
+        if (!method) { Swal.fire('Pilih metode pembayaran', 'Silakan pilih metode pembayaran terlebih dahulu.', 'info'); return; }
+        button.disabled = true;
+        try {
+            const response = await fetch(button.dataset.url, { method:'POST', headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json','Content-Type':'application/json'}, body:JSON.stringify({payment_method:method}) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Pembayaran gagal dibuat.');
+            window.snap.pay(data.token, { onSuccess:() => location.reload(), onPending:() => location.reload(), onError:() => Swal.fire('Pembayaran gagal','Silakan coba lagi.','error'), onClose:() => button.disabled = false });
+        } catch (error) { Swal.fire('Gagal', error.message, 'error'); button.disabled = false; }
+    }));
+
     function confirmLogoutClient() {
         Swal.fire({
             title: 'Keluar dari Akun?',

@@ -225,20 +225,28 @@
         .reservation-summary-trigger:hover { background: var(--gold-hover); }
         .reservation-summary-trigger strong { white-space: nowrap; }
         .reservation-summary {
-            position: fixed; z-index: 1001; left: 50%; bottom: 82px; transform: translateX(-50%);
-            width: min(420px, calc(100% - 32px)); max-height: min(70vh, 560px); overflow-y: auto;
-            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
-            padding: 24px; box-shadow: 0 12px 40px rgba(36,26,22,.2);
+            position: fixed; z-index: 1001; left: 50%; top: 50%; transform: translate(-50%, -46%);
+            width: min(620px, calc(100% - 32px)); max-height: min(82vh, 680px); overflow-y: auto;
+            background: rgba(255,255,255,.98); border: 1px solid rgba(239,232,222,.95); border-radius: 24px;
+            padding: 30px; box-shadow: 0 24px 80px rgba(36,26,22,.24), 0 4px 16px rgba(36,26,22,.08);
+            animation: reservation-modal-in .22s ease-out forwards;
         }
+        @keyframes reservation-modal-in { from { opacity:0; transform:translate(-50%, -42%) scale(.97); } to { opacity:1; transform:translate(-50%, -50%) scale(1); } }
+        .reservation-summary-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(36,26,22,.38); backdrop-filter: blur(6px); animation: reservation-backdrop-in .18s ease-out forwards; }
+        @keyframes reservation-backdrop-in { from { opacity:0; } to { opacity:1; } }
+        .reservation-summary-backdrop[hidden] { display: none !important; }
         .reservation-summary[hidden] { display: none !important; }
-        .reservation-summary-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-        .reservation-summary-heading h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text-dark); margin-bottom: 16px; }
-        .reservation-summary-close { border:0; background:transparent; color:var(--text-muted); font-size:1.1rem; cursor:pointer; padding:6px; }
-        .reservation-summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.88rem; color: var(--text-muted); }
-        .reservation-summary-row strong { color: var(--text-dark); }
+        .reservation-summary-heading { position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding-top:8px; padding-bottom:18px; border-bottom:1px solid var(--border-color); }
+        .reservation-summary-heading h2 { font-family: 'Playfair Display', serif; font-size: 1.55rem; color: var(--text-dark); margin:0; letter-spacing:-.02em; }
+        .reservation-summary-heading::before { content:'RINGKASAN PESANAN'; position:absolute; margin-top:-17px; color:var(--gold-primary); font-size:.62rem; letter-spacing:.14em; font-weight:800; }
+        .reservation-summary-close { width:36px; height:36px; display:grid; place-items:center; border:1px solid var(--border-color); background:#FFF; color:var(--text-muted); font-size:1rem; cursor:pointer; padding:0; border-radius:50%; transition:.2s; }
+        .reservation-summary-close:hover { background:#FDF8EF; color:var(--gold-hover); border-color:var(--gold-primary); transform:rotate(90deg); }
+        .reservation-summary-row { display: flex; justify-content: space-between; align-items:flex-start; gap:20px; margin:0; padding:16px 0; font-size: 0.88rem; color: var(--text-muted); }
+        .reservation-summary-row + .reservation-summary-row { border-top:1px dashed var(--border-color); }
+        .reservation-summary-row strong { color: var(--text-dark); text-align:right; max-width:65%; }
         .reservation-summary-total {
-            display: flex; justify-content: space-between; align-items: center; padding-top: 14px;
-            border-top: 1px solid var(--border-color); margin-top: 14px; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center; padding: 18px 0 0;
+            border-top: 1px solid var(--border-color); margin-top: 4px; font-weight: 700;
         }
         .reservation-summary-total strong { font-size: 1.2rem; color: var(--gold-primary); }
         
@@ -248,6 +256,13 @@
         }
         .reservation-submit:hover:not(:disabled) { background: var(--gold-hover); }
         .reservation-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        @media(max-width: 600px) {
+            .reservation-summary { width: calc(100% - 20px); padding: 26px 20px 22px; border-radius:20px; }
+            .reservation-summary-heading h2 { font-size:1.3rem; }
+            .reservation-summary-row { font-size:.82rem; }
+            .reservation-summary-trigger { bottom:14px; width:calc(100% - 24px); }
+        }
 
         .reservation-alert { padding: 12px 16px; background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 10px; margin-bottom: 20px; font-size: 0.88rem; }
         .reservation-error { color: #DC2626; font-size: 0.78rem; margin-top: 4px; display: block; }
@@ -470,6 +485,7 @@
                 </button>
 
                 <!-- RINCIAN RESERVASI POPUP -->
+                <div class="reservation-summary-backdrop" id="summary-backdrop" hidden></div>
                 <aside class="reservation-summary" id="reservation-summary" aria-labelledby="summary-heading" hidden>
                     <div class="reservation-summary-heading">
                         <h2 id="summary-heading">Rincian Reservasi</h2>
@@ -489,6 +505,9 @@
                     </div>
                     <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 14px; line-height: 1.5;">
                         Harga akhir dan ketersediaan jadwal akan dikonfirmasi oleh admin setelah reservasi diajukan.
+                    </p>
+                    <p style="font-size: 0.78rem; color: var(--gold-hover); margin-top: 8px; line-height: 1.5;">
+                        Setelah reservasi dikirim, pembayaran dapat dilakukan melalui gateway atau unggah bukti pembayaran dari menu Riwayat Reservasi.
                     </p>
                     <button class="reservation-submit" type="submit" @disabled($pakets->isEmpty() &&$layanans->isEmpty())>
                         Ajukan Reservasi Sekarang <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
@@ -513,6 +532,7 @@
             const summaryPopup = document.getElementById('reservation-summary');
             const summaryTrigger = document.getElementById('summary-trigger');
             const summaryClose = document.getElementById('summary-close');
+            const summaryBackdrop = document.getElementById('summary-backdrop');
             const summaryTriggerTotal = document.getElementById('summary-trigger-total');
             const tglAcaraInput = document.getElementById('tgl_acara');
             const waktuMulaiInput = document.getElementById('waktu_mulai');
@@ -763,6 +783,7 @@
 
             function setSummaryOpen(open) {
                 summaryPopup.hidden = !open;
+                summaryBackdrop.hidden = !open;
                 summaryTrigger.setAttribute('aria-expanded', String(open));
                 if (open) summaryClose.focus();
                 else summaryTrigger.focus();

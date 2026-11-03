@@ -10,6 +10,7 @@
         padding: 24px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         margin-top: 20px;
+        width: 100%;
     }
 
     .custom-table {
@@ -119,13 +120,18 @@
     .btn-action-delete:hover {
         background-color: #FEE2E2;
     }
+    .user-management-content { width: min(1080px, 100%); margin: 0 auto; }
+    .client-only-note { color:#8C8279; font-size:.75rem; font-style:italic; }
 </style>
 
 <!-- Dashboard Header Bar -->
+<div class="user-management-content">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <div>
         <h1 style="font-family: 'Playfair Display', serif; color: #241A16; font-size: 1.6rem; font-weight: 700;">Kelola Akun Pengguna</h1>
         <p style="font-size: 0.85rem; color: #8C8279; margin-top: 4px;">Daftar seluruh akun admin dan client yang terdaftar.</p>
+    </div>
+</div>
 
 <!-- Container Tabel Bergaya Card -->
 <div class="user-card-section">
@@ -155,10 +161,14 @@
                         </td>
                         <td style="text-align: center;">
                             <div style="display: flex; justify-content: center; gap: 8px;">
-                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-action-edit">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                                </a>
-                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun ini?')" style="margin: 0;">
+                                @if($user->role === 'admin')
+                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-action-edit">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                @else
+                                    <span class="client-only-note">Client hanya dapat dihapus</span>
+                                @endif
+                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="confirmDelete(event, this)" style="margin: 0;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-action-delete">
@@ -177,6 +187,33 @@
         </table>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(event, form) {
+        event.preventDefault();
+
+        if (typeof Swal === 'undefined') {
+            if (window.confirm('Yakin ingin menghapus akun ini?')) form.submit();
+            return;
+        }
+
+        Swal.fire({
+            title: 'Hapus Akun Ini?',
+            text: 'Data akun yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#8C8279',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            background: '#FFFFFF',
+            color: '#241A16'
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
+        });
+    }
+</script>
 
 {{-- SweetAlert2 Notifikasi Sukses --}}
 @if(session('success'))

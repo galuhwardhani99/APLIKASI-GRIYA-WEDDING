@@ -18,6 +18,7 @@ class Reservasi extends Model
         'tgl_acara' => 'date',
         'tanggal_acara' => 'date',
         'tanggal_pengajuan' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -46,6 +47,9 @@ class Reservasi extends Model
         'waktu_selesai',
         'catatan',
         'bukti_transfer',
+        'payment_order_id',
+        'payment_status',
+        'paid_at',
     ];
 
     public function user()
