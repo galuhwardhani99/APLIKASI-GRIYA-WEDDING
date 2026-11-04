@@ -9,6 +9,8 @@
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
         :root {
@@ -24,6 +26,7 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
+        .swal2-container { z-index: 10000 !important; }
 
         /* Sidebar Client */
         .client-sidebar {
@@ -198,10 +201,19 @@
         .history-empty a:hover { text-decoration: underline; }
 
         .history-pagination { display: flex; justify-content: center; margin-top: 24px; }
-        .payment-method-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:8px; }
-        .payment-method-card { display:flex; align-items:center; gap:6px; padding:7px; border:1px solid #E8DDCF; border-radius:7px; font-size:.68rem; color:#5E5149; cursor:pointer; background:#FFF; }
-        .payment-method-card:has(input:checked) { border-color:#C58F43; background:#FDF8EF; box-shadow:0 0 0 1px #C58F43; }
-        .payment-method-card input { accent-color:#C58F43; }
+        
+        /* Layout Pembayaran Rapih */
+        .payment-box {
+            background: #FAFAFA;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .payment-amount { font-size: 1rem; font-weight: 800; color: var(--gold-primary); }
+        .payment-status-info { font-size: 0.78rem; display: flex; align-items: center; gap: 5px; }
     </style>
 </head>
 <body>
@@ -241,12 +253,12 @@
         </nav>
 
         <div class="client-sidebar-footer">
-    <a href="{{ route('client.home') }}"><i class="fa-solid fa-globe"></i> Halaman Client</a>
-    <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
-        @csrf
-        <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
-    </form>
-</div>
+            <a href="{{ route('client.home') }}"><i class="fa-solid fa-globe"></i> Halaman Client</a>
+            <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                @csrf
+                <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
+            </form>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -263,10 +275,6 @@
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="history-status has-proof" style="display:block;margin-bottom:18px;padding:12px 16px;">{{ session('success') }}</div>
-        @endif
-
         <div class="history-table-wrap">
             <table class="history-table">
                 <thead>
@@ -277,7 +285,7 @@
                         <th>Waktu</th>
                         <th>Jumlah</th>
                         <th>Status</th>
-                        <th>Pembayaran</th>
+                        <th>Pembayaran &amp; Bukti</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -298,32 +306,46 @@
                             <td>
                                 <span class="history-status">{{ $reservasi->status_reservasi }}</span>
                             </td>
-                            <td style="min-width:220px;">
-                                @php($totalPembayaran = (int) (($reservasi->harga_paket ?: $reservasi->harga_layanan ?: 0) * ($reservasi->jumlah_pesanan ?: 1)))
-                                <strong>Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</strong>
-                                @if(in_array($reservasi->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
-                                    <small style="display:block;color:#15803D;margin-top:4px;"><i class="fa-solid fa-circle-check"></i> Pembayaran berhasil</small>
-                                @else
-                                    @if($reservasi->status_reservasi === 'Disetujui' && config('services.midtrans.client_key') && $totalPembayaran > 0)
-                                        <a class="btn-gold" href="{{ route('client.payment.show', $reservasi) }}" style="display:inline-block;text-decoration:none;margin-top:8px;padding:8px 11px;font-size:.75rem;">
-                                            <i class="fa-solid fa-credit-card"></i> Lanjut ke Pembayaran
-                                        </a>
-                                    @elseif($reservasi->status_reservasi !== 'Disetujui')
-                                        <small style="display:block;color:#8C8279;margin-top:4px;"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
+                            <td style="min-width:240px;">
+                                <div class="payment-box">
+                                    @php($totalPembayaran = (int) (($reservasi->harga_paket ?: $reservasi->harga_layanan ?: 0) * ($reservasi->jumlah_pesanan ?: 1)))
+                                    <div class="payment-amount">Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</div>
+                                    
+                                    @if(in_array($reservasi->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
+                                        <div class="payment-status-info" style="color:#15803D;"><i class="fa-solid fa-circle-check"></i> Pembayaran berhasil</div>
                                     @else
-                                        <small style="display:block;color:#B45309;margin-top:4px;">Gateway belum dikonfigurasi</small>
+                                        @if($reservasi->status_reservasi === 'Disetujui' && config('services.midtrans.client_key') && $totalPembayaran > 0)
+                                            <a class="btn-gold" href="{{ route('client.payment.show', $reservasi) }}" style="text-decoration:none;padding:6px 10px;font-size:.75rem;justify-content:center;">
+                                                <i class="fa-solid fa-credit-card"></i> Lanjut ke Pembayaran
+                                            </a>
+                                        @elseif($reservasi->status_reservasi !== 'Disetujui')
+                                            <div class="payment-status-info" style="color:#8C8279;"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</div>
+                                        @else
+                                            <div class="payment-status-info" style="color:#B45309;">Gateway belum dikonfigurasi</div>
+                                        @endif
                                     @endif
-                                @endif
-                                <form action="{{ route('reservasi.payment.proof', $reservasi) }}" method="POST" enctype="multipart/form-data" style="margin-top:9px;">
-                                    @csrf
-                                    <input type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required style="width:100%;font-size:.72rem;">
-                                    <button type="submit" style="margin-top:5px;border:1px solid #C58F43;background:#fff;color:#9A6B2F;border-radius:7px;padding:6px 9px;font-size:.72rem;cursor:pointer;">
-                                        <i class="fa-solid fa-upload"></i> {{ $reservasi->bukti_transfer ? 'Ganti Bukti' : 'Upload Bukti' }}
-                                    </button>
-                                    @if($reservasi->bukti_transfer)
-                                        <small style="display:block;color:#15803D;margin-top:3px;">Bukti sudah diunggah</small>
-                                    @endif
-                                </form>
+
+                                    <!-- Form Upload / Ganti Bukti & Pratinjau -->
+                                    <form action="{{ route('reservasi.payment.proof', $reservasi) }}" method="POST" enctype="multipart/form-data" style="border-top:1px dashed #E5DCD0;padding-top:8px;margin-top:2px;">
+                                        @csrf
+                                        <div style="display:flex;flex-direction:column;gap:6px;">
+                                            <input type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required style="font-size:.72rem;width:100%;">
+                                            <div style="display:flex;gap:6px;">
+                                                <button type="submit" style="flex:1;border:1px solid #C58F43;background:var(--gold-primary);color:#fff;border-radius:6px;padding:6px;font-size:.72rem;font-weight:700;cursor:pointer;">
+                                                    <i class="fa-solid fa-upload"></i> {{ $reservasi->bukti_transfer ? 'Ganti Bukti' : 'Upload' }}
+                                                </button>
+                                                @if($reservasi->bukti_transfer)
+                                                    <button type="button" onclick="previewProof('{{ asset('storage/' . $reservasi->bukti_transfer) }}')" style="border:1px solid #C58F43;background:#fff;color:var(--gold-primary);border-radius:6px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;" title="Pratinjau Bukti">
+                                                        <i class="fa-solid fa-eye"></i> Pratinjau
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @if($reservasi->bukti_transfer)
+                                            <small style="color:#15803D;margin-top:4px;display:block;"><i class="fa-solid fa-circle-check"></i> Bukti sudah diunggah</small>
+                                        @endif
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -343,60 +365,67 @@
         </div>
     </main>
 
-</body>
-<!-- SweetAlert2 CDN & Script Konfirmasi -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-@if(config('services.midtrans.client_key'))
-    <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-@endif
-<script>
-    document.querySelectorAll('.js-pay-button').forEach((button) => {
-        button.addEventListener('click', async () => {
-            button.disabled = true;
-            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memuat...';
-            try {
-                const method = button.parentElement.querySelector('input[name^="payment_method_"]:checked')?.value || '';
-                const response = await fetch(button.dataset.url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ payment_method: method }),
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Transaksi gagal dibuat.');
-                window.snap.pay(data.token, {
-                    onSuccess: () => window.location.reload(),
-                    onPending: () => window.location.reload(),
-                    onError: () => Swal.fire('Pembayaran gagal', 'Silakan coba lagi.', 'error'),
-                    onClose: () => { button.disabled = false; button.innerHTML = '<i class="fa-solid fa-credit-card"></i> Bayar Sekarang'; },
-                });
-            } catch (error) {
-                Swal.fire('Tidak dapat memproses pembayaran', error.message, 'error');
-                button.disabled = false;
-                button.innerHTML = '<i class="fa-solid fa-credit-card"></i> Bayar Sekarang';
-            }
-        });
-    });
+    <!-- SweetAlert2 CDN & Script Konfirmasi -->
+    <!-- SweetAlert2 CDN & Script Konfirmasi -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Popup Notifikasi Flash Session dari Controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#C58F43',
+                background: '#FFFFFF',
+                color: '#241A16'
+            });
+        @endif
 
-    function confirmLogoutClient() {
-        Swal.fire({
-            title: 'Keluar dari Akun?',
-            text: 'Anda harus masuk kembali untuk membuat atau melihat reservasi.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Keluar',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logout-form-client').submit();
+        // Fungsi Pratinjau Bukti Pembayaran (Mendukung Gambar & PDF)
+        function previewProof(url) {
+            // Cek apakah file berformat PDF atau Gambar berdasarkan ekstensi URL
+            const isPdf = url.toLowerCase().endsWith('.pdf');
+
+            let contentHtml = '';
+            if (isPdf) {
+                // Jika PDF, gunakan tag embed/iframe agar bisa digulir dan dilihat layaknya dokumen
+                contentHtml = `<embed src="${url}" type="application/pdf" width="100%" height="500px" style="border-radius:8px;" />`;
+            } else {
+                // Jika Gambar (JPG/PNG), tampilkan dalam tag img yang responsif
+                contentHtml = `<img src="${url}" alt="Bukti Transfer" style="max-width:100%; height:auto; max-height:75vh; border-radius:8px; object-fit:contain;" />`;
             }
-        });
-    }
-</script>
+
+            Swal.fire({
+                title: 'Pratinjau Bukti Pembayaran',
+                html: contentHtml,
+                width: '700px',
+                confirmButtonColor: '#C58F43',
+                confirmButtonText: 'Tutup',
+                background: '#FFFFFF',
+                color: '#241A16',
+                customClass: {
+                    popup: 'swal2-preview-popup'
+                }
+            });
+        }
+
+        function confirmLogoutClient() {
+            Swal.fire({
+                title: 'Keluar dari Akun?',
+                text: 'Anda harus masuk kembali untuk membuat atau melihat reservasi.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form-client').submit();
+                }
+            });
+        }
+    </script>
+</body>
 </html>

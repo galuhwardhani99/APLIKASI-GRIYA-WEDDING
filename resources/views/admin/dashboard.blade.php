@@ -15,6 +15,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
+        /* Badge Notifikasi Titik Merah Angka */
+        .badge-notification {
+            background-color: #EF4444;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+        }
         :root {
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
@@ -324,7 +340,17 @@
                 <li><a href="{{ route('admin.portofolio.index') }}" class="nav-item"><i class="fa-solid fa-images"></i> Galeri Portofolio</a></li>
                 
                 <li class="admin-nav-label admin-nav-spaced">AKTIVITAS &amp; AKUN</li>
-                <li><a href="{{ route('admin.jadwal.index') }}" class="nav-item"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a></li>
+                
+                <!-- MENU JADWAL ACARA DENGAN BADGE NOTIFIKASI -->
+                <li>
+                    <a href="{{ route('admin.jadwal.index') }}" class="nav-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                        <i class="fa-regular fa-calendar"></i> Jadwal Acara
+                        @if(isset($pendingReservationsCount) && $pendingReservationsCount > 0)
+                            <span class="badge-notification">{{ $pendingReservationsCount }}</span>
+                        @endif
+                    </a>
+                </li>
+
                 <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>
                 <li><a href="{{ route('admin.users.index') }}" class="nav-item"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a></li>
                 <li><a href="{{ route('user.profile.edit') }}" class="nav-item {{ request()->routeIs('user.profile.*') ? 'active' : '' }}"><i class="fa-solid fa-user-gear"></i> Pengaturan Akun</a></li>

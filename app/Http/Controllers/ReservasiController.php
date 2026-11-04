@@ -60,8 +60,8 @@ class ReservasiController extends Controller
             ]);
 
             if ($request->boolean('full_day')) {
-                $validated['waktu_mulai'] = '00:00';
-                $validated['waktu_selesai'] = '23:59';
+                $validated['waktu_mulai'] = '09:00';
+                $validated['waktu_selesai'] = '21:00';
             }
 
             $bookingsForDate = BookingAvailability::forDate($validated['tgl_acara']);

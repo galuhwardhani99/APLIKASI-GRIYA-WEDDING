@@ -12,10 +12,13 @@ class JadwalController extends Controller
 {
     public function index()
     {
+        // Hitung jumlah reservasi yang masih berstatus Menunggu Konfirmasi
+        $pendingReservationsCount = Reservasi::where('status_reservasi', 'Menunggu Konfirmasi')->count();
+
         // Load relasi jadwal
         $reservasi = Reservasi::with(['user', 'jadwal', 'layanans'])->latest('id_reservasi')->get();
 
-        return view('admin.jadwal.index', compact('reservasi'));
+        return view('admin.jadwal.index', compact('reservasi', 'pendingReservationsCount'));
     }
 
     public function validasi(Request $request, $id)
