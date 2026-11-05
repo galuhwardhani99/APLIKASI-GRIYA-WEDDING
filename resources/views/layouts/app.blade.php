@@ -360,11 +360,7 @@
             <div class="footer-brand"><small>GRIYA RIAS</small> Elly Jr.</div>
             <p class="footer-description">Make Up &amp; Event Organizer untuk momen spesial Anda.</p>
             <div class="footer-contact">
-                <div class="footer-contact-item">
-                    <span class="footer-contact-label">WhatsApp</span>
-                    <a href="https://wa.me/{{ config('services.griya.whatsapp') }}" target="_blank" rel="noopener">
-                        +{{ config('services.griya.whatsapp') }}
-                    </a>
+               
                 </div>
             </div>
             <p class="footer-copyright">&copy; {{ date('Y') }} Griya Rias Elly Jr. Semua hak dilindungi.</p>

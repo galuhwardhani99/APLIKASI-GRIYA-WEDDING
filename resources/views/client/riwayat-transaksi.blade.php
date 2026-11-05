@@ -287,43 +287,88 @@
                         <th>Status Pembayaran</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($transaksi as $item)
-                        <tr>
-                            @php($namaLayananTerpilih = $item->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
-                            <td><strong>{{ $item->kode_reservasi }}</strong></td>
-                            <td>{{ $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: $item->paket?->nama_paket ?: $item->layanan?->nama_layanan ?: $item->detail_acara ?: '—') }}</td>
-                            <td>{{ $item->tgl_reservasi ? \Carbon\Carbon::parse($item->tgl_reservasi)->translatedFormat('d F Y') : '—' }}</td>
-                            <td>{{ $item->jumlah_pesanan }}</td>
-                            <td><strong>Rp {{ number_format($item->biaya_sewa ?: (($item->harga_paket ?? $item->harga_layanan ?? 0) * $item->jumlah_pesanan), 0, ',', '.') }}</strong></td>
-                            <td>
-                                <span class="history-status {{ $item->bukti_transfer ? 'has-proof' : '' }}">
-                                    @if($item->bukti_transfer)
-                                        <i class="fa-solid fa-circle-check"></i> Bukti Pembayaran Diterima
-                                    @else
-                                        <i class="fa-solid fa-clock"></i> Segera Chat Admin
-                                    @endif
-                                </span>
-                                <small class="history-note">Status Reservasi: {{ ucfirst($item->status_reservasi) }}</small>
-                                @if($item->status_reservasi === 'Disetujui' && !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
-                                    <a class="btn-gold" href="https://wa.me/6287850875676?text={{ rawurlencode('Halo Admin Griya Rias Elly Jr.,' . "\n\n" . 'Reservasi saya: ' . ($item->jenis_acara ?: ($item->detail_acara ?: 'acara saya')) . ' telah berhasil divalidasi oleh admin.' . "\n\n" . 'Saya ingin berdiskusi mengenai pembayaran. Kapan saya bisa bertemu untuk diskusi pembayaran?' . "\n\n" . 'Kode reservasi: ' . $item->kode_reservasi) }}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;padding:7px 10px;font-size:.72rem;">
-                                        <i class="fa-brands fa-whatsapp"></i> Kirim via WhatsApp
-                                    </a>
-                                @elseif($item->status_reservasi !== 'Disetujui')
-                                    <small class="history-note"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="history-empty">
-                                <i class="fa-solid fa-receipt" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
-                                Belum ada transaksi booking. Setelah mengajukan reservasi, ringkasannya akan muncul di sini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<tbody>
+    @forelse($transaksi as $item)
+        <tr>
+            @php($namaLayananTerpilih = $item->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
+            
+            {{-- 1. Kode Reservasi --}}
+            <td><strong>{{ $item->kode_reservasi }}</strong></td>
+            
+            {{-- 2. Paket / Layanan --}}
+            <td>{{ $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: $item->paket?->nama_paket ?: $item->layanan?->nama_layanan ?: $item->detail_acara ?: '—') }}</td>
+            
+            {{-- 3. Tanggal Booking (Perbaikan nama kolom database) --}}
+            @php($tglTampil = $item->tanggal_acara ?? $item->tanggal_pengajuan)
+            <td>{{ $tglTampil ? \Carbon\Carbon::parse($tglTampil)->translatedFormat('d F Y') : '—' }}</td>
+            
+            {{-- 4. Jumlah --}}
+            <td>{{ $item->jumlah_pesanan }}</td>
+            
+            {{-- 5. Total Biaya --}}
+            <td><strong>Rp {{ number_format($item->biaya_sewa ?: (($item->harga_paket ?? $item->harga_layanan ?? 0) * $item->jumlah_pesanan), 0, ',', '.') }}</strong></td>
+            
+            {{-- 6. Status Pembayaran & Tombol WA --}}
+            <td>
+                <span class="history-status {{ $item->bukti_transfer ? 'has-proof' : '' }}">
+                    @if($item->bukti_transfer)
+                        <i class="fa-solid fa-circle-check"></i> Bukti Pembayaran Diterima
+                    @else
+                        <i class="fa-solid fa-clock"></i> Segera Chat Admin
+                    @endif
+                </span>
+                <small class="history-note">Status Reservasi: {{ ucfirst($item->status_reservasi) }}</small>
+                
+                <?php
+                    $isApproved = ($item->status_reservasi === 'Disetujui');
+                    $isUnpaid = !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true);
+                ?>
+
+                @if($isApproved && $isUnpaid)
+                    <?php
+                        $waNamaPaket = $item->nama_paket ?? $namaLayananTerpilih ?? $item->nama_layanan ?? $item->paket?->nama_paket ?? $item->layanan?->nama_layanan ?? '—';
+                        
+                        $biayaSewa = $item->biaya_sewa ?? 0;
+                        $hargaPaket = $item->harga_paket ?? $item->harga_layanan ?? 0;
+                        $jumlah = $item->jumlah_pesanan ?? 1;
+                        $waTotalBiaya = $biayaSewa > 0 ? $biayaSewa : ($hargaPaket * $jumlah);
+                        
+                        // Tanggal untuk format Struk WA (d/m/Y)
+                        $rawTgl = $item->tanggal_acara ?? $item->tanggal_pengajuan;
+                        $waTgl = $rawTgl ? \Carbon\Carbon::parse($rawTgl)->translatedFormat('d/m/Y') : '—';
+                        
+                        // Nama Acara dari database
+                        $waNamaAcara = $item->jenis_acara ?: ($item->detail_acara ?: 'Acara Saya');
+                        
+                        $waText = "GRIYA RIAS ELLY JR.\n"
+                                . "Jl. Rengganis Nomor 333A Doko, Kab. Kediri\n"
+                                . "Tgl : " . $waTgl . "\n"
+                                . "Kode : " . $item->kode_reservasi . "\n"
+                                . "Plgn : " . auth()->user()->name . "\n"
+                                . "Acara : " . $waNamaAcara . "\n"
+                                . "Paket : " . $waNamaPaket . "\n"
+                                . "TOTAL : Rp " . number_format($waTotalBiaya, 0, ',', '.') . "\n\n"
+                                . "Halo Admin, reservasi saya telah berhasil divalidasi. Saya ingin berdiskusi mengenai pembayaran. Kapan saya bisa bertemu untuk diskusi pembayaran?\n\n"
+                                . "Terima kasih! :)";
+                    ?>
+                    <a class="btn-gold" href="https://wa.me/6287850875676?text={{ rawurlencode($waText) }}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;padding:7px 10px;font-size:.72rem;">
+                        <i class="fa-brands fa-whatsapp"></i> Kirim via WhatsApp
+                    </a>
+                @elseif($item->status_reservasi !== 'Disetujui')
+                    <small class="history-note"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
+                @endif
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" class="history-empty">
+                <i class="fa-solid fa-receipt" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
+                Belum ada transaksi booking. Setelah mengajukan reservasi, ringkasannya akan muncul di sini.
+            </td>
+        </tr>
+    @endforelse
+</tbody>
+        </table>
         </div>
 
         <div class="history-pagination">

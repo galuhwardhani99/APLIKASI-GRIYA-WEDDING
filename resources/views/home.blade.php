@@ -242,8 +242,7 @@
         <div class="contact-info reveal" style="--d:300ms">
             <div><b>Alamat</b><span>{{ config('services.griya.location') }}</span></div>
             <div><b>Jam Layanan</b><span>Senin - Minggu, 08.00 - 20.00</span></div>
-            <div><b>WhatsApp</b><span>+{{ $whatsapp }}</span></div>
-        </div>
+            <div><b>WhatsApp</b><a href="https://wa.me/+6287850875676" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;"><span>+{{ $whatsapp }}</span></a></div>        </div>
     </div>
 </section>
 @endsection
