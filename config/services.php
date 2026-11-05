@@ -36,7 +36,7 @@ return [
     ],
 
     'griya' => [
-        'location' => env('GRIYA_LOCATION', '[Alamat lengkap Griya Rias Elly Jr.]'),
+        'location' => env('GRIYA_LOCATION', 'Jl. Rengganis Nomor 333A, Doko, Kabupaten Kediri'),
         'whatsapp' => env('GRIYA_WHATSAPP', '087850875676'),
     ],
 

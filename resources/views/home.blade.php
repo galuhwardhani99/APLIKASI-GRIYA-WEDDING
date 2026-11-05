@@ -229,20 +229,15 @@
 <section class="contact" id="kontak">
     <div class="container">
         <h2 class="reveal">Siap Merencanakan Hari Istimewa Anda?</h2>
-        <p class="reveal" style="--d:100ms">Hubungi kami atau langsung pesan jadwal untuk memastikan tanggal acara Anda tersedia.</p>
+        <p class="reveal" style="--d:100ms">Temukan inspirasi dan layanan terbaik untuk mewujudkan momen pernikahan impian Anda.</p>
 
         <div class="hero-actions reveal" style="--d:200ms">
-            <a class="btn btn-gold" target="_blank" rel="noopener"
-               href="https://wa.me/{{ $whatsapp }}?text={{ urlencode('Halo Griya Rias Elly Jr., saya ingin bertanya tentang layanan.') }}">
-                Chat via WhatsApp
+            <a class="btn btn-gold" href="#galeri">
+                Lihat Portofolio
             </a>
             <a href="{{ auth()->check() && ! auth()->user()->isAdmin() ? '#kontak' : route('login') }}" class="btn btn-outline">Pesan Jadwal</a>
         </div>
 
-        <div class="contact-info reveal" style="--d:300ms">
-            <div><b>Alamat</b><span>{{ config('services.griya.location') }}</span></div>
-            <div><b>Jam Layanan</b><span>Senin - Minggu, 08.00 - 20.00</span></div>
-            <div><b>WhatsApp</b><a href="https://wa.me/+6287850875676" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;"><span>+{{ $whatsapp }}</span></a></div>        </div>
     </div>
 </section>
 @endsection

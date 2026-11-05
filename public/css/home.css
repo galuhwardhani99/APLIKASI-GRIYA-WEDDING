@@ -271,13 +271,14 @@ body.menu-open { overflow: hidden; }
 .contact-info b { display: block; color: var(--gold); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
 .contact-info span { color: #cdb9a8; font-size: 15px; }
 
-.footer { background: var(--brown-d); color: #a58f80; text-align: center; padding: 36px 0; font-size: 14px; }
+.footer { background: var(--brown); color: #a58f80; text-align: center; padding: 36px 0; font-size: 14px; }
 .footer-brand { font-family: 'Playfair Display', serif; font-size: 24px; color: #eadfd0; margin-bottom: 6px; }
 .footer-brand small { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 3px; color: var(--rose); margin-right: 6px; }
 .footer-description { color: #cdb9a8; }
-.footer-contact { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; max-width: 360px; margin: 26px auto; text-align: left; }
+.footer-contact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 980px; margin: 26px auto; text-align: left; }
 .footer-contact-item { padding: 18px 20px; border: 1px solid rgba(255, 255, 255, .12); border-radius: 14px; }
 .footer-contact-label { display: block; margin-bottom: 7px; color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+.footer-contact-item > span:not(.footer-contact-label) { color: #cdb9a8; line-height: 1.6; }
 .footer-contact-item a { color: #eadfd0; line-height: 1.6; }
 .footer-contact-item a:hover { color: var(--gold); }
 .footer-copyright { margin-top: 24px; font-size: 12px; }
