@@ -71,4 +71,42 @@ class JadwalController extends Controller
 
         return redirect()->back()->with('success', 'Bukti pembayaran berhasil diterima. Client tidak dapat melakukan pembayaran ulang.');
     }
+
+    // Tambahkan method ini di dalam class JadwalController
+    public function kirimNotifWaAdmin($id)
+    {
+        $reservasi = Reservasi::with('user')->findOrFail($id);
+        $noHp = $reservasi->user->no_hp ?? $reservasi->user->phone ?? null;
+        $namaPemesan = $reservasi->user->name ?? 'Pelanggan';
+
+        if (!$noHp) {
+            return redirect()->back()->with('error', 'Nomor WhatsApp pelanggan tidak ditemukan!');
+        }
+
+        $linkRiwayat = route('client.riwayat.reservasi');
+        $tanggalAcara = \Carbon\Carbon::parse($reservasi->tanggal_acara)->translatedFormat('d F Y');
+        
+        $pesan = "Halo *{$namaPemesan}*,\n\n" .
+                 "Mengingatkan mengenai reservasi wedding Anda ({$reservasi->jenis_acara}) pada tanggal *{$tanggalAcara}*. 🎉\n" .
+                 "Silakan cek detail riwayat pemesanan Anda di sini:\n{$linkRiwayat}";
+
+        // Format nomor HP ke 62
+        $target = preg_replace('/^0/', '62', $noHp);
+
+        // Kirim via Fonnte API
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'Authorization' => env('FONNTE_TOKEN'),
+        ])->post('https://api.fonnte.com/send', [
+            'target' => $target,
+            'message' => $pesan,
+        ]);
+
+        $result = $response->json();
+
+        if (isset($result['status']) && $result['status']) {
+            return redirect()->back()->with('success', 'Notifikasi WhatsApp berhasil dikirim ke ' . $namaPemesan . '!');
+        } else {
+            return redirect()->back()->with('error', 'Gagal mengirim WhatsApp: ' . ($result['reason'] ?? 'Kesalahan API Fonnte'));
+        }
+    }
 }

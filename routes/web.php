@@ -16,6 +16,7 @@ use App\Http\Controllers\Client\PaymentController;
 use App\Http\Controllers\UserProfileController;
 use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WhatsAppController;
 
 // ---------- Halaman Publik ----------
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -47,6 +48,8 @@ Route::post('/logout', [LoginController::class, 'logout'])
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
 
+    // Tambahkan baris ini di dalam group middleware admin
+    Route::post('/jadwal/kirim-wa/{id}', [AdminJadwalController::class, 'kirimNotifWaAdmin'])->name('jadwal.kirimWa');
     Route::resource('layanan', LayananController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('paket', PaketController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('kategori-paket', KategoriPaketController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -96,3 +99,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/payment/midtrans/notification', [PaymentController::class, 'notification'])->name('payment.midtrans.notification');
+Route::get('/kirim-notif-wa', [WhatsAppController::class, 'kirimPengingatOtomatis']);

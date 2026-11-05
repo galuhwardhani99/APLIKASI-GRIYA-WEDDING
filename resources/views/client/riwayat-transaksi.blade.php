@@ -182,6 +182,7 @@
             border-bottom: 1px solid var(--border-color);
         }
         .history-table td { padding: 18px 16px; border-top: 1px solid #F0EBE6; vertical-align: middle; font-size: 0.9rem; }
+        .history-table td small { display: block; color: var(--text-muted); margin-top: 4px; font-size: 0.8rem; }
         
         .history-status {
             display: inline-flex;
@@ -300,14 +301,14 @@
                                     @if($item->bukti_transfer)
                                         <i class="fa-solid fa-circle-check"></i> Bukti Pembayaran Diterima
                                     @else
-                                        <i class="fa-solid fa-clock"></i> Belum Ada Pembayaran
+                                        <i class="fa-solid fa-clock"></i> Segera Chat Admin
                                     @endif
                                 </span>
                                 <small class="history-note">Status Reservasi: {{ ucfirst($item->status_reservasi) }}</small>
                                 @if($item->status_reservasi === 'Disetujui' && !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
-                                    <button type="button" class="btn-gold js-open-payment-modal" data-modal="payment-modal-{{ $item->id_reservasi }}" style="border:0;margin-top:8px;padding:7px 10px;font-size:.72rem;cursor:pointer;">
-                                        <i class="fa-solid fa-arrow-right"></i> Lanjutkan Pembayaran
-                                    </button>
+                                    <a class="btn-gold" href="https://wa.me/6287850875676?text={{ rawurlencode('Halo Admin Griya Rias Elly Jr.,' . "\n\n" . 'Reservasi saya: ' . ($item->jenis_acara ?: ($item->detail_acara ?: 'acara saya')) . ' telah berhasil divalidasi oleh admin.' . "\n\n" . 'Saya ingin berdiskusi mengenai pembayaran. Kapan saya bisa bertemu untuk diskusi pembayaran?' . "\n\n" . 'Kode reservasi: ' . $item->kode_reservasi) }}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;padding:7px 10px;font-size:.72rem;">
+                                        <i class="fa-brands fa-whatsapp"></i> Kirim via WhatsApp
+                                    </a>
                                 @elseif($item->status_reservasi !== 'Disetujui')
                                     <small class="history-note"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
                                 @endif
@@ -396,6 +397,10 @@
             window.snap.pay(data.token, { onSuccess:() => location.reload(), onPending:() => location.reload(), onError:() => Swal.fire('Pembayaran gagal','Silakan coba lagi.','error'), onClose:() => button.disabled = false });
         } catch (error) { Swal.fire('Gagal', error.message, 'error'); button.disabled = false; }
     }));
+
+    function previewProof(url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
 
     function confirmLogoutClient() {
         Swal.fire({

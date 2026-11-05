@@ -50,7 +50,7 @@
     .btn-light:hover { background: #f5eee7; }
 
     /* Layout Grid */
-    .layout-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+    .layout-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
 
     /* Card List Jadwal */
     .jadwal-list { display: flex; flex-direction: column; gap: 16px; }
@@ -100,50 +100,6 @@
 
     .btn-validasi { background-color: #4E9F70; color: #fff; }
 
-    /* Panel WA Direct */
-    .panel-wa {
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 20px;
-        position: sticky;
-        top: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    }
-
-    .wa-title { font-size: 0.95rem; font-weight: 700; color: var(--gold-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .wa-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; }
-    
-    .wa-box {
-        background-color: #FAFAFA;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 12px;
-        font-size: 0.8rem;
-        color: var(--text-dark);
-        margin-bottom: 16px;
-        line-height: 1.5;
-    }
-
-    .btn-kirim-wa {
-        width: 100%;
-        background-color: #10B981;
-        color: #fff;
-        border: none;
-        padding: 10px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-        transition: opacity 0.2s;
-    }
-    .btn-kirim-wa:hover { opacity: 0.9; }
-
     /* Modal Overlay & Card Custom */
     .modal-overlay { 
         position: fixed; inset: 0; 
@@ -190,7 +146,6 @@
 
     @media(max-width: 992px) {
         .layout-grid { grid-template-columns: 1fr; }
-        .panel-wa { position: relative; top: 0; }
     }
 </style>
 @endpush
@@ -247,13 +202,13 @@
                         </div>
 
                         <div class="card-actions">
-                            <!-- Tombol WA Direct -->
-                            <button class="btn-sm" style="background:#10B981; color:#fff;" 
-                                onclick="pilihPelangganWA('{{ $item->user->name ?? 'Pelanggan' }}', '{{ $item->user->no_hp ?? '' }}', '{{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d F Y') }}')">
-                                <i class="fa-brands fa-whatsapp"></i> WA
-                            </button>
-
-                            <!-- Tombol Validasi / Tervalidasi -->
+                            <form action="{{ route('admin.jadwal.kirimWa', $item->id_reservasi) }}" method="POST" style="margin: 0;">
+                                @csrf
+                                <button type="submit" class="btn-sm" style="background:#10B981; color:#fff;" title="Kirim pengingat WhatsApp">
+                                    <i class="fa-brands fa-whatsapp"></i> WA
+                                </button>
+                            </form>
+                            
                             @php
                                 $isTervalidasi = ($item->status_reservasi == 'Disetujui') || ($item->jadwal &&$item->jadwal->status_validasi == 'Tervalidasi');
                             @endphp
@@ -281,21 +236,6 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan: Kirim WhatsApp Direct -->
-        <div>
-            <div class="panel-wa">
-                <div class="wa-title"><i class="fa-regular fa-comment-dots"></i> Kirim WhatsApp Direct</div>
-                <p class="wa-desc">Pilih tombol WA pada salah satu jadwal pelanggan untuk memuat template pengingat otomatis.</p>
-
-                <div class="wa-box" id="waPreviewBox">
-                    Klik tombol WA pada pelanggan di sebelah kiri untuk menampilkan pesan otomatis di sini.
-                </div>
-
-                <a href="#" id="btnKirimWA" target="_blank" class="btn-kirim-wa">
-                    <i class="fa-paper-plane"></i> KIRIM WA NOTIFIKASI
-                </a>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -409,16 +349,6 @@
 
             grid.appendChild(dayCell);
         }
-    }
-
-    function pilihPelangganWA(nama, noHp, tanggal) {
-        let formattedPhone = noHp.replace(/^0/, '62');
-        let pesan = `Halo Kak ${nama}, ini pengingat dari Griya Rias Elly Jr. mengenai jadwal acara Anda pada tanggal ${tanggal}. Perias kami akan tiba di lokasi sesuai jadwal. Terima kasih!`;
-        
-        document.getElementById('waPreviewBox').innerText = pesan;
-        
-        let waLink = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(pesan)}`;
-        document.getElementById('btnKirimWA').setAttribute('href', waLink);
     }
 
     // ================= SWEETALERT2 CONFIRMATIONS =================

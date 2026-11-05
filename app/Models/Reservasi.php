@@ -78,4 +78,9 @@ class Reservasi extends Model
             ->withPivot(['nama_layanan', 'harga_layanan'])
             ->withTimestamps();
     }
+
+    public function akun()
+    {
+        return $this->belongsTo(User::class, 'id_akun', 'id'); // Sesuaikan primary key tabel users jika beda
+    }
 }
