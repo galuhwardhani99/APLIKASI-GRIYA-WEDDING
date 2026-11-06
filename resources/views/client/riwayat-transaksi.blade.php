@@ -348,7 +348,7 @@
                                 . "Acara : " . $waNamaAcara . "\n"
                                 . "Paket : " . $waNamaPaket . "\n"
                                 . "TOTAL : Rp " . number_format($waTotalBiaya, 0, ',', '.') . "\n\n"
-                                . "Halo Admin, reservasi saya telah berhasil divalidasi. Saya ingin berdiskusi mengenai pembayaran. Kapan saya bisa bertemu untuk diskusi pembayaran?\n\n"
+                                . "Halo Admin, reservasi saya telah berhasil divalidasi. Saya ingin mendiskusikan detail persiapan acara saya. Kapan saya bisa datang atau menghubungi admin untuk diskusi detailnya?\n\n"
                                 . "Terima kasih! :)";
                     ?>
                     <a class="btn-gold" href="https://wa.me/6287850875676?text={{ rawurlencode($waText) }}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;padding:7px 10px;font-size:.72rem;">

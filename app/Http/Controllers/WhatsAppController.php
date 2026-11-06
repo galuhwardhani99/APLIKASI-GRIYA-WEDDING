@@ -28,7 +28,7 @@ class WhatsAppController extends Controller
         $besok = Carbon::tomorrow()->toDateString();
         
         // Ambil data reservasi yang tanggal acaranya besok, sekaligus ambil data user (pemesan)
-        $reservasis = Reservasi::with('akun')->whereDate('tanggal_acara', $besok)->get();
+        $reservasis = Reservasi::with(['akun', 'layanans'])->whereDate('tanggal_acara', $besok)->get();
 
         if ($reservasis->isEmpty()) {
             return "Tidak ada jadwal wedding untuk besok (" . $besok . ").";
@@ -38,6 +38,9 @@ class WhatsAppController extends Controller
             // Pastikan relasi akun dan nomor HP/teleponnya ada
             $noHp = $item->akun->no_hp ?? $item->akun->phone ?? null; // Sesuaikan nama kolom no_hp di tabel users kamu
             $namaPemesan = $item->akun->name ?? 'Pelanggan';
+            $namaAcara = $item->nama_paket
+                ?: ($item->layanans->pluck('nama_layanan')->filter()->implode(', ')
+                    ?: ($item->nama_layanan ?: ($item->jenis_acara ?: 'acara Anda')));
 
             if (!$noHp) {
                 continue; // Lewati jika nomor HP tidak ditemukan
@@ -45,7 +48,7 @@ class WhatsAppController extends Controller
 
             // 1. Pesan Pengingat H-1 Acara Wedding
             $linkRiwayat = route('client.riwayat.reservasi'); 
-            $pesanAcara = "Halo *{$namaPemesan}*,\n\nMengingatkan bahwa acara {$item->jenis_acara} anda akan dilangsungkan BESOK! 🎉\nSilakan cek detail riwayat pemesanan Anda di sini: {$linkRiwayat}";
+            $pesanAcara = "Halo *{$namaPemesan}*,\n\nMengingatkan bahwa acara *{$namaAcara}* Anda akan dilangsungkan BESOK! 🎉\n\nSilakan cek detail riwayat pemesanan Anda di sini:\n{$linkRiwayat}";
             
             $this->kirimFonnte($noHp, $pesanAcara);
 

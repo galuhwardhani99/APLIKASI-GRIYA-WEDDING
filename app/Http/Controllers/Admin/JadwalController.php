@@ -75,7 +75,7 @@ class JadwalController extends Controller
     // Tambahkan method ini di dalam class JadwalController
     public function kirimNotifWaAdmin($id)
     {
-        $reservasi = Reservasi::with('user')->findOrFail($id);
+        $reservasi = Reservasi::with(['user', 'layanans'])->findOrFail($id);
         $noHp = $reservasi->user->no_hp ?? $reservasi->user->phone ?? null;
         $namaPemesan = $reservasi->user->name ?? 'Pelanggan';
 
@@ -85,9 +85,12 @@ class JadwalController extends Controller
 
         $linkRiwayat = route('client.riwayat.reservasi');
         $tanggalAcara = \Carbon\Carbon::parse($reservasi->tanggal_acara)->translatedFormat('d F Y');
+        $namaAcara = $reservasi->nama_paket
+            ?: ($reservasi->layanans->pluck('nama_layanan')->filter()->implode(', ')
+                ?: ($reservasi->nama_layanan ?: ($reservasi->jenis_acara ?: 'acara Anda')));
         
         $pesan = "Halo *{$namaPemesan}*,\n\n" .
-                 "Mengingatkan mengenai reservasi wedding Anda ({$reservasi->jenis_acara}) pada tanggal *{$tanggalAcara}*. 🎉\n" .
+                 "Mengingatkan mengenai acara *{$namaAcara}* Anda pada tanggal *{$tanggalAcara}*. 🎉\n\n" .
                  "Silakan cek detail riwayat pemesanan Anda di sini:\n{$linkRiwayat}";
 
         // Format nomor HP ke 62
