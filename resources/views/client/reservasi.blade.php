@@ -371,48 +371,75 @@
                         <div class="reservation-panel-heading">
                             <span class="reservation-step">02</span>
                             <div>
-                                <h2>Detail Acara</h2>
-                                <p>Tentukan tanggal, waktu, dan lokasi acara Anda.</p>
+                                <h2>Detail Acara & Persiapan Rias</h2>
+                                <p>Tentukan tanggal, opsi layanan, serta jadwal persiapan dandan Anda.</p>
                             </div>
                         </div>
                         <div class="reservation-fields reservation-fields-two">
                             <div class="reservation-field reservation-field-event-date">
-                                <label for="tgl_acara">Tanggal Acara <span>*</span></label>
+                                <label for="tgl_acara">Tanggal Acara / Rias <span>*</span></label>
                                 <input id="tgl_acara" name="tgl_acara" type="date" min="{{ now()->toDateString() }}" value="{{ old('tgl_acara') }}" required>
                                 @error('tgl_acara') <small class="reservation-error">{{ $message }}</small> @enderror
                             </div>
+
+                            <!-- Opsi Tipe Reservasi Sesuai Revisi Dosen -->
+                            <div class="reservation-field reservation-field-full">
+                                <label>Tipe Layanan Acara <span>*</span></label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px;">
+                                    <label style="border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: flex-start; gap: 8px; background: #FFF;" id="label-tipe-lengkap">
+                                        <input type="radio" name="tipe_reservasi" value="lengkap" checked style="margin-top: 3px;">
+                                        <div>
+                                            <strong style="display: block; font-size: 0.88rem; color: var(--text-dark);">Rias + Acara (Wedding/Lengkap)</strong>
+                                            <small style="color: var(--text-muted); font-size: 0.78rem;">Termasuk persiapan dandan 3 jam sebelum acara & penggunaan venue acara hari itu.</small>
+                                        </div>
+                                    </label>
+                                    <label style="border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: flex-start; gap: 8px; background: #FFF;" id="label-tipe-rias-saja">
+                                        <input type="radio" name="tipe_reservasi" value="rias_saja" style="margin-top: 3px;">
+                                        <div>
+                                            <strong style="display: block; font-size: 0.88rem; color: var(--text-dark);">Rias Saja (Maks. 3 Jam)</strong>
+                                            <small style="color: var(--text-muted); font-size: 0.78rem;">SOP Durasi Rias 3 Jam (Cth: 07:00 - 10:00). Setelah 3 jam, slot berikutnya dapat dibooking client lain.</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="reservation-field reservation-field-event-start">
-                                <label for="waktu_mulai">Waktu Mulai <span>*</span> (09:00 - 21:00)</label>
-                                <input id="waktu_mulai" name="waktu_mulai" type="time" min="09:00" max="21:00" value="{{ old('waktu_mulai') }}" required>
+                                <label for="waktu_mulai">Waktu Mulai Rias <span>*</span></label>
+                                <input id="waktu_mulai" name="waktu_mulai" type="time" value="{{ old('waktu_mulai') }}" required>
                                 @error('waktu_mulai') <small class="reservation-error">{{ $message }}</small> @enderror
                             </div>
+
                             <div class="reservation-field reservation-field-event-end">
-                                <label for="waktu_selesai">Waktu Selesai <span>*</span> (09:00 - 21:00)</label>
-                                <input id="waktu_selesai" name="waktu_selesai" type="time" min="09:00" max="21:00" value="{{ old('waktu_selesai') }}" required>
+                                <label for="waktu_selesai">Estimasi Selesai Rias (SOP 3 Jam) <span>*</span></label>
+                                <input id="waktu_selesai" name="waktu_selesai" type="time" value="{{ old('waktu_selesai') }}" readonly style="background: #F4E6D2;">
                                 @error('waktu_selesai') <small class="reservation-error">{{ $message }}</small> @enderror
                             </div>
+
                             <div class="reservation-field reservation-field-full">
                                 <label style="display:flex;align-items:center;gap:9px;cursor:pointer;">
                                     <input id="full_day_booking" name="full_day" type="checkbox" value="1" @checked(old('full_day')) style="width:16px;height:16px;accent-color:var(--gold-primary);">
-                                    Booking seharian (Full day: 09:00 - 21:00)
+                                    Booking seharian (Full day acara: 09:00 - 21:00)
                                 </label>
                             </div>
+
                             <div id="availability-hint" class="reservation-field reservation-field-full" aria-live="polite" style="color:var(--text-muted);font-size:.82rem;">
-                                Pilih tanggal untuk melihat jam yang masih kosong.
+                                Pilih tanggal untuk melihat jam dandan yang masih kosong.
                             </div>
+
                             <div class="reservation-field reservation-field-full">
-                                <label for="lokasi_acara">Lokasi Acara <span>*</span></label>
+                                <label for="lokasi_acara">Lokasi Acara / Rias <span>*</span></label>
                                 <textarea id="lokasi_acara" name="lokasi_acara" rows="3" maxlength="2000" placeholder="Nama gedung, alamat lengkap, dan patokan lokasi..." required>{{ old('lokasi_acara') }}</textarea>
                                 @error('lokasi_acara') <small class="reservation-error">{{ $message }}</small> @enderror
 
                                 <div style="display: flex; gap: 8px; margin-top: 10px; margin-bottom: 6px;">
-        <input type="text" id="map-search-input" placeholder="Cari nama gedung, jalan, atau tempat (Cth: Polinema Kediri)..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; background: #FFF;">
-        <button type="button" id="map-search-btn" class="btn" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 6px;"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
-    </div>
-    
+                                    <input type="text" id="map-search-input" placeholder="Cari nama gedung, jalan, atau tempat (Cth: Polinema Kediri)..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; background: #FFF;">
+                                    <button type="button" id="map-search-btn" class="btn" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 6px;"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
+                                </div>
+                                
                                 <div id="map-picker" style="width: 100%; height: 260px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border-color);"></div>
                                 <small style="color: var(--text-muted); display: block; margin-top: 4px;"><i class="fa-solid fa-location-dot" style="color: var(--gold-primary);"></i> Klik atau geser pin pada peta untuk menandai lokasi acara Anda secara otomatis.</small>
                             </div>
+
                             <div class="reservation-field reservation-field-full">
                                 <label for="catatan">Catatan Tambahan <small style="color: var(--text-muted); font-weight: 400;">(Opsional)</small></label>
                                 <textarea id="catatan" name="catatan" rows="3" maxlength="2000" placeholder="Ceritakan kebutuhan khusus atau detail acara Anda...">{{ old('catatan') }}</textarea>
@@ -453,60 +480,58 @@
                         @error('id_item') <small class="reservation-error">{{ $message }}</small> @enderror
                         @error('id_items') <small class="reservation-error">{{ $message }}</small> @enderror
 
-<!-- LIST PAKET -->
-<div class="reservation-choice-list" id="paket-options" data-options="paket" @if($jenisDipilih !== 'paket') hidden @endif>
-    @forelse ($pakets as $paket)
-        <label class="reservation-package-option" style="align-items: flex-start; padding: 16px;">
-            <input type="radio" name="id_item" value="paket:{{ $paket->id }}" data-name="{{ $paket->nama_paket }}" data-price="{{ $paket->harga }}" @checked(old('id_item', $selectedItemValue) === 'paket:' . $paket->id && $jenisDipilih === 'paket')" style="margin-top: 4px;">
-            <div class="reservation-package-info" style="display: flex; flex-direction: column; gap: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <strong style="font-size: 0.95rem; color: var(--text-dark);">{{ $paket->nama_paket }}</strong>
-                    <span class="reservation-package-price" style="font-size: 1rem; font-weight: 800; color: var(--gold-primary);">Rp {{ number_format($paket->harga, 0, ',', '.') }}</span>
-                </div>
-                <small style="color: var(--gold-hover); font-weight: 700;">{{ $paket->kategoriPaket?->nama_kategori }}</small>
-                
-                <!-- Menampilkan Rincian Benefit / Fasilitas Paket secara Dinamis dari Inputan Admin Bu Elly -->
-                @if($paket->deskripsi)
-                    <div style="background: #FDF8EF; border: 1px solid #F5E6CC; border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.82rem; color: #55483F; line-height: 1.5;">
-                        <strong style="display: block; color: var(--gold-hover); margin-bottom: 4px;"><i class="fa-solid fa-list-check" style="margin-right: 5px;"></i> Benefit &amp; Fasilitas Paket:</strong>
-                        <div style="white-space: pre-line;">{!! nl2br(e($paket->deskripsi)) !!}</div>
-                    </div>
-                @endif
-            </div>
-        </label>
-    @empty
-        <div style="text-align: center; color: var(--text-muted); padding: 16px;">Belum ada paket aktif.</div>
-    @endforelse
-</div>
+                        <!-- LIST PAKET -->
+                        <div class="reservation-choice-list" id="paket-options" data-options="paket" @if($jenisDipilih !== 'paket') hidden @endif>
+                            @forelse ($pakets as $paket)
+                                <label class="reservation-package-option" style="align-items: flex-start; padding: 16px;">
+                                    <input type="radio" name="id_item" value="paket:{{ $paket->id }}" data-name="{{ $paket->nama_paket }}" data-price="{{ $paket->harga }}" @checked(old('id_item', $selectedItemValue) === 'paket:' . $paket->id && $jenisDipilih === 'paket')" style="margin-top: 4px;">
+                                    <div class="reservation-package-info" style="display: flex; flex-direction: column; gap: 6px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                            <strong style="font-size: 0.95rem; color: var(--text-dark);">{{ $paket->nama_paket }}</strong>
+                                            <span class="reservation-package-price" style="font-size: 1rem; font-weight: 800; color: var(--gold-primary);">Rp {{ number_format($paket->harga, 0, ',', '.') }}</span>
+                                        </div>
+                                        <small style="color: var(--gold-hover); font-weight: 700;">{{ $paket->kategoriPaket?->nama_kategori }}</small>
+                                        
+                                        @if($paket->deskripsi)
+                                            <div style="background: #FDF8EF; border: 1px solid #F5E6CC; border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.82rem; color: #55483F; line-height: 1.5;">
+                                                <strong style="display: block; color: var(--gold-hover); margin-bottom: 4px;"><i class="fa-solid fa-list-check" style="margin-right: 5px;"></i> Benefit &amp; Fasilitas Paket:</strong>
+                                                <div style="white-space: pre-line;">{!! nl2br(e($paket->deskripsi)) !!}</div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </label>
+                            @empty
+                                <div style="text-align: center; color: var(--text-muted); padding: 16px;">Belum ada paket aktif.</div>
+                            @endforelse
+                        </div>
 
                         <!-- LIST LAYANAN -->
-<div class="reservation-choice-list" id="layanan-options" data-options="layanan" @if($jenisDipilih !== 'layanan') hidden @endif>
-    @forelse ($layanans as $layanan)
-        <label class="reservation-package-option" style="align-items: flex-start; padding: 16px;">
-            <input type="checkbox" name="id_items[]" value="{{ $layanan->id_layanan }}" data-name="{{ $layanan->nama_layanan }}" data-price="{{ $layanan->harga }}" @checked(in_array((string) $layanan->id_layanan, array_map('strval', (array) old('id_items', [])), true) && $jenisDipilih === 'layanan')" style="margin-top: 4px;">
-            <div class="reservation-package-info" style="display: flex; flex-direction: column; gap: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <strong style="font-size: 0.95rem; color: var(--text-dark);">{{ $layanan->nama_layanan }}</strong>
-                    <span class="reservation-package-price" style="font-size: 1rem; font-weight: 800; color: var(--gold-primary);">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</span>
-                </div>
-                
-                @if($layanan->variasi)
-                    <small style="color: var(--gold-hover); font-weight: 700;">{{ $layanan->variasi }}</small>
-                @endif
-                
-                <!-- Menampilkan Deskripsi / Detail Layanan secara Rinci -->
-                @if($layanan->deskripsi)
-                    <div style="background: #FDF8EF; border: 1px solid #F5E6CC; border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.82rem; color: #55483F; line-height: 1.5;">
-                        <strong style="display: block; color: var(--gold-hover); margin-bottom: 4px;"><i class="fa-solid fa-circle-info" style="margin-right: 5px;"></i> Detail Layanan:</strong>
-                        <div style="white-space: pre-line;">{!! nl2br(e($layanan->deskripsi)) !!}</div>
-                    </div>
-                @endif
-            </div>
-        </label>
-    @empty
-        <div style="text-align: center; color: var(--text-muted); padding: 16px;">Belum ada layanan aktif.</div>
-    @endforelse
-</div>
+                        <div class="reservation-choice-list" id="layanan-options" data-options="layanan" @if($jenisDipilih !== 'layanan') hidden @endif>
+                            @forelse ($layanans as $layanan)
+                                <label class="reservation-package-option" style="align-items: flex-start; padding: 16px;">
+                                    <input type="checkbox" name="id_items[]" value="{{ $layanan->id_layanan }}" data-name="{{ $layanan->nama_layanan }}" data-price="{{ $layanan->harga }}" @checked(in_array((string) $layanan->id_layanan, array_map('strval', (array) old('id_items', [])), true) && $jenisDipilih === 'layanan')" style="margin-top: 4px;">
+                                    <div class="reservation-package-info" style="display: flex; flex-direction: column; gap: 6px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                            <strong style="font-size: 0.95rem; color: var(--text-dark);">{{ $layanan->nama_layanan }}</strong>
+                                            <span class="reservation-package-price" style="font-size: 1rem; font-weight: 800; color: var(--gold-primary);">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</span>
+                                        </div>
+                                        
+                                        @if($layanan->variasi)
+                                            <small style="color: var(--gold-hover); font-weight: 700;">{{ $layanan->variasi }}</small>
+                                        @endif
+                                        
+                                        @if($layanan->deskripsi)
+                                            <div style="background: #FDF8EF; border: 1px solid #F5E6CC; border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.82rem; color: #55483F; line-height: 1.5;">
+                                                <strong style="display: block; color: var(--gold-hover); margin-bottom: 4px;"><i class="fa-solid fa-circle-info" style="margin-right: 5px;"></i> Detail Layanan:</strong>
+                                                <div style="white-space: pre-line;">{!! nl2br(e($layanan->deskripsi)) !!}</div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </label>
+                            @empty
+                                <div style="text-align: center; color: var(--text-muted); padding: 16px;">Belum ada layanan aktif.</div>
+                            @endforelse
+                        </div>
                     </section>
                 </div>
 
@@ -540,7 +565,6 @@
                     <p style="font-size: 0.78rem; color: var(--gold-hover); margin-top: 8px; line-height: 1.5;">
                         Setelah reservasi dikirim, pembayaran dapat dilakukan melalui gateway atau unggah bukti pembayaran dari menu Riwayat Reservasi.
                     </p>
-                    <!-- Tombol dipastikan bertipe type="button" agar aman dan dapat dipicu melalui event JavaScript click -->
                     <button class="reservation-submit" type="button" id="submit-btn">
                         Ajukan Reservasi Sekarang <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
                     </button>
@@ -550,10 +574,10 @@
     </main>
 
     <!-- SweetAlert2 CDN & Script Logic -->
-    <!-- SweetAlert2 CDN & Script Logic -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // --- 1. DEKLARASI ELEMEN DOM ---
             const reservationForm = document.getElementById('reservation-form');
             const submitBtn = document.getElementById('submit-btn');
             const typeInput = document.getElementById('jenis_pesanan');
@@ -574,14 +598,19 @@
             const fullDayInput = document.getElementById('full_day_booking');
             const lokasiAcaraInput = document.getElementById('lokasi_acara');
             const availabilityHint = document.getElementById('availability-hint');
+            const tipeReservasiInputs = document.querySelectorAll('input[name="tipe_reservasi"]');
+            const labelLengkap = document.getElementById('label-tipe-lengkap');
+            const labelRiasSaja = document.getElementById('label-tipe-rias-saja');
+
             let bookedSchedules = [];
             let lastConflictKey = '';
             let previousTimes = null;
             const formatPrice = value => new Intl.NumberFormat('id-ID').format(value);
 
-            // Jam Operasional Ketat: 09:00 s.d. 21:00
-            const JAM_BUKA = 9 * 60;  // 540 menit
-            const JAM_TUTUP = 21 * 60; // 1260 menit
+            // --- 2. UTILITY WAKTU & OPERASIONAL ---
+            const JAM_BUKA_ACARA = 9 * 60;   // 540 menit (09:00)
+            const JAM_BUKA_RIAS = 3 * 60;    // 180 menit (03:00 Subuh)
+            const JAM_TUTUP = 21 * 60;       // 1260 menit (21:00)
 
             const timeToMinutes = time => {
                 const [hours, minutes] = (time || '00:00').slice(0, 5).split(':').map(Number);
@@ -593,12 +622,12 @@
 
             function getFreeSlots(date) {
                 const busy = schedulesForDate(date).map(schedule => ({
-                    start: isScheduleFullDay(schedule) ? JAM_BUKA : Math.max(JAM_BUKA, timeToMinutes(schedule.start)),
+                    start: isScheduleFullDay(schedule) ? JAM_BUKA_ACARA : Math.max(JAM_BUKA_RIAS, timeToMinutes(schedule.start)),
                     end: isScheduleFullDay(schedule) ? JAM_TUTUP : Math.min(JAM_TUTUP, timeToMinutes(schedule.end))
                 })).sort((a, b) => a.start - b.start);
                 
                 const slots = [];
-                let cursor = JAM_BUKA;
+                let cursor = JAM_BUKA_RIAS;
                 busy.forEach(interval => {
                     if (interval.start > cursor) slots.push([minutesToTime(cursor), minutesToTime(interval.start)]);
                     cursor = Math.max(cursor, interval.end);
@@ -606,7 +635,167 @@
                 if (cursor < JAM_TUTUP) slots.push([minutesToTime(cursor), minutesToTime(JAM_TUTUP)]);
                 return slots.filter(slot => timeToMinutes(slot[1]) > timeToMinutes(slot[0]));
             }
-            // --- PENCARIAN LOKASI PADA PETA (OSM NOMINATIM) ---
+
+            // --- 3. SINKRONISASI TIPE RESERVASI & EFEK HIGHLIGHT ---
+            function updateTipeHighlight() {
+                const selectedValue = document.querySelector('input[name="tipe_reservasi"]:checked')?.value;
+                if (labelLengkap && labelRiasSaja) {
+                    if (selectedValue === 'lengkap') {
+                        labelLengkap.style.borderColor = 'var(--gold-primary)';
+                        labelLengkap.style.background = '#FDF8EF';
+                        labelRiasSaja.style.borderColor = 'var(--border-color)';
+                        labelRiasSaja.style.background = '#FFF';
+                    } else if (selectedValue === 'rias_saja') {
+                        labelRiasSaja.style.borderColor = 'var(--gold-primary)';
+                        labelRiasSaja.style.background = '#FDF8EF';
+                        labelLengkap.style.borderColor = 'var(--border-color)';
+                        labelLengkap.style.background = '#FFF';
+                    }
+                }
+            }
+
+            function calculateEndTime() {
+                if (!waktuMulaiInput.value) return;
+
+                const tipeSelected = document.querySelector('input[name="tipe_reservasi"]:checked')?.value;
+                
+                if (fullDayInput.checked || tipeSelected === 'lengkap') {
+                    waktuSelesaiInput.value = '21:00';
+                } else if (tipeSelected === 'rias_saja') {
+                    const startMinutes = timeToMinutes(waktuMulaiInput.value);
+                    const endMinutes = startMinutes + (3 * 60); // SOP 3 Jam
+                    if (endMinutes <= (24 * 60)) {
+                        waktuSelesaiInput.value = minutesToTime(endMinutes);
+                    }
+                }
+            }
+
+            function syncTipeAndPackage() {
+                const tipeSelected = document.querySelector('input[name="tipe_reservasi"]:checked')?.value;
+                const selectedItem = document.querySelector('#paket-options input[name="id_item"]:checked') 
+                    || document.querySelector('#layanan-options input[name="id_items[]"]:checked');
+
+                if (!selectedItem) {
+                    updateSummary();
+                    return;
+                }
+
+                const itemName = selectedItem.dataset.name || '';
+                const itemNameLower = itemName.toLowerCase();
+                const isWeddingOrFull = itemNameLower.includes('wedding') || itemNameLower.includes('pengantin') || itemNameLower.includes('dekorasi') || itemNameLower.includes('lengkap');
+
+                if (isWeddingOrFull) {
+                    if (tipeSelected !== 'lengkap') {
+                        const radioLengkap = document.querySelector('input[name="tipe_reservasi"][value="lengkap"]');
+                        if (radioLengkap) radioLengkap.checked = true;
+                    }
+                    fullDayInput.checked = true;
+                } else {
+                    const wasFullDay = fullDayInput.checked || tipeSelected === 'lengkap';
+
+                    if (tipeSelected !== 'rias_saja') {
+                        const radioRiasSaja = document.querySelector('input[name="tipe_reservasi"][value="rias_saja"]');
+                        if (radioRiasSaja) radioRiasSaja.checked = true;
+                    }
+                    
+                    fullDayInput.checked = false;
+
+                    if (wasFullDay) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tipe Layanan Disesuaikan',
+                            html: `Anda memilih <strong>${itemName}</strong>.<br>Opsi otomatis diubah ke <strong>Rias Saja (SOP Maks. 3 Jam)</strong> dan centang <em>Full Day</em> dilepas.`,
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 4000,
+                            timerProgressBar: true,
+                            background: '#FFFFFF',
+                            color: '#241A16'
+                        });
+                    }
+                }
+
+                updateTipeHighlight();
+                syncFullDayInputs();
+                calculateEndTime();
+                updateSummary();
+            }
+
+            // --- 4. FUNGSIONALITAS KALKULASI RINGKASAN HARGA & OPSI ---
+            function updateSummary() {
+                const currentType = typeInput.value || 'paket';
+                
+                const selectedItems = currentType === 'layanan'
+                    ? [...document.querySelectorAll('#layanan-options input[name="id_items[]"]:checked')]
+                    : [...document.querySelectorAll('#paket-options input[name="id_item"]:checked')];
+
+                const price = selectedItems.reduce((sum, item) => sum + Number(item.dataset.price || 0), 0);
+                const names = selectedItems.map(item => item.dataset.name);
+
+                itemLabel.textContent = currentType === 'paket' ? 'Paket dipilih' : (currentType === 'layanan' ? 'Layanan dipilih' : 'Pilihan');
+                packageName.textContent = names.length ? names.join(', ') : 'Belum ada pilihan';
+                unitPrice.textContent = 'Rp ' + formatPrice(price);
+                total.textContent = 'Rp ' + formatPrice(price);
+                summaryTriggerTotal.innerHTML = 'Rp ' + formatPrice(price) + ' <i class="fa-solid fa-chevron-up" style="margin-left:6px;"></i>';
+            }
+
+            function showOptions(type) {
+                typeInput.value = type;
+                typeButtons.forEach(button => {
+                    const active = button.dataset.typeChoice === type;
+                    button.classList.toggle('selected', active);
+                });
+                optionGroups.forEach(group => {
+                    const active = group.dataset.options === type;
+                    group.hidden = !active;
+                    const inputs = [...group.querySelectorAll('input')];
+                    inputs.forEach((input, index) => {
+                        input.disabled = !active;
+                        input.required = active && type === 'paket' && index === 0;
+                    });
+                });
+                updateOptionButtonStyles();
+                updateSummary();
+            }
+
+            function updateOptionButtonStyles() {
+                document.querySelectorAll('.reservation-package-option').forEach(label => {
+                    label.classList.toggle('selected', Boolean(label.querySelector('input:checked')));
+                });
+            }
+
+            // --- 5. EVENT LISTENERS PERUBAHAN INPUT ---
+            tipeReservasiInputs.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'rias_saja') {
+                        fullDayInput.checked = false;
+                        syncFullDayInputs();
+                    } else if (this.value === 'lengkap') {
+                        fullDayInput.checked = true;
+                        syncFullDayInputs();
+                    }
+                    updateTipeHighlight();
+                    calculateEndTime();
+                    hasTimeConflict(true);
+                    updateSummary();
+                });
+            });
+
+            waktuMulaiInput.addEventListener('change', () => {
+                calculateEndTime();
+                updateSummary();
+            });
+
+            document.querySelectorAll('input[name="id_item"], input[name="id_items[]"]').forEach(input => {
+                input.addEventListener('change', () => {
+                    syncTipeAndPackage();
+                    updateOptionButtonStyles();
+                    updateSummary();
+                });
+            });
+
+            // --- 6. PENCARIAN LOKASI PETA (OSM NOMINATIM) ---
             const searchInput = document.getElementById('map-search-input');
             const searchBtn = document.getElementById('map-search-btn');
 
@@ -648,10 +837,9 @@
                     }
                 });
             }
-            // --------------------------------------------------
 
-            // --- INISIALISASI PETA INTERAKTIF (LEAFLET / OPENSTREETMAP) ---
-            const defaultLat = -7.8480; // Titik pusat Kediri, Jawa Timur
+            // --- 7. INISIALISASI PETA LEAFLET ---
+            const defaultLat = -7.8480; 
             const defaultLng = 112.0178;
 
             const map = L.map('map-picker').setView([defaultLat, defaultLng], 13);
@@ -686,33 +874,36 @@
                 const position = marker.getLatLng();
                 updateAddress(position.lat, position.lng);
             });
-            // -------------------------------------------------------------
 
+            // --- 8. HINT & VALIDASI JADWAL OPERASIONAL ---
             function updateAvailabilityHint() {
                 if (!tglAcaraInput.value) {
-                    availabilityHint.textContent = 'Pilih tanggal untuk melihat jam yang masih kosong.';
+                    availabilityHint.textContent = 'Pilih tanggal untuk melihat jam dandan yang masih kosong.';
                     return;
                 }
                 const slots = getFreeSlots(tglAcaraInput.value);
                 availabilityHint.textContent = slots.length
-                    ? `Jam kosong (09:00 - 21:00): ${slots.map(slot => `${slot[0]}–${slot[1]}`).join(', ')}`
+                    ? `Jam kosong (03:00 - 21:00): ${slots.map(slot => `${slot[0]}–${slot[1]}`).join(', ')}`
                     : 'Tidak ada jam kosong pada tanggal ini (Full).';
             }
 
-            // Validasi Jam Operasional (09:00 - 21:00)
             function validateOperationalHours() {
                 if (fullDayInput.checked) return true;
 
                 const startMin = timeToMinutes(waktuMulaiInput.value);
                 const endMin = timeToMinutes(waktuSelesaiInput.value);
+                const tipeSelected = document.querySelector('input[name="tipe_reservasi"]:checked')?.value;
 
                 if (!waktuMulaiInput.value || !waktuSelesaiInput.value) return true;
 
-                if (startMin < JAM_BUKA || startMin > JAM_TUTUP || endMin < JAM_BUKA || endMin > JAM_TUTUP) {
+                const jamBukaEfektif = (tipeSelected === 'rias_saja') ? JAM_BUKA_RIAS : JAM_BUKA_ACARA;
+                const labelJamBuka = (tipeSelected === 'rias_saja') ? '03:00 Subuh' : '09:00 Pagi';
+
+                if (startMin < jamBukaEfektif || startMin > JAM_TUTUP || endMin > JAM_TUTUP) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Diluar Jam Operasional',
-                        text: 'Waktu reservasi hanya dapat diakses antara pukul 09:00 pagi sampai 21:00 malam.',
+                        text: `Untuk layanan ${tipeSelected === 'rias_saja' ? 'Rias Saja' : 'Rias + Acara'}, waktu rias dapat dimulai antara pukul ${labelJamBuka} sampai 21:00 malam.`,
                         confirmButtonColor: '#C58F43',
                         background: '#FFFFFF',
                         color: '#241A16'
@@ -788,7 +979,7 @@
                 hasTimeConflict(true);
             }
 
-            // Flash Message Notifikasi SweetAlert2 dari Session Controller
+            // --- 9. NOTIFIKASI SESSION FLASH ---
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -826,12 +1017,11 @@
                 });
             @endif
 
-            // Logika Klik Tombol Submit secara Aman di dalam Modal
+            // --- 10. SUBMIT FORM & POPUP ---
             if (submitBtn) {
                 submitBtn.addEventListener('click', function (e) {
                     e.preventDefault();
 
-                    // 1. Validasi Tanggal & Waktu Acara
                     if (!tglAcaraInput.value || !waktuMulaiInput.value || !waktuSelesaiInput.value) {
                         setSummaryOpen(false);
                         Swal.fire({
@@ -843,13 +1033,11 @@
                         return;
                     }
 
-                    // 2. Validasi Jam Operasional (09:00 - 21:00)
                     if (!validateOperationalHours()) {
                         setSummaryOpen(false);
                         return;
                     }
 
-                    // 3. Validasi Lokasi Acara
                     if (!lokasiAcaraInput.value.trim()) {
                         setSummaryOpen(false);
                         lokasiAcaraInput.focus();
@@ -862,16 +1050,14 @@
                         return;
                     }
 
-                    // 4. Validasi Bentrok Jadwal
                     if (hasTimeConflict(true)) {
                         setSummaryOpen(false);
                         return;
                     }
 
-                    // 5. Validasi Pilihan Paket / Layanan
                     const selectedItems = typeInput.value === 'layanan'
-                        ? [...document.querySelectorAll('input[name="id_items[]"]:checked:not(:disabled)')]
-                        : [document.querySelector('input[name="id_item"]:checked:not(:disabled)')].filter(Boolean);
+                        ? [...document.querySelectorAll('#layanan-options input[name="id_items[]"]:checked')]
+                        : [...document.querySelectorAll('#paket-options input[name="id_item"]:checked')];
                     
                     if (!selectedItems.length) {
                         setSummaryOpen(false);
@@ -917,6 +1103,7 @@
                 });
             }
 
+            // --- 11. FETCH API & INITIALIZATION ---
             fetch('{{ route("api.jadwal.tervalidasi") }}')
                 .then(response => response.json())
                 .then(schedules => {
@@ -939,59 +1126,6 @@
             }));
             
             fullDayInput.addEventListener('change', syncFullDayInputs);
-            syncFullDayInputs();
-
-            function showOptions(type) {
-                typeInput.value = type;
-                typeButtons.forEach(button => {
-                    const active = button.dataset.typeChoice === type;
-                    button.classList.toggle('selected', active);
-                });
-                optionGroups.forEach(group => {
-                    const active = group.dataset.options === type;
-                    group.hidden = !active;
-                    const inputs = [...group.querySelectorAll('input')];
-                    inputs.forEach((input, index) => {
-                        input.disabled = !active;
-                        input.required = active && type === 'paket' && index === 0;
-                        if (!active) input.checked = false;
-                    });
-                });
-                updateOptionButtonStyles();
-                updateSummary();
-            }
-
-            function updateOptionButtonStyles() {
-                document.querySelectorAll('.reservation-package-option').forEach(label => {
-                    label.classList.toggle('selected', Boolean(label.querySelector('input:checked')));
-                });
-            }
-            
-            document.querySelectorAll('input[name="id_item"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const packageName = (this.dataset.name || '').toLowerCase();
-                    if (packageName.includes('wedding') || packageName.includes('pengantin') || packageName.includes('wisuda') || packageName.includes('lengkap')) {
-                        fullDayInput.checked = true;
-                        if (typeof syncFullDayInputs === 'function') {
-                            syncFullDayInputs();
-                        }
-                    }
-                });
-            });
-
-            function updateSummary() {
-                const selectedItems = typeInput.value === 'layanan'
-                    ? [...document.querySelectorAll('input[name="id_items[]"]:checked:not(:disabled)')]
-                    : [document.querySelector('input[name="id_item"]:checked:not(:disabled)')].filter(Boolean);
-                const price = selectedItems.reduce((sum, item) => sum + Number(item.dataset.price || 0), 0);
-                const names = selectedItems.map(item => item.dataset.name);
-
-                itemLabel.textContent = typeInput.value === 'paket' ? 'Paket dipilih' : (typeInput.value === 'layanan' ? 'Layanan dipilih' : 'Pilihan');
-                packageName.textContent = names.length ? names.join(', ') : 'Belum ada pilihan';
-                unitPrice.textContent = 'Rp ' + formatPrice(price);
-                total.textContent = 'Rp ' + formatPrice(price);
-                summaryTriggerTotal.innerHTML = 'Rp ' + formatPrice(price) + ' <i class="fa-solid fa-chevron-up" style="margin-left:6px;"></i>';
-            }
 
             function setSummaryOpen(open) {
                 summaryPopup.hidden = !open;
@@ -1008,12 +1142,15 @@
             });
 
             typeButtons.forEach(button => button.addEventListener('click', () => showOptions(button.dataset.typeChoice)));
-            document.querySelectorAll('input[name="id_item"], input[name="id_items[]"]').forEach(input => input.addEventListener('change', () => {
-                updateOptionButtonStyles();
-                updateSummary();
-            }));
-            if (typeInput.value) showOptions(typeInput.value);
-            else updateSummary();
+
+            // Inisialisasi awal saat halaman pertama dimuat
+            const initialType = typeInput.value || 'paket';
+            showOptions(initialType);
+            syncFullDayInputs();
+            updateTipeHighlight();
+            calculateEndTime();
+            syncTipeAndPackage();
+            updateSummary();
         });
 
         function confirmLogoutClient() {
