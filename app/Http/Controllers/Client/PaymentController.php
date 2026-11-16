@@ -91,9 +91,56 @@ class PaymentController extends Controller
         }
 
         return response()->json([
-            'token' => $response->json('token'),
+            'redirect_url' => $response->json('redirect_url'),
             'order_id' => $orderId,
         ]);
+    }
+
+    public function syncStatus(Reservasi $reservasi)
+    {
+        abort_unless($reservasi->id_akun === auth()->id(), 403);
+
+        if ($reservasi->payment_status === 'paid' || ! $reservasi->payment_order_id) {
+            return response()->json(['payment_status' => $reservasi->payment_status ?? 'unpaid']);
+        }
+
+        $baseUrl = config('services.midtrans.is_production')
+            ? 'https://api.midtrans.com/v2'
+            : 'https://api.sandbox.midtrans.com/v2';
+
+        $response = Http::withBasicAuth(config('services.midtrans.server_key'), '')
+            ->acceptJson()
+            ->get($baseUrl . '/' . rawurlencode($reservasi->payment_order_id) . '/status');
+
+        if ($response->failed()) {
+            return response()->json(['payment_status' => $reservasi->payment_status ?? 'unpaid'], 502);
+        }
+
+        $data = $response->json();
+        if (($data['order_id'] ?? null) !== $reservasi->payment_order_id
+            || (int) round((float) ($data['gross_amount'] ?? 0)) !== $this->amount($reservasi)) {
+            return response()->json(['payment_status' => $reservasi->payment_status ?? 'unpaid'], 422);
+        }
+
+        $status = $data['transaction_status'] ?? 'pending';
+        $fraud = $data['fraud_status'] ?? null;
+        $paymentStatus = match (true) {
+            $status === 'settlement' => 'paid',
+            $status === 'capture' && $fraud !== 'challenge' => 'paid',
+            $status === 'expire' => 'expired',
+            default => $status,
+        };
+
+        Reservasi::whereKey($reservasi->getKey())
+            ->where('payment_status', '!=', 'paid')
+            ->update([
+                'payment_status' => $paymentStatus,
+                'paid_at' => $paymentStatus === 'paid' ? now() : $reservasi->paid_at,
+            ]);
+
+        $reservasi->refresh();
+
+        return response()->json(['payment_status' => $reservasi->payment_status]);
     }
 
     public function uploadProof(Request $request, Reservasi $reservasi)
@@ -140,6 +187,11 @@ class PaymentController extends Controller
             return response()->json(['success' => true]);
         }
 
+        // Jangan menerima notifikasi pembayaran dengan nominal yang berbeda dari tagihan.
+        if ((int) round((float) ($data['gross_amount'] ?? 0)) !== $this->amount($reservasi)) {
+            return response()->json(['message' => 'Nominal pembayaran tidak sesuai.'], 422);
+        }
+
         $status = $data['transaction_status'] ?? 'pending';
         $fraud = $data['fraud_status'] ?? null;
 
@@ -150,10 +202,14 @@ class PaymentController extends Controller
             default => $status,
         };
 
-        $reservasi->update([
-            'payment_status' => $paymentStatus,
-            'paid_at' => $paymentStatus === 'paid' ? now() : $reservasi->paid_at,
-        ]);
+        // Status paid bersifat final agar notifikasi pending/expire yang terlambat
+        // tidak menurunkan status transaksi yang sudah berhasil dibayar.
+        if ($reservasi->payment_status !== 'paid') {
+            $reservasi->update([
+                'payment_status' => $paymentStatus,
+                'paid_at' => $paymentStatus === 'paid' ? now() : $reservasi->paid_at,
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }

@@ -51,13 +51,16 @@
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 <script>
 document.getElementById('pay-button').addEventListener('click', async function(){
     const button=this, method=document.querySelector('input[name="payment_method"]:checked')?.value;
     if(!method){Swal.fire('Pilih metode pembayaran','Silakan pilih salah satu metode pembayaran.','info');return;}
+    const paymentTab=window.open('about:blank','_blank');
+    if(!paymentTab){Swal.fire('Tab pembayaran diblokir','Izinkan pop-up untuk membuka halaman pembayaran Midtrans.','warning');return;}
+    paymentTab.opener=null;
     button.disabled=true;button.textContent='Memuat pembayaran...';
-    try{const res=await fetch(button.dataset.url,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({payment_method:method})});const data=await res.json();if(!res.ok)throw new Error(data.message||'Pembayaran gagal dibuat.');window.snap.pay(data.token,{onSuccess:()=>location.reload(),onPending:()=>location.reload(),onError:()=>Swal.fire('Pembayaran gagal','Silakan coba lagi.','error'),onClose:()=>{button.disabled=false;button.innerHTML='<i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran';}})}catch(e){Swal.fire('Gagal',e.message,'error');button.disabled=false;button.innerHTML='<i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran';}
+    try{const res=await fetch(button.dataset.url,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({payment_method:method})});const data=await res.json();if(!res.ok)throw new Error(data.message||'Pembayaran gagal dibuat.');if(!data.redirect_url)throw new Error('URL pembayaran Midtrans tidak tersedia.');paymentTab.location.href=data.redirect_url;button.textContent='Menunggu pembayaran...';}
+    catch(e){paymentTab.close();Swal.fire('Gagal',e.message,'error');button.disabled=false;button.innerHTML='<i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran';}
 });
 </script>
 </body>

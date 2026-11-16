@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi.create');
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
     Route::post('/reservasi/{reservasi}/payment', [PaymentController::class, 'create'])->name('reservasi.payment.create');
+    Route::post('/reservasi/{reservasi}/payment/sync', [PaymentController::class, 'syncStatus'])->name('reservasi.payment.sync');
     Route::post('/reservasi/{reservasi}/bukti-pembayaran', [PaymentController::class, 'uploadProof'])->name('reservasi.payment.proof');
     Route::get('/transaksi/{reservasi}/pembayaran', [PaymentController::class, 'show'])->name('client.payment.show');
 });
