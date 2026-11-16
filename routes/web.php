@@ -63,7 +63,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/jadwal', [AdminJadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/jadwal/json', [ClientJadwalController::class, 'getJadwalJson'])->name('jadwal.json');
     Route::post('/jadwal/validasi/{id}', [AdminJadwalController::class, 'validasi'])->name('jadwal.validasi');
-    Route::post('/jadwal/verifikasi-bukti/{id}', [AdminJadwalController::class, 'verifyPaymentProof'])->name('jadwal.verifyPaymentProof');
     Route::put('/jadwal/update-tanggal/{id}', [AdminJadwalController::class, 'updateTanggal'])->name('admin.jadwal.updateTanggal');
 });
 
@@ -95,7 +94,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reservasi', [ReservasiController::class, 'store'])->name('reservasi.store');
     Route::post('/reservasi/{reservasi}/payment', [PaymentController::class, 'create'])->name('reservasi.payment.create');
     Route::post('/reservasi/{reservasi}/payment/sync', [PaymentController::class, 'syncStatus'])->name('reservasi.payment.sync');
-    Route::post('/reservasi/{reservasi}/bukti-pembayaran', [PaymentController::class, 'uploadProof'])->name('reservasi.payment.proof');
     Route::get('/transaksi/{reservasi}/pembayaran', [PaymentController::class, 'show'])->name('client.payment.show');
 });
 

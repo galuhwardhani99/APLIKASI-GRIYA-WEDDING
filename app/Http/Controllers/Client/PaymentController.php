@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Reservasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -17,7 +16,7 @@ class PaymentController extends Controller
         abort_if(in_array($reservasi->payment_status, ['paid', 'proof_verified'], true), 403, 'Pembayaran reservasi ini sudah diterima.');
         abort_unless($reservasi->status_reservasi === 'Disetujui', 403, 'Reservasi belum disetujui admin.');
 
-        return view('client.pembayaran', compact('reservasi'));
+        return redirect()->route('client.riwayat.transaksi', ['reservasi' => $reservasi->id_reservasi]);
     }
 
     public function create(Reservasi $reservasi)
@@ -91,6 +90,7 @@ class PaymentController extends Controller
         }
 
         return response()->json([
+            'token' => $response->json('token'),
             'redirect_url' => $response->json('redirect_url'),
             'order_id' => $orderId,
         ]);
@@ -141,30 +141,6 @@ class PaymentController extends Controller
         $reservasi->refresh();
 
         return response()->json(['payment_status' => $reservasi->payment_status]);
-    }
-
-    public function uploadProof(Request $request, Reservasi $reservasi)
-    {
-        abort_unless($reservasi->id_akun === auth()->id(), 403);
-
-        abort_if($reservasi->payment_status === 'proof_verified', 403, 'Bukti pembayaran sudah diterima admin.');
-
-        $validated = $request->validate([
-            'bukti_transfer' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-        ], [
-            'bukti_transfer.required' => 'Pilih file bukti pembayaran.',
-            'bukti_transfer.mimes' => 'Bukti harus berupa JPG, PNG, atau PDF.',
-            'bukti_transfer.max' => 'Ukuran bukti maksimal 2 MB.',
-        ]);
-
-        if ($reservasi->bukti_transfer && Storage::disk('public')->exists($reservasi->bukti_transfer)) {
-            Storage::disk('public')->delete($reservasi->bukti_transfer);
-        }
-
-        $path = $validated['bukti_transfer']->store('bukti-pembayaran', 'public');
-        $reservasi->update(['bukti_transfer' => $path]);
-
-        return back()->with('success', 'Bukti pembayaran berhasil diunggah dan menunggu verifikasi admin.');
     }
 
     public function notification(Request $request)

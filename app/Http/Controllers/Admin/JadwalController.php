@@ -58,20 +58,6 @@ class JadwalController extends Controller
         return redirect()->back()->with('success', 'Tanggal acara berhasil diperbarui!');
     }
 
-    public function verifyPaymentProof($id)
-    {
-        $reservasi = Reservasi::findOrFail($id);
-
-        abort_unless($reservasi->bukti_transfer, 422, 'Bukti pembayaran belum diunggah.');
-
-        $reservasi->update([
-            'payment_status' => 'proof_verified',
-            'paid_at' => now(),
-        ]);
-
-        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diterima. Client tidak dapat melakukan pembayaran ulang.');
-    }
-
     // Tambahkan method ini di dalam class JadwalController
     public function kirimNotifWaAdmin($id)
     {

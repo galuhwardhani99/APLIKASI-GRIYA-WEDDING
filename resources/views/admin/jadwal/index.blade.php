@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('title', 'Jadwal Acara - Admin Griya Rias Elly Jr.')
 
@@ -184,20 +184,14 @@
                                 $namaPesanan = $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: 'Rias Pengantin');
                             @endphp
                             <div class="client-name">{{ $item->user->name ?? 'Pelanggan' }} ({{ $namaPesanan }})</div>
+                            @foreach($item->layanans as $layananTerpilih)
+                                @if($layananTerpilih->pivot->catatan_layanan)
+                                    <div class="location-info" style="white-space:pre-line;"><strong>Catatan {{ $layananTerpilih->pivot->nama_layanan }}:</strong> {{ $layananTerpilih->pivot->catatan_layanan }}</div>
+                                @endif
+                            @endforeach
                             <div class="location-info">Lokasi: {{ $item->lokasi ?? 'Lokasi Klien' }}</div>
                             <div style="margin-top:8px;font-size:.78rem;color:#6B7280;">
                                 Pembayaran: <strong>{{ ucfirst($item->payment_status ?? 'unpaid') }}</strong>
-                                @if($item->bukti_transfer)
-                                    · <a href="{{ asset('storage/' . $item->bukti_transfer) }}" target="_blank" rel="noopener" style="color:#A87632;">Lihat bukti</a>
-                                    @if(($item->payment_status ?? 'unpaid') !== 'proof_verified' && ($item->payment_status ?? 'unpaid') !== 'paid')
-                                        <form action="{{ route('admin.jadwal.verifyPaymentProof', $item->id_reservasi) }}" method="POST" style="display:inline;margin-left:6px;" onsubmit="return confirm('Terima bukti pembayaran ini? Client tidak dapat melakukan pembayaran ulang setelah diterima.')">
-                                            @csrf
-                                            <button type="submit" style="border:0;background:#15803D;color:#fff;border-radius:5px;padding:3px 7px;font-size:.7rem;cursor:pointer;">Terima Bukti</button>
-                                        </form>
-                                    @else
-                                        <span style="color:#15803D;">· Bukti diterima</span>
-                                    @endif
-                                @endif
                             </div>
                         </div>
 
@@ -336,7 +330,7 @@
                 const fullDayBooking = bookings.some(schedule => schedule.full_day);
                 const bookingTimes = [...new Set(bookings.map(schedule => schedule.full_day
                     ? 'Full day'
-                    : `${schedule.start}–${schedule.end}`))];
+                    : `${schedule.start}â€“${schedule.end}`))];
                 dayCell.classList.add(fullDayBooking ? 'full-day-booking' : 'partial-booking');
                 dayCell.title = fullDayBooking ? 'Sudah dibooking seharian' : `Sudah dibooking: ${bookingTimes.join(', ')}`;
                 bookingTimes.forEach(time => {

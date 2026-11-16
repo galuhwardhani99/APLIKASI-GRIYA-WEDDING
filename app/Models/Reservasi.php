@@ -46,7 +46,6 @@ class Reservasi extends Model
         'waktu_mulai',
         'waktu_selesai',
         'catatan',
-        'bukti_transfer',
         'payment_order_id',
         'payment_status',
         'paid_at',
@@ -75,7 +74,7 @@ class Reservasi extends Model
     public function layanans(): BelongsToMany
     {
         return $this->belongsToMany(Layanan::class, 'reservasi_layanans', 'id_reservasi', 'id_layanan', 'id_reservasi', 'id_layanan')
-            ->withPivot(['nama_layanan', 'harga_layanan'])
+            ->withPivot(['nama_layanan', 'harga_layanan', 'catatan_layanan'])
             ->withTimestamps();
     }
 

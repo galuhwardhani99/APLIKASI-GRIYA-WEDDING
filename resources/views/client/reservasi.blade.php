@@ -215,6 +215,11 @@
         .reservation-package-info small { color: var(--gold-primary); font-weight: 600; font-size: 0.78rem; }
         .reservation-package-info span { color: var(--text-muted); font-size: 0.8rem; }
         .reservation-package-price { font-weight: 800; color: var(--gold-primary); font-size: 0.95rem; }
+        .service-option-group { display: grid; gap: 8px; }
+        .service-note-field { margin: 0 4px 4px 42px; }
+        .service-note-field[hidden] { display: none !important; }
+        .service-note-field label { display: block; margin-bottom: 5px; color: var(--gold-hover); font-size: .78rem; font-weight: 700; }
+        .service-note-field textarea { width: 100%; min-height: 76px; padding: 9px 11px; border: 1px solid var(--border-color); border-radius: 8px; background: #FFF; color: var(--text-dark); font: inherit; font-size: .8rem; resize: vertical; }
 
         /* Floating reservation summary */
         .reservation-summary-trigger {
@@ -508,26 +513,34 @@
                         <!-- LIST LAYANAN -->
                         <div class="reservation-choice-list" id="layanan-options" data-options="layanan" @if($jenisDipilih !== 'layanan') hidden @endif>
                             @forelse ($layanans as $layanan)
-                                <label class="reservation-package-option" style="align-items: flex-start; padding: 16px;">
-                                    <input type="checkbox" name="id_items[]" value="{{ $layanan->id_layanan }}" data-name="{{ $layanan->nama_layanan }}" data-price="{{ $layanan->harga }}" @checked(in_array((string) $layanan->id_layanan, array_map('strval', (array) old('id_items', [])), true) && $jenisDipilih === 'layanan')" style="margin-top: 4px;">
-                                    <div class="reservation-package-info" style="display: flex; flex-direction: column; gap: 6px;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                            <strong style="font-size: 0.95rem; color: var(--text-dark);">{{ $layanan->nama_layanan }}</strong>
-                                            <span class="reservation-package-price" style="font-size: 1rem; font-weight: 800; color: var(--gold-primary);">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</span>
-                                        </div>
-                                        
-                                        @if($layanan->variasi)
-                                            <small style="color: var(--gold-hover); font-weight: 700;">{{ $layanan->variasi }}</small>
-                                        @endif
-                                        
-                                        @if($layanan->deskripsi)
-                                            <div style="background: #FDF8EF; border: 1px solid #F5E6CC; border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.82rem; color: #55483F; line-height: 1.5;">
-                                                <strong style="display: block; color: var(--gold-hover); margin-bottom: 4px;"><i class="fa-solid fa-circle-info" style="margin-right: 5px;"></i> Detail Layanan:</strong>
-                                                <div style="white-space: pre-line;">{!! nl2br(e($layanan->deskripsi)) !!}</div>
+                                @php($serviceWasSelected = in_array((string) $layanan->id_layanan, array_map('strval', (array) old('id_items', [])), true) && $jenisDipilih === 'layanan')
+                                <div class="service-option-group">
+                                    <label class="reservation-package-option {{ $serviceWasSelected ? 'selected' : '' }}" style="align-items: flex-start; padding: 16px;">
+                                        <input type="checkbox" name="id_items[]" value="{{ $layanan->id_layanan }}" data-name="{{ $layanan->nama_layanan }}" data-price="{{ $layanan->harga }}" @checked($serviceWasSelected) style="margin-top: 4px;">
+                                        <div class="reservation-package-info" style="display: flex; flex-direction: column; gap: 6px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                                <strong style="font-size: 0.95rem; color: var(--text-dark);">{{ $layanan->nama_layanan }}</strong>
+                                                <span class="reservation-package-price" style="font-size: 1rem; font-weight: 800; color: var(--gold-primary);">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</span>
                                             </div>
-                                        @endif
+
+                                            @if($layanan->variasi)
+                                                <small style="color: var(--gold-hover); font-weight: 700;">{{ $layanan->variasi }}</small>
+                                            @endif
+
+                                            @if($layanan->deskripsi)
+                                                <div style="background: #FDF8EF; border: 1px solid #F5E6CC; border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.82rem; color: #55483F; line-height: 1.5;">
+                                                    <strong style="display: block; color: var(--gold-hover); margin-bottom: 4px;"><i class="fa-solid fa-circle-info" style="margin-right: 5px;"></i> Detail Layanan:</strong>
+                                                    <div style="white-space: pre-line;">{!! nl2br(e($layanan->deskripsi)) !!}</div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </label>
+                                    <div class="service-note-field" data-service-note-field @unless($serviceWasSelected) hidden @endunless>
+                                        <label for="catatan_layanan_{{ $layanan->id_layanan }}">Catatan untuk {{ $layanan->nama_layanan }} <span style="font-weight:400;">(Opsional)</span></label>
+                                        <textarea id="catatan_layanan_{{ $layanan->id_layanan }}" name="catatan_layanan[{{ $layanan->id_layanan }}]" maxlength="1500" placeholder="Tuliskan pilihan, daftar, jumlah, atau rincian khusus untuk layanan ini...">{{ old('catatan_layanan.' . $layanan->id_layanan) }}</textarea>
+                                        @error('catatan_layanan.' . $layanan->id_layanan)<small class="reservation-error">{{ $message }}</small>@enderror
                                     </div>
-                                </label>
+                                </div>
                             @empty
                                 <div style="text-align: center; color: var(--text-muted); padding: 16px;">Belum ada layanan aktif.</div>
                             @endforelse
@@ -563,7 +576,7 @@
                         Harga akhir dan ketersediaan jadwal akan dikonfirmasi oleh admin setelah reservasi diajukan.
                     </p>
                     <p style="font-size: 0.78rem; color: var(--gold-hover); margin-top: 8px; line-height: 1.5;">
-                        Setelah reservasi dikirim, pembayaran dapat dilakukan melalui gateway atau unggah bukti pembayaran dari menu Riwayat Reservasi.
+                        Setelah reservasi disetujui, pembayaran dapat dilakukan melalui Midtrans dari menu Riwayat Transaksi.
                     </p>
                     <button class="reservation-submit" type="button" id="submit-btn">
                         Ajukan Reservasi Sekarang <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
@@ -789,6 +802,8 @@
 
             document.querySelectorAll('input[name="id_item"], input[name="id_items[]"]').forEach(input => {
                 input.addEventListener('change', () => {
+                    const serviceNoteField = input.closest('.service-option-group')?.querySelector('[data-service-note-field]');
+                    if (serviceNoteField) serviceNoteField.hidden = !input.checked;
                     syncTipeAndPackage();
                     updateOptionButtonStyles();
                     updateSummary();

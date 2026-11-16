@@ -29,7 +29,7 @@
                 <label class="method"><input type="radio" name="payment_method" value="credit_card"> Kartu Kredit</label>
             </div>
             <button class="pay" id="pay-button" data-url="{{ route('reservasi.payment.create', $reservasi) }}"><i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran</button>
-            <p class="note" style="margin-top:12px">Pembayaran diproses melalui Midtrans. Pilih metode di atas, lalu ikuti instruksi pada halaman gateway.</p>
+            <p class="note" style="margin-top:12px">Snap Midtrans akan terbuka sebagai popup. Di Sandbox, salin VA atau kode pembayaran, tutup popup, lalu klik tombol lagi untuk membuka Simulator Midtrans.</p>
         </section>
         <aside class="card">
             <h2>Ringkasan Reservasi</h2>
@@ -38,30 +38,31 @@
             <div class="summary-row"><span>Tanggal acara</span><strong>{{ $reservasi->tanggal_acara?->translatedFormat('d F Y') }}</strong></div>
             @php($totalPembayaran = (int) (($reservasi->harga_paket ?: $reservasi->harga_layanan ?: 0) * ($reservasi->jumlah_pesanan ?: 1)))
             <div class="total"><span>Total</span><strong>Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</strong></div>
-            <div class="proof">
-                <label for="bukti_transfer">Upload bukti pembayaran manual</label>
-                <form action="{{ route('reservasi.payment.proof', $reservasi) }}" method="POST" enctype="multipart/form-data">
-                    @csrf<input id="bukti_transfer" type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required>
-                    <button class="upload" type="submit"><i class="fa-solid fa-upload"></i> {{ $reservasi->bukti_transfer ? 'Ganti Bukti' : 'Upload Bukti' }}</button>
-                </form>
-                <p class="note">Format JPG, PNG, atau PDF. Maksimal 2 MB. Bukti dapat dilihat admin untuk diverifikasi.</p>
-            </div>
         </aside>
     </div>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 <script>
 document.getElementById('pay-button').addEventListener('click', async function(){
+    if(this.dataset.simulatorReady === 'true'){
+        window.open('https://simulator.sandbox.midtrans.com/','_blank','noopener');
+        return;
+    }
     const button=this, method=document.querySelector('input[name="payment_method"]:checked')?.value;
     if(!method){Swal.fire('Pilih metode pembayaran','Silakan pilih salah satu metode pembayaran.','info');return;}
-    const paymentTab=window.open('about:blank','_blank');
-    if(!paymentTab){Swal.fire('Tab pembayaran diblokir','Izinkan pop-up untuk membuka halaman pembayaran Midtrans.','warning');return;}
-    paymentTab.opener=null;
     button.disabled=true;button.textContent='Memuat pembayaran...';
-    try{const res=await fetch(button.dataset.url,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({payment_method:method})});const data=await res.json();if(!res.ok)throw new Error(data.message||'Pembayaran gagal dibuat.');if(!data.redirect_url)throw new Error('URL pembayaran Midtrans tidak tersedia.');paymentTab.location.href=data.redirect_url;button.textContent='Menunggu pembayaran...';}
-    catch(e){paymentTab.close();Swal.fire('Gagal',e.message,'error');button.disabled=false;button.innerHTML='<i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran';}
+    try{const res=await fetch(button.dataset.url,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({payment_method:method})});const data=await res.json();if(!res.ok)throw new Error(data.message||'Pembayaran gagal dibuat.');if(!data.token||!window.snap)throw new Error('Snap Midtrans belum siap. Muat ulang halaman lalu coba lagi.');window.snap.pay(data.token,{onSuccess:()=>location.reload(),onPending:()=>simulatorReady(button),onError:()=>{button.disabled=false;Swal.fire('Pembayaran gagal','Silakan coba lagi.','error');},onClose:()=>simulatorReady(button)});}
+    catch(e){Swal.fire('Gagal',e.message,'error');button.disabled=false;button.innerHTML='<i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran';}
 });
+function simulatorReady(button){
+    if(!{{ config('services.midtrans.is_production') ? 'true' : 'false' }}){
+        button.dataset.simulatorReady='true';
+        button.innerHTML='<i class="fa-solid fa-arrow-up-right-from-square"></i> Lanjut ke Simulator Sandbox';
+    } else { button.innerHTML='<i class="fa-solid fa-lock"></i> Lanjutkan Pembayaran'; }
+    button.disabled=false;
+}
 </script>
 </body>
 </html>
