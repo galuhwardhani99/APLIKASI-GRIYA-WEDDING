@@ -13,10 +13,14 @@ use App\Http\Controllers\Client\JadwalController as ClientJadwalController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
 use App\Http\Controllers\Client\PaymentController;
+use App\Models\Transaksi;
 use App\Http\Controllers\UserProfileController;
 use App\Models\Portofolio;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WhatsAppController;
+use App\Models\Reservasi;
+use App\Models\User;
+use Carbon\Carbon;
 
 // ---------- Halaman Publik ----------
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -46,7 +50,46 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 // ---------- Admin ----------
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+    // Pastikan mengimpor model di bagian atas web.php:
+
+// Di dalam Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () { ...
+Route::get('/dashboard', function () {
+    $now = Carbon::now();
+
+    // 1. Total Pendapatan Bulan Ini (Gunakan kolom tanggal_acara)
+    $pendapatanBulanIni = Reservasi::whereMonth('tanggal_acara', $now->month)
+        ->whereYear('tanggal_acara', $now->year)
+        ->whereIn('payment_status', ['paid', 'settlement', 'lunas', 'capture'])
+        ->get()
+        ->sum(function ($item) {
+            return $item->biaya_sewa ?? $item->harga_paket ?? $item->harga_layanan ?? 0;
+        });
+
+    // 2. Total Reservasi (Semua reservasi yang sudah tervalidasi/disetujui)
+    $totalReservasi = Reservasi::whereIn('status_reservasi', ['tervalidasi', 'disetujui', 'selesai', 'confirmed'])
+        ->count();
+
+    // 3. Client Aktif (User dengan role 'client')
+    $clientAktif = User::where('role', 'client')->count();
+
+    // 4. Daftar Transaksi Terbaru
+    $transaksiTerbaru = Reservasi::with(['user', 'paket', 'layanans'])
+        ->orderByDesc('id_reservasi')
+        ->take(7)
+        ->get();
+
+    // 5. Badge Notifikasi Jadwal Acara Pending untuk Sidebar
+    $pendingReservationsCount = Reservasi::whereIn('status_reservasi', ['pending', 'menunggu', 'menunggu_konfirmasi'])
+        ->count();
+
+    return view('admin.dashboard', compact(
+        'pendapatanBulanIni',
+        'totalReservasi',
+        'clientAktif',
+        'transaksiTerbaru',
+        'pendingReservationsCount'
+    ));
+})->name('dashboard');
 
     // Tambahkan baris ini di dalam group middleware admin
     Route::post('/jadwal/kirim-wa/{id}', [AdminJadwalController::class, 'kirimNotifWaAdmin'])->name('jadwal.kirimWa');

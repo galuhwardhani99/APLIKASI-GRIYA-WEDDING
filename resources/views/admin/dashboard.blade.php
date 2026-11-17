@@ -378,58 +378,104 @@
         </div>
 
         <!-- Stats Grid Berbingkai Ikon -->
+        <!-- Stats Grid Berbingkai Ikon -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
                 <div>
                     <div class="stat-title">Total Pendapatan Bulan Ini</div>
-                    <div class="stat-value">Rp 48.500.000</div>
+                    <div class="stat-value">Rp {{ number_format($pendapatanBulanIni ?? 0, 0, ',', '.') }}</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon"><i class="fa-regular fa-calendar-check"></i></div>
                 <div>
                     <div class="stat-title">Total Reservasi</div>
-                    <div class="stat-value">18 Acara</div>
+                    <div class="stat-value">{{ $totalReservasi ?? 0 }} Acara</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                 <div>
                     <div class="stat-title">Client Aktif</div>
-                    <div class="stat-value">124 User</div>
+                    <div class="stat-value">{{ $clientAktif ?? 0 }} User</div>
                 </div>
             </div>
         </div>
 
         <!-- Table Section -->
         <div class="table-section">
-            <h2 class="table-header">Daftar Transaksi Terbaru</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+                <h2 class="table-header" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Daftar Transaksi Terbaru</h2>
+                <a href="{{ route('admin.jadwal.index') }}" style="font-size: 0.82rem; font-weight: 700; color: var(--gold-primary); text-decoration: none;">
+                    Kelola Jadwal Acara <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+                </a>
+            </div>
+
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Client</th>
-                        <th>Layanan</th>
+                        <th>Layanan / Paket</th>
                         <th>Tgl Acara</th>
-                        <th>Status</th>
+                        <th>Nominal</th>
+                        <th>Status Pembayaran</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td style="color: var(--text-muted); font-weight: 700;">#GR-0892</td>
-                        <td><strong>Siti Rahmawati</strong></td>
-                        <td>Rias Akad &amp; Resepsi Gold</td>
-                        <td>06 Oct 2026</td>
-                        <td><span class="status-badge status-dp">DP Verified</span></td>
-                    </tr>
-                    <tr>
-                        <td style="color: var(--text-muted); font-weight: 700;">#GR-0891</td>
-                        <td><strong>Anisa Putri</strong></td>
-                        <td>WO Package Intimate</td>
-                        <td>12 Oct 2026</td>
-                        <td><span class="status-badge status-lunas">Lunas 100%</span></td>
-                    </tr>
+                    @forelse($transaksiTerbaru as $item)
+                        <tr>
+                            <td style="color: var(--text-muted); font-weight: 700;">
+                                {{ $item->kode_reservasi ?? '#GR-' . str_pad($item->id_reservasi, 4, '0', STR_PAD_LEFT) }}
+                            </td>
+                            <td>
+                                <strong>{{ $item->user->name ?? 'Client' }}</strong>
+                            </td>
+                            <td>
+                                @if($item->jenis_pesanan === 'paket')
+                                    {{ $item->nama_paket ?? $item->paket?->nama_paket ?? 'Paket Rias' }}
+                                @elseif($item->layanans && $item->layanans->isNotEmpty())
+                                    {{ $item->layanans->pluck('nama_layanan')->join(', ') }}
+                                @else
+                                    {{ $item->nama_layanan ?? $item->layanan?->nama_layanan ?? 'Layanan Rias' }}
+                                @endif
+                            </td>
+                            <td>
+                                @php
+                                    $tgl = $item->tanggal_acara ?? $item->tgl_acara;
+                                @endphp
+                                {{ $tgl ? \Carbon\Carbon::parse($tgl)->format('d M Y') : '-' }}
+                            </td>
+                            <td style="font-weight: 700;">
+                                @php
+                                    $nominal = $item->biaya_sewa ?? $item->harga_paket ?? $item->harga_layanan ?? 0;
+                                @endphp
+                                Rp {{ number_format($nominal, 0, ',', '.') }}
+                            </td>
+                            <td>
+                                @php
+                                    $payStatus = strtolower($item->payment_status ?? 'unpaid');
+                                @endphp
+
+                                @if(in_array($payStatus, ['paid', 'settlement', 'lunas', 'capture']))
+                                    <span class="status-badge status-lunas">Lunas 100%</span>
+                                @elseif(in_array($payStatus, ['dp', 'dp_verified', 'partial']))
+                                    <span class="status-badge status-dp">DP Verified</span>
+                                @elseif(in_array($payStatus, ['expire', 'cancel', 'deny', 'failed']))
+                                    <span class="status-badge" style="background-color: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;">Gagal / Batal</span>
+                                @else
+                                    <span class="status-badge" style="background-color: #FFFBEB; color: #B45309; border: 1px solid #FDE68A;">Unpaid / Pending</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                                Belum ada data transaksi reservasi.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
