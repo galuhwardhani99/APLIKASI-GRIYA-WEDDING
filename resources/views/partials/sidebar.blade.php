@@ -52,17 +52,10 @@
             </a>
         </li>
         <li>
-            <!-- Dihubungkan ke route transaksi jika ada, atau gunakan route('admin.dashboard') / '#' tanpa memicu void -->
-            @if(Route::has('admin.transaksi.index'))
-                <a href="{{ route('admin.transaksi.index') }}" class="nav-item {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
-                </a>
-            @else
-                <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}" onclick="alert('Fitur Laporan Transaksi sedang dalam pengembangan.'); return false;">
-                    <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
-                </a>
-            @endif
-        </li>
+            <a href="{{ route('admin.laporan.transaksi') }}" class="nav-item {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+         </a>
+        </li>        
         <li>
             <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users-gear"></i> Kelola Akun

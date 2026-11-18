@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PaketController;
 use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
@@ -65,7 +66,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/jadwal/validasi/{id}', [AdminJadwalController::class, 'validasi'])->name('jadwal.validasi');
     Route::post('/jadwal/verifikasi-bukti/{id}', [AdminJadwalController::class, 'verifyPaymentProof'])->name('jadwal.verifyPaymentProof');
     Route::put('/jadwal/update-tanggal/{id}', [AdminJadwalController::class, 'updateTanggal'])->name('admin.jadwal.updateTanggal');
-});
+    // Laporan Transaksi Admin
+    Route::get('/laporan-transaksi', [LaporanController::class, 'index'])->name('laporan.transaksi');
+    Route::get('/laporan-transaksi/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.transaksi.pdf');
+    // Laporan Transaksi Admin
+    Route::get('/laporan-transaksi', [LaporanController::class, 'index'])->name('laporan.transaksi');
+    Route::get('/laporan-transaksi/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.transaksi.pdf');
+    Route::get('/laporan-transaksi/excel', [LaporanController::class, 'exportExcel'])->name('laporan.transaksi.excel'); // <-- TAMBAHKAN INI
+    // baris penutup grup admin
+    });
 
 // ---------- Client ----------
 Route::middleware(['auth', 'role:client'])->group(function () {
