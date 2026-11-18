@@ -51,6 +51,8 @@ class ReservasiController extends Controller
                 'id_item' => ['nullable', 'required_if:jenis_pesanan,paket', 'regex:/^paket:[0-9]+$/'],
                 'id_items' => ['nullable', 'required_if:jenis_pesanan,layanan', 'array', 'min:1'],
                 'id_items.*' => ['required', 'integer', 'distinct', 'exists:layanans,id_layanan'],
+                'catatan_layanan' => ['nullable', 'array'],
+                'catatan_layanan.*' => ['nullable', 'string', 'max:1500'],
                 'tgl_acara' => ['required', 'date', 'after_or_equal:today'],
                 'full_day' => ['nullable', 'boolean'],
                 'waktu_mulai' => ['required_unless:full_day,1', 'nullable', 'date_format:H:i'],
@@ -129,6 +131,7 @@ class ReservasiController extends Controller
                         $layanan->id_layanan => [
                             'nama_layanan' => $layanan->nama_layanan,
                             'harga_layanan' => $layanan->harga,
+                            'catatan_layanan' => $validated['catatan_layanan'][$layanan->id_layanan] ?? null,
                         ],
                     ])->all());
                 }
@@ -204,9 +207,6 @@ class ReservasiController extends Controller
             $updateData = [];
             if ($request->has('status_reservasi')) {
                 $updateData['status_reservasi'] = $request->status_reservasi;
-            }
-            if ($request->has('bukti_transfer')) {
-                $updateData['bukti_transfer'] = $request->bukti_transfer;
             }
 
             $reservasi->update($updateData);

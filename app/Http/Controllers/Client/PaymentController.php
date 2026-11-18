@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Reservasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -17,7 +16,7 @@ class PaymentController extends Controller
         abort_if(in_array($reservasi->payment_status, ['paid', 'proof_verified'], true), 403, 'Pembayaran reservasi ini sudah diterima.');
         abort_unless($reservasi->status_reservasi === 'Disetujui', 403, 'Reservasi belum disetujui admin.');
 
-        return view('client.pembayaran', compact('reservasi'));
+        return redirect()->route('client.riwayat.transaksi', ['reservasi' => $reservasi->id_reservasi]);
     }
 
     public function create(Reservasi $reservasi)
@@ -92,32 +91,56 @@ class PaymentController extends Controller
 
         return response()->json([
             'token' => $response->json('token'),
+            'redirect_url' => $response->json('redirect_url'),
             'order_id' => $orderId,
         ]);
     }
 
-    public function uploadProof(Request $request, Reservasi $reservasi)
+    public function syncStatus(Reservasi $reservasi)
     {
         abort_unless($reservasi->id_akun === auth()->id(), 403);
 
-        abort_if($reservasi->payment_status === 'proof_verified', 403, 'Bukti pembayaran sudah diterima admin.');
-
-        $validated = $request->validate([
-            'bukti_transfer' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-        ], [
-            'bukti_transfer.required' => 'Pilih file bukti pembayaran.',
-            'bukti_transfer.mimes' => 'Bukti harus berupa JPG, PNG, atau PDF.',
-            'bukti_transfer.max' => 'Ukuran bukti maksimal 2 MB.',
-        ]);
-
-        if ($reservasi->bukti_transfer && Storage::disk('public')->exists($reservasi->bukti_transfer)) {
-            Storage::disk('public')->delete($reservasi->bukti_transfer);
+        if ($reservasi->payment_status === 'paid' || ! $reservasi->payment_order_id) {
+            return response()->json(['payment_status' => $reservasi->payment_status ?? 'unpaid']);
         }
 
-        $path = $validated['bukti_transfer']->store('bukti-pembayaran', 'public');
-        $reservasi->update(['bukti_transfer' => $path]);
+        $baseUrl = config('services.midtrans.is_production')
+            ? 'https://api.midtrans.com/v2'
+            : 'https://api.sandbox.midtrans.com/v2';
 
-        return back()->with('success', 'Bukti pembayaran berhasil diunggah dan menunggu verifikasi admin.');
+        $response = Http::withBasicAuth(config('services.midtrans.server_key'), '')
+            ->acceptJson()
+            ->get($baseUrl . '/' . rawurlencode($reservasi->payment_order_id) . '/status');
+
+        if ($response->failed()) {
+            return response()->json(['payment_status' => $reservasi->payment_status ?? 'unpaid'], 502);
+        }
+
+        $data = $response->json();
+        if (($data['order_id'] ?? null) !== $reservasi->payment_order_id
+            || (int) round((float) ($data['gross_amount'] ?? 0)) !== $this->amount($reservasi)) {
+            return response()->json(['payment_status' => $reservasi->payment_status ?? 'unpaid'], 422);
+        }
+
+        $status = $data['transaction_status'] ?? 'pending';
+        $fraud = $data['fraud_status'] ?? null;
+        $paymentStatus = match (true) {
+            $status === 'settlement' => 'paid',
+            $status === 'capture' && $fraud !== 'challenge' => 'paid',
+            $status === 'expire' => 'expired',
+            default => $status,
+        };
+
+        Reservasi::whereKey($reservasi->getKey())
+            ->where('payment_status', '!=', 'paid')
+            ->update([
+                'payment_status' => $paymentStatus,
+                'paid_at' => $paymentStatus === 'paid' ? now() : $reservasi->paid_at,
+            ]);
+
+        $reservasi->refresh();
+
+        return response()->json(['payment_status' => $reservasi->payment_status]);
     }
 
     public function notification(Request $request)
@@ -140,6 +163,11 @@ class PaymentController extends Controller
             return response()->json(['success' => true]);
         }
 
+        // Jangan menerima notifikasi pembayaran dengan nominal yang berbeda dari tagihan.
+        if ((int) round((float) ($data['gross_amount'] ?? 0)) !== $this->amount($reservasi)) {
+            return response()->json(['message' => 'Nominal pembayaran tidak sesuai.'], 422);
+        }
+
         $status = $data['transaction_status'] ?? 'pending';
         $fraud = $data['fraud_status'] ?? null;
 
@@ -150,10 +178,14 @@ class PaymentController extends Controller
             default => $status,
         };
 
-        $reservasi->update([
-            'payment_status' => $paymentStatus,
-            'paid_at' => $paymentStatus === 'paid' ? now() : $reservasi->paid_at,
-        ]);
+        // Status paid bersifat final agar notifikasi pending/expire yang terlambat
+        // tidak menurunkan status transaksi yang sudah berhasil dibayar.
+        if ($reservasi->payment_status !== 'paid') {
+            $reservasi->update([
+                'payment_status' => $paymentStatus,
+                'paid_at' => $paymentStatus === 'paid' ? now() : $reservasi->paid_at,
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }

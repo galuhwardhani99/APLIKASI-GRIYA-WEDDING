@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -287,88 +287,55 @@
                         <th>Status Pembayaran</th>
                     </tr>
                 </thead>
-<tbody>
-    @forelse($transaksi as $item)
-        <tr>
-            @php($namaLayananTerpilih = $item->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
-            
-            {{-- 1. Kode Reservasi --}}
-            <td><strong>{{ $item->kode_reservasi }}</strong></td>
-            
-            {{-- 2. Paket / Layanan --}}
-            <td>{{ $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: $item->paket?->nama_paket ?: $item->layanan?->nama_layanan ?: $item->detail_acara ?: '—') }}</td>
-            
-            {{-- 3. Tanggal Booking (Perbaikan nama kolom database) --}}
-            @php($tglTampil = $item->tanggal_acara ?? $item->tanggal_pengajuan)
-            <td>{{ $tglTampil ? \Carbon\Carbon::parse($tglTampil)->translatedFormat('d F Y') : '—' }}</td>
-            
-            {{-- 4. Jumlah --}}
-            <td>{{ $item->jumlah_pesanan }}</td>
-            
-            {{-- 5. Total Biaya --}}
-            <td><strong>Rp {{ number_format($item->biaya_sewa ?: (($item->harga_paket ?? $item->harga_layanan ?? 0) * $item->jumlah_pesanan), 0, ',', '.') }}</strong></td>
-            
-            {{-- 6. Status Pembayaran & Tombol WA --}}
-            <td>
-                <span class="history-status {{ $item->bukti_transfer ? 'has-proof' : '' }}">
-                    @if($item->bukti_transfer)
-                        <i class="fa-solid fa-circle-check"></i> Bukti Pembayaran Diterima
-                    @else
-                        <i class="fa-solid fa-clock"></i> Segera Chat Admin
-                    @endif
-                </span>
-                <small class="history-note">Status Reservasi: {{ ucfirst($item->status_reservasi) }}</small>
-                
-                <?php
-                    $isApproved = ($item->status_reservasi === 'Disetujui');
-                    $isUnpaid = !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true);
-                ?>
-
-                @if($isApproved && $isUnpaid)
-                    <?php
-                        $waNamaPaket = $item->nama_paket ?? $namaLayananTerpilih ?? $item->nama_layanan ?? $item->paket?->nama_paket ?? $item->layanan?->nama_layanan ?? '—';
-                        
-                        $biayaSewa = $item->biaya_sewa ?? 0;
-                        $hargaPaket = $item->harga_paket ?? $item->harga_layanan ?? 0;
-                        $jumlah = $item->jumlah_pesanan ?? 1;
-                        $waTotalBiaya = $biayaSewa > 0 ? $biayaSewa : ($hargaPaket * $jumlah);
-                        
-                        // Tanggal untuk format Struk WA (d/m/Y)
-                        $rawTgl = $item->tanggal_acara ?? $item->tanggal_pengajuan;
-                        $waTgl = $rawTgl ? \Carbon\Carbon::parse($rawTgl)->translatedFormat('d/m/Y') : '—';
-                        
-                        // Nama Acara dari database
-                        $waNamaAcara = $item->jenis_acara ?: ($item->detail_acara ?: 'Acara Saya');
-                        
-                        $waText = "GRIYA RIAS ELLY JR.\n"
-                                . "Jl. Rengganis Nomor 333A Doko, Kab. Kediri\n"
-                                . "Tgl : " . $waTgl . "\n"
-                                . "Kode : " . $item->kode_reservasi . "\n"
-                                . "Plgn : " . auth()->user()->name . "\n"
-                                . "Acara : " . $waNamaAcara . "\n"
-                                . "Paket : " . $waNamaPaket . "\n"
-                                . "TOTAL : Rp " . number_format($waTotalBiaya, 0, ',', '.') . "\n\n"
-                                . "Halo Admin, reservasi saya telah berhasil divalidasi. Saya ingin mendiskusikan detail persiapan acara saya. Kapan saya bisa datang atau menghubungi admin untuk diskusi detailnya?\n\n"
-                                . "Terima kasih! :)";
-                    ?>
-                    <a class="btn-gold" href="https://wa.me/6287850875676?text={{ rawurlencode($waText) }}" target="_blank" rel="noopener noreferrer" style="margin-top:8px;padding:7px 10px;font-size:.72rem;">
-                        <i class="fa-brands fa-whatsapp"></i> Kirim via WhatsApp
-                    </a>
-                @elseif($item->status_reservasi !== 'Disetujui')
-                    <small class="history-note"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
-                @endif
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="6" class="history-empty">
-                <i class="fa-solid fa-receipt" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
-                Belum ada transaksi booking. Setelah mengajukan reservasi, ringkasannya akan muncul di sini.
-            </td>
-        </tr>
-    @endforelse
-</tbody>
-        </table>
+                <tbody>
+                    @forelse($transaksi as $item)
+                        <tr>
+                            @php($namaLayananTerpilih = $item->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
+                            <td><strong>{{ $item->kode_reservasi }}</strong></td>
+                            <td>
+                                {{ $item->nama_paket ?: ($namaLayananTerpilih ?: $item->nama_layanan ?: $item->paket?->nama_paket ?: $item->layanan?->nama_layanan ?: $item->detail_acara ?: '—') }}
+                                @foreach($item->layanans as $layananTerpilih)
+                                    @if($layananTerpilih->pivot->catatan_layanan)
+                                        <small style="display:block;white-space:pre-line;color:var(--text-muted);"><strong>Catatan {{ $layananTerpilih->pivot->nama_layanan }}:</strong> {{ $layananTerpilih->pivot->catatan_layanan }}</small>
+                                    @endif
+                                @endforeach
+                            </td>
+                            <td>{{ ($item->tanggal_acara ?? $item->tgl_acara ?? $item->tanggal_pengajuan ?? $item->tgl_reservasi)?->translatedFormat('d F Y') ?? 'â€”' }}</td>
+                            <td>{{ $item->jumlah_pesanan }}</td>
+                            <td><strong>Rp {{ number_format($item->biaya_sewa ?: (($item->harga_paket ?? $item->harga_layanan ?? 0) * $item->jumlah_pesanan), 0, ',', '.') }}</strong></td>
+                            <td>
+                                @php($paymentStatus = $item->payment_status ?? 'unpaid')
+                                <span id="payment-status-{{ $item->id_reservasi }}" class="history-status {{ in_array($paymentStatus, ['paid', 'proof_verified'], true) ? 'has-proof' : '' }}" @if($item->payment_order_id && !in_array($paymentStatus, ['paid', 'proof_verified'], true)) data-payment-sync-url="{{ route('reservasi.payment.sync', $item) }}" @endif>
+                                    @if($paymentStatus === 'paid')
+                                        <i class="fa-solid fa-circle-check"></i> Pembayaran Lunas
+                                    @elseif($paymentStatus === 'proof_verified')
+                                        <i class="fa-solid fa-circle-check"></i> Pembayaran Lunas
+                                    @elseif(in_array($paymentStatus, ['pending', 'authorize', 'capture'], true))
+                                        <i class="fa-solid fa-clock"></i> Menunggu Pembayaran
+                                    @else
+                                        <i class="fa-solid fa-clock"></i> {{ $paymentStatus === 'expired' ? 'Pembayaran Kedaluwarsa' : 'Belum Ada Pembayaran' }}
+                                    @endif
+                                </span>
+                                <small class="history-note">Status Reservasi: {{ ucfirst($item->status_reservasi) }}</small>
+                                @if($item->status_reservasi === 'Disetujui' && !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
+                                    <button type="button" class="btn-gold js-open-payment-modal" data-modal="payment-modal-{{ $item->id_reservasi }}" style="border:0;margin-top:8px;padding:7px 10px;font-size:.72rem;cursor:pointer;">
+                                        <i class="fa-solid fa-arrow-right"></i> Lanjutkan Pembayaran
+                                    </button>
+                                @elseif($item->status_reservasi !== 'Disetujui')
+                                    <small class="history-note"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</small>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="history-empty">
+                                <i class="fa-solid fa-receipt" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
+                                Belum ada transaksi booking. Setelah mengajukan reservasi, ringkasannya akan muncul di sini.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
 
         <div class="history-pagination">
@@ -382,7 +349,7 @@
             <div class="payment-modal" id="payment-modal-{{ $item->id_reservasi }}" hidden>
                 <div class="payment-modal-card" role="dialog" aria-modal="true" aria-labelledby="payment-title-{{ $item->id_reservasi }}">
                     <div class="payment-modal-head">
-                        <div><h2 id="payment-title-{{ $item->id_reservasi }}">Lanjutkan Pembayaran</h2><small style="color:var(--text-muted);">{{ $item->kode_reservasi }} · Reservasi disetujui admin</small></div>
+                        <div><h2 id="payment-title-{{ $item->id_reservasi }}">Lanjutkan Pembayaran</h2><small style="color:var(--text-muted);">{{ $item->kode_reservasi }} Â· Reservasi disetujui admin</small></div>
                         <button type="button" class="payment-modal-close js-close-payment-modal" data-modal="payment-modal-{{ $item->id_reservasi }}" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="payment-modal-grid">
@@ -395,18 +362,15 @@
                                 <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="shopeepay"> ShopeePay</label>
                                 <label class="payment-method-modal"><input type="radio" name="payment_method_{{ $item->id_reservasi }}" value="credit_card"> Kartu Kredit</label>
                             </div>
-                            <button type="button" class="payment-modal-pay js-midtrans-pay" data-url="{{ route('reservasi.payment.create', $item) }}" data-modal="payment-modal-{{ $item->id_reservasi }}"><i class="fa-solid fa-lock"></i> Bayar Sekarang</button>
+                            <button type="button" class="payment-modal-pay js-midtrans-pay" data-url="{{ route('reservasi.payment.create', $item) }}" data-sync-url="{{ route('reservasi.payment.sync', $item) }}" data-status-id="payment-status-{{ $item->id_reservasi }}" data-modal="payment-modal-{{ $item->id_reservasi }}" data-simulator-enabled="{{ config('services.midtrans.is_production') ? 'false' : 'true' }}"><i class="fa-solid fa-lock"></i> Bayar Sekarang</button>
+                            @unless(config('services.midtrans.is_production'))
+                                <p style="margin:9px 0 0;color:var(--text-muted);font-size:.72rem;line-height:1.5;">Untuk Sandbox, salin nomor VA atau kode pembayaran dari Snap, tutup popup, lalu klik tombol lagi untuk membuka Simulator Midtrans.</p>
+                            @endunless
                         </section>
                         <section class="payment-modal-section">
                             <h3>Ringkasan Transaksi</h3>
                             <div style="display:flex;justify-content:space-between;gap:12px;font-size:.82rem;padding:10px 0;border-bottom:1px solid var(--border-color);"><span style="color:var(--text-muted)">Paket / layanan</span><strong>{{ $item->nama_paket ?: ($item->nama_layanan ?: $item->detail_acara) }}</strong></div>
                             <div style="display:flex;justify-content:space-between;font-size:.82rem;padding:14px 0 0;"><span style="color:var(--text-muted)">Total</span><strong style="color:var(--gold-primary);font-size:1.15rem;">Rp {{ number_format($totalModal, 0, ',', '.') }}</strong></div>
-                            <form action="{{ route('reservasi.payment.proof', $item) }}" method="POST" enctype="multipart/form-data" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border-color);">
-                                @csrf
-                                <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:7px;">Upload bukti pembayaran</label>
-                                <input type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required style="width:100%;font-size:.75rem;">
-                                <button type="submit" style="margin-top:10px;border:1px solid var(--gold-primary);background:#fff;color:var(--gold-hover);border-radius:8px;padding:9px 11px;cursor:pointer;font-weight:600;font-size:.75rem;"><i class="fa-solid fa-upload"></i> Upload Bukti</button>
-                            </form>
                         </section>
                     </div>
                 </div>
@@ -416,7 +380,9 @@
 </body>
 <!-- SweetAlert2 CDN & Script Konfirmasi -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+@if(config('services.midtrans.client_key'))
+    <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+@endif
 <script>
     document.querySelectorAll('.js-open-payment-modal').forEach(button => button.addEventListener('click', () => {
         document.getElementById(button.dataset.modal).hidden = false;
@@ -430,22 +396,89 @@
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') document.querySelectorAll('.payment-modal:not([hidden])').forEach(modal => modal.hidden = true);
     });
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
     document.querySelectorAll('.js-midtrans-pay').forEach(button => button.addEventListener('click', async () => {
         const modal = document.getElementById(button.dataset.modal);
+        if (button.dataset.simulatorReady === 'true') {
+            window.open('https://simulator.sandbox.midtrans.com/', '_blank', 'noopener');
+            return;
+        }
         const method = modal.querySelector('input[type="radio"]:checked')?.value;
         if (!method) { Swal.fire('Pilih metode pembayaran', 'Silakan pilih metode pembayaran terlebih dahulu.', 'info'); return; }
         button.disabled = true;
         try {
-            const response = await fetch(button.dataset.url, { method:'POST', headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json','Content-Type':'application/json'}, body:JSON.stringify({payment_method:method}) });
+            const response = await fetch(button.dataset.url, { method:'POST', headers:{'X-CSRF-TOKEN':csrfToken,'Accept':'application/json','Content-Type':'application/json'}, body:JSON.stringify({payment_method:method}) });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Pembayaran gagal dibuat.');
-            window.snap.pay(data.token, { onSuccess:() => location.reload(), onPending:() => location.reload(), onError:() => Swal.fire('Pembayaran gagal','Silakan coba lagi.','error'), onClose:() => button.disabled = false });
+            if (!data.token || !window.snap) throw new Error('Snap Midtrans belum siap. Muat ulang halaman lalu coba lagi.');
+            button.dataset.simulatorReady = 'false';
+            button.dataset.orderId = data.order_id;
+            const statusElement = document.getElementById(button.dataset.statusId);
+            if (statusElement) statusElement.dataset.paymentSyncUrl = button.dataset.syncUrl;
+            window.snap.pay(data.token, {
+                onSuccess: () => { button.innerHTML = '<i class="fa-solid fa-check"></i> Pembayaran berhasil'; syncPaymentStatuses(); },
+                onPending: () => enableSandboxSimulator(button),
+                onError: () => { button.disabled = false; button.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang'; Swal.fire('Pembayaran gagal','Silakan coba lagi.','error'); },
+                onClose: () => enableSandboxSimulator(button),
+            });
         } catch (error) { Swal.fire('Gagal', error.message, 'error'); button.disabled = false; }
     }));
 
-    function previewProof(url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
+    function enableSandboxSimulator(button) {
+        if (button.dataset.simulatorEnabled === 'true') {
+            button.dataset.simulatorReady = 'true';
+            button.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Lanjut ke Simulator Sandbox';
+        } else {
+            button.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang';
+        }
+        button.disabled = false;
     }
+
+    async function syncPaymentStatuses() {
+        for (const statusElement of document.querySelectorAll('[data-payment-sync-url]')) {
+            try {
+                const response = await fetch(statusElement.dataset.paymentSyncUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                });
+                if (!response.ok) continue;
+                const data = await response.json();
+                if (['pending', 'authorize', 'capture'].includes(data.payment_status)) {
+                    statusElement.innerHTML = '<i class="fa-solid fa-clock"></i> Menunggu Pembayaran';
+                } else if (data.payment_status === 'expired') {
+                    statusElement.innerHTML = '<i class="fa-solid fa-clock"></i> Pembayaran Kedaluwarsa';
+                }
+                if (data.payment_status === 'paid') {
+                    statusElement.classList.add('has-proof');
+                    statusElement.innerHTML = '<i class="fa-solid fa-circle-check"></i> Pembayaran Lunas';
+                    statusElement.removeAttribute('data-payment-sync-url');
+                    const row = statusElement.closest('tr');
+                    const modalTrigger = row?.querySelector('.js-open-payment-modal');
+                    if (modalTrigger) {
+                        const modal = document.getElementById(modalTrigger.dataset.modal);
+                        if (modal) modal.hidden = true;
+                        modalTrigger.remove();
+                    }
+                } else if (data.payment_status === 'proof_verified') {
+                    statusElement.classList.add('has-proof');
+                    statusElement.innerHTML = '<i class="fa-solid fa-circle-check"></i> Pembayaran Lunas';
+                    statusElement.removeAttribute('data-payment-sync-url');
+                }
+            } catch (error) {
+                // Tetap coba lagi pada siklus berikutnya jika Midtrans belum dapat dijangkau.
+            }
+        }
+    }
+    const requestedReservation = new URLSearchParams(window.location.search).get('reservasi');
+    if (requestedReservation) {
+        const paymentModal = document.getElementById(`payment-modal-${requestedReservation}`);
+        if (paymentModal) paymentModal.hidden = false;
+    }
+    syncPaymentStatuses();
+    window.setInterval(syncPaymentStatuses, 15000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') syncPaymentStatuses();
+    });
 
     function confirmLogoutClient() {
         Swal.fire({

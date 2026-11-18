@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -297,11 +297,16 @@
                                 <small>Diajukan {{ ($reservasi->tanggal_pengajuan ?? $reservasi->tgl_reservasi)?->format('d/m/Y') }}</small>
                             </td>
                             <td>
-                                {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—') }}
+                                {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: 'â€”') }}
                                 <small>{{ $reservasi->lokasi_acara ?: $reservasi->lokasi }}</small>
+                                @foreach($reservasi->layanans as $layananTerpilih)
+                                    @if($layananTerpilih->pivot->catatan_layanan)
+                                        <small style="white-space:pre-line;"><strong>Catatan {{ $layananTerpilih->pivot->nama_layanan }}:</strong> {{ $layananTerpilih->pivot->catatan_layanan }}</small>
+                                    @endif
+                                @endforeach
                             </td>
-                            <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? '—' }}</td>
-                            <td>{{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '—' }} – {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '—' }}</td>
+                            <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? 'â€”' }}</td>
+                            <td>{{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : 'â€”' }} â€“ {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : 'â€”' }}</td>
                             <td>{{ $reservasi->jumlah_pesanan }}</td>
                             <td>
                                 <span class="history-status">{{ $reservasi->status_reservasi }}</span>
@@ -312,10 +317,10 @@
                                     <div class="payment-amount">Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</div>
                                     
                                     @if(in_array($reservasi->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
-                                        <div class="payment-status-info" style="color:#15803D;"><i class="fa-solid fa-circle-check"></i> Pembayaran berhasil</div>
+                                        <div class="payment-status-info" style="color:#15803D;"><i class="fa-solid fa-circle-check"></i> Pembayaran lunas</div>
                                     @else
                                         @if($reservasi->status_reservasi === 'Disetujui' && config('services.midtrans.client_key') && $totalPembayaran > 0)
-                                            <a class="btn-gold" href="{{ route('client.payment.show', $reservasi) }}" style="text-decoration:none;padding:6px 10px;font-size:.75rem;justify-content:center;">
+                                            <a class="btn-gold" href="{{ route('client.riwayat.transaksi', ['reservasi' => $reservasi->id_reservasi]) }}" style="text-decoration:none;padding:6px 10px;font-size:.75rem;justify-content:center;">
                                                 <i class="fa-solid fa-credit-card"></i> Lanjut ke Pembayaran
                                             </a>
                                         @elseif($reservasi->status_reservasi !== 'Disetujui')
@@ -325,26 +330,6 @@
                                         @endif
                                     @endif
 
-                                    <!-- Form Upload / Ganti Bukti & Pratinjau -->
-                                    <form action="{{ route('reservasi.payment.proof', $reservasi) }}" method="POST" enctype="multipart/form-data" style="border-top:1px dashed #E5DCD0;padding-top:8px;margin-top:2px;">
-                                        @csrf
-                                        <div style="display:flex;flex-direction:column;gap:6px;">
-                                            <input type="file" name="bukti_transfer" accept=".jpg,.jpeg,.png,.pdf" required style="font-size:.72rem;width:100%;">
-                                            <div style="display:flex;gap:6px;">
-                                                <button type="submit" style="flex:1;border:1px solid #C58F43;background:var(--gold-primary);color:#fff;border-radius:6px;padding:6px;font-size:.72rem;font-weight:700;cursor:pointer;">
-                                                    <i class="fa-solid fa-upload"></i> {{ $reservasi->bukti_transfer ? 'Ganti Bukti' : 'Upload' }}
-                                                </button>
-                                                @if($reservasi->bukti_transfer)
-                                                    <button type="button" onclick="previewProof('{{ asset('storage/' . $reservasi->bukti_transfer) }}')" style="border:1px solid #C58F43;background:#fff;color:var(--gold-primary);border-radius:6px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;" title="Pratinjau Bukti">
-                                                        <i class="fa-solid fa-eye"></i> Pratinjau
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        @if($reservasi->bukti_transfer)
-                                            <small style="color:#15803D;margin-top:4px;display:block;"><i class="fa-solid fa-circle-check"></i> Bukti sudah diunggah</small>
-                                        @endif
-                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -380,34 +365,6 @@
                 color: '#241A16'
             });
         @endif
-
-        // Fungsi Pratinjau Bukti Pembayaran (Mendukung Gambar & PDF)
-        function previewProof(url) {
-            // Cek apakah file berformat PDF atau Gambar berdasarkan ekstensi URL
-            const isPdf = url.toLowerCase().endsWith('.pdf');
-
-            let contentHtml = '';
-            if (isPdf) {
-                // Jika PDF, gunakan tag embed/iframe agar bisa digulir dan dilihat layaknya dokumen
-                contentHtml = `<embed src="${url}" type="application/pdf" width="100%" height="500px" style="border-radius:8px;" />`;
-            } else {
-                // Jika Gambar (JPG/PNG), tampilkan dalam tag img yang responsif
-                contentHtml = `<img src="${url}" alt="Bukti Transfer" style="max-width:100%; height:auto; max-height:75vh; border-radius:8px; object-fit:contain;" />`;
-            }
-
-            Swal.fire({
-                title: 'Pratinjau Bukti Pembayaran',
-                html: contentHtml,
-                width: '700px',
-                confirmButtonColor: '#C58F43',
-                confirmButtonText: 'Tutup',
-                background: '#FFFFFF',
-                color: '#241A16',
-                customClass: {
-                    popup: 'swal2-preview-popup'
-                }
-            });
-        }
 
         function confirmLogoutClient() {
             Swal.fire({
