@@ -47,8 +47,20 @@ class WhatsAppController extends Controller
             }
 
             // 1. Pesan Pengingat H-1 Acara Wedding
-            $linkRiwayat = route('client.riwayat.reservasi'); 
-            $pesanAcara = "Halo *{$namaPemesan}*,\n\nMengingatkan bahwa acara *{$namaAcara}* Anda akan dilangsungkan BESOK! 🎉\n\nSilakan cek detail riwayat pemesanan Anda di sini:\n{$linkRiwayat}";
+            $tanggal = Carbon::parse($item->tanggal_acara)->format('d/m/Y');
+            $total   = 'Rp ' . number_format($item->total_harga ?? 0, 0, ',', '.'); // Sesuaikan nama kolom total
+
+            $pesanAcara = "GRIYA RIAS ELLY JR.\n"
+                . "Jl. Rengganis Nomor 333A Doko, Kab. Kediri\n"
+                . "Tgl : {$tanggal}\n"
+                . "Kode : {$item->kode_reservasi}\n"
+                . "Plgn : {$namaPemesan}\n"
+                . "Acara : " . ($item->jenis_acara ?: '-') . "\n"
+                . "Paket : {$namaAcara}\n"
+                . "TOTAL : {$total}\n\n"
+                . "Halo Admin, reservasi saya telah berhasil divalidasi. "
+                . "Saya ingin berdiskusi mengenai pembayaran. "
+                . "Kapan saya bisa bertemu untuk diskusi pembayaran?";
             
             $this->kirimFonnte($noHp, $pesanAcara);
 

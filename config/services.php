@@ -40,6 +40,10 @@ return [
         'whatsapp' => env('GRIYA_WHATSAPP', '087850875676'),
     ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+    ],
+
     'midtrans' => [
         'server_key' => env('MIDTRANS_SERVER_KEY'),
         'client_key' => env('MIDTRANS_CLIENT_KEY'),
