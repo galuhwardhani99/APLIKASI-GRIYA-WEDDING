@@ -196,12 +196,7 @@
                         </div>
 
                         <div class="card-actions">
-                            <form action="{{ route('admin.jadwal.kirimWa', $item->id_reservasi) }}" method="POST" style="margin: 0;">
-                                @csrf
-                                <button type="submit" class="btn-sm" style="background:#10B981; color:#fff;" title="Kirim pengingat WhatsApp">
-                                    <i class="fa-brands fa-whatsapp"></i> WA
-                                </button>
-                            </form>
+                        
                             
                             @php
                                 $isTervalidasi = ($item->status_reservasi == 'Disetujui') || ($item->jadwal &&$item->jadwal->status_validasi == 'Tervalidasi');
