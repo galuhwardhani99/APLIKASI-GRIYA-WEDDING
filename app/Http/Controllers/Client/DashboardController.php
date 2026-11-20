@@ -78,11 +78,30 @@ class DashboardController extends Controller
 
     public function riwayatReservasi(): View
     {
+        $userId = auth()->id();
+        $seenValidations = session('client_seen_validations', []);
+
+        // Ambil reservasi yang berstatus Disetujui / Ditolak & belum dibayar
+        $validatedReservasis = Reservasi::where('id_akun', $userId)
+            ->whereIn('status_reservasi', ['Disetujui', 'Ditolak'])
+            ->whereNotIn('payment_status', ['paid', 'proof_verified'])
+            ->get(['id_reservasi', 'kode_reservasi', 'status_reservasi']);
+
+        // Filter hanya yang benar-benar belum pernah dilihat oleh client
+        $newlyValidatedList = $validatedReservasis->filter(function ($item) use ($seenValidations) {
+            $key = $item->id_reservasi . ':' . $item->status_reservasi;
+            return !in_array($key, $seenValidations, true);
+        })->values();
+
+        // Tandai semuanya sudah dilihat di session
+        $newSeenKeys = $validatedReservasis->map(fn ($item) => $item->id_reservasi . ':' . $item->status_reservasi)->all();
+        session(['client_seen_validations' => array_values(array_unique(array_merge($seenValidations, $newSeenKeys)))]);
+
         $reservasis = Reservasi::with(['paket', 'layanans', 'jadwal'])
-            ->where('id_akun', auth()->id())
+            ->where('id_akun', $userId)
             ->latest('id_reservasi')->paginate(10);
 
-        return view('client.riwayat-reservasi', compact('reservasis'));
+        return view('client.riwayat-reservasi', compact('reservasis', 'newlyValidatedList'));
     }
 
     public function riwayatTransaksi(): View

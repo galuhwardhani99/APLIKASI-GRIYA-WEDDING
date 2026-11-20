@@ -16,6 +16,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
+        .badge-notification {
+            background-color: #EF4444;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+        }
         :root {
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
@@ -37,6 +52,26 @@
             display: flex; 
             min-height: 100vh; 
             -webkit-font-smoothing: antialiased;
+        }
+        .badge-paid {
+            background-color: #16A34A;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
+        }
+        .nav-item.active .badge-paid {
+            background-color: #FFFFFF;
+            color: #16A34A;
+            box-shadow: none;
         }
 
         /* Container Sidebar Freeze Teratur & Bergaris Tegas */
@@ -101,40 +136,40 @@
             display: flex; 
             align-items: center; 
             gap: 12px; 
-            padding: 14px 12px; 
+            padding: 14px 10px; 
             margin: 16px 0; 
             background: #FAFAFA; 
             border: 1px solid var(--border-color); 
             border-radius: 10px; 
         }
-
         .admin-sidebar-avatar { 
             width: 40px; 
             height: 40px; 
             border-radius: 50%; 
             display: grid; 
             place-items: center; 
-            background: #F4E6D2; 
-            color: #93622D; 
+            background: #f4e6d2; 
+            color: #93622d; 
             font-weight: 800; 
             flex-shrink: 0; 
-            border: 1px solid #EAD8BF;
         }
-
+        .admin-sidebar-user strong, .admin-sidebar-user small { display: block; }
         .admin-sidebar-user strong { font-size: .86rem; color: var(--text-dark); }
-        .admin-sidebar-user small { color: var(--text-muted); font-size: .72rem; margin-top: 2px; font-weight: 600; }
+        .admin-sidebar-user small { color: var(--text-muted); font-size: .72rem; margin-top: 3px; font-weight: 600; }
         
         /* Label Menu & Scrollbar */
-        .admin-nav-label { list-style: none; font-size: .65rem; letter-spacing: .15em; font-weight: 800; color: #A59A8E; padding: 10px 12px 4px; }
+        .admin-nav-label { list-style: none; font-size: .65rem; letter-spacing: .12em; font-weight: 800; color: #a59a8e; padding: 10px 12px 4px; }
         .admin-nav-spaced { margin-top: 12px; }
 
         .sidebar > nav { display: flex; flex: 1; min-height: 0; }
         .nav-menu { list-style: none; display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 4px; overflow-y: auto; padding-right: 4px; }
         .nav-menu::-webkit-scrollbar { width: 4px; }
+        .nav-menu::-webkit-scrollbar-track { background: transparent; }
         .nav-menu::-webkit-scrollbar-thumb { background-color: #EFE8DE; border-radius: 4px; }
+        .nav-menu { scrollbar-width: thin; scrollbar-color: #EFE8DE transparent; overscroll-behavior: contain; }
         
         .nav-item { 
-            padding: 10px 12px; 
+            padding: 11px 12px; 
             border-radius: 8px; 
             color: #55483F; 
             text-decoration: none; 
@@ -142,23 +177,21 @@
             display: flex; 
             align-items: center; 
             gap: 12px; 
-            transition: all .2s ease; 
+            transition: all .2s; 
             font-weight: 600; 
         }
-
         .nav-item i { width: 18px; text-align: center; color: #9B8877; font-size: 1rem; }
         .nav-item:hover { background-color: #FBF5EC; color: var(--gold-hover); }
-        .nav-item.active { background-color: var(--gold-primary); color: #FFF; font-weight: 700; box-shadow: 0 4px 10px rgba(197, 143, 67, 0.25); }
-        .nav-item.active i { color: #FFF; }
+        .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; box-shadow: 0 4px 10px rgba(197, 143, 67, 0.25); }
+        .nav-item.active i { color: #fff; }
 
-        /* Tombol Aksi Bawah Sidebar */
-        .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color); display: grid; gap: 8px; }
-        
+        /* Bottom Actions Sidebar */
+        .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color); display: grid; gap: 7px; }
         .btn-sidebar-home { 
             display: flex; 
             align-items: center; 
             gap: 12px; 
-            padding: 10px 12px; 
+            padding: 11px 12px; 
             border-radius: 8px; 
             color: #55483F; 
             text-decoration: none; 
@@ -167,32 +200,24 @@
             border: 1px solid var(--border-color);
             transition: all .2s ease; 
         }
-
-        .admin-sidebar-user { display:flex; align-items:center; gap:12px; padding:14px 10px; margin:16px 0; background:#FAFAFA; border:1px solid var(--border-color); border-radius:10px; }
-        .admin-sidebar-avatar { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:#f4e6d2; color:#93622d; font-weight:800; flex-shrink: 0; }
-        .admin-sidebar-user strong, .admin-sidebar-user small { display:block; }
-        .admin-sidebar-user strong { font-size:.86rem; }
-        .admin-sidebar-user small { color:var(--text-muted); font-size:.72rem; margin-top:3px; }
-        .admin-nav-label { list-style:none; font-size:.65rem; letter-spacing:.12em; font-weight:800; color:#a59a8e; padding:10px 12px 4px; }
-        .admin-nav-spaced { margin-top:12px; }
-
-        .nav-menu { list-style:none; display:flex; flex:1; min-height:0; flex-direction:column; gap:4px; overflow-y:auto; padding-right:4px; }
-        .nav-menu::-webkit-scrollbar { width:4px; }
-        .nav-menu::-webkit-scrollbar-track { background:transparent; }
-        .nav-menu::-webkit-scrollbar-thumb { background-color:#EFE8DE; border-radius:4px; }
-        .nav-menu { scrollbar-width:thin; scrollbar-color:#EFE8DE transparent; overscroll-behavior:contain; }
-        .nav-item { padding:11px 12px; border-radius:8px; color:#55483F; text-decoration:none; font-size:.86rem; display:flex; align-items:center; gap:12px; transition:all .2s; font-weight:600; }
-        .nav-item i { width:18px; text-align:center; color:#9B8877; }
-        .nav-item:hover { background-color:#FBF5EC; color:var(--gold-hover); }
-        .nav-item.active { background-color: var(--gold-primary); color: #fff; font-weight: 600; }
-        .nav-item.active i { color: #fff; }
-
-        /* Bottom Actions Sidebar */
-        .sidebar-footer { margin-top:auto; padding-top:16px; border-top:1px solid var(--border-color); display:grid; gap:7px; }
-        .btn-sidebar-home { display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:8px; color:#55483F; text-decoration:none; font-size:.86rem; font-weight:600; transition:all .2s ease; }
-        .btn-sidebar-home i { width:18px; text-align:center; color:#9B8877; }
-        .btn-sidebar-home:hover { background:#FBF5EC; color:var(--gold-hover); }
-        .btn-sidebar-logout { width:100%; display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; color:#B33B3B; background:#FFF5F5; border:1px solid #F1D0D0; font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s ease; font-family:inherit; }
+        .btn-sidebar-home i { width: 18px; text-align: center; color: #9B8877; }
+        .btn-sidebar-home:hover { background: #FBF5EC; color: var(--gold-hover); }
+        .btn-sidebar-logout { 
+            width: 100%; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 10px 12px; 
+            border-radius: 8px; 
+            color: #B33B3B; 
+            background: #FFF5F5; 
+            border: 1px solid #F1D0D0; 
+            font-size: .85rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all .2s ease; 
+            font-family: inherit; 
+        }
         .btn-sidebar-logout:hover { background-color: #FEE2E2; color: #991B1B; border-color: #F87171; }
 
         /* Main Content Container */
@@ -249,7 +274,45 @@
                     color: '#241A16'
                 });
             @endif
+
+            const paidCount = {{ $newPaidPaymentsCount ?? 0 }};
+            const prevPaidCount = Number(sessionStorage.getItem('admin_prev_paid_count') || 0);
+
+            if (paidCount > prevPaidCount) {
+                playAdminNotifSound();
+            }
+            sessionStorage.setItem('admin_prev_paid_count', paidCount);
         });
+
+        function playAdminNotifSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+
+            // Nada kasir / coin masuk (B5 -> E6)
+            const notes = [987.77, 1318.51];
+
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const startTime = now + (i * 0.11);
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+
+                gain.gain.setValueAtTime(0.001, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.25, startTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + 0.46);
+            });
+        } catch (e) {}
+    }
     </script>
 
     @stack('scripts')

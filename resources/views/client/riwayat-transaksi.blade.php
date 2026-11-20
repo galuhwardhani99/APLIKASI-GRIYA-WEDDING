@@ -11,6 +11,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        .badge-client-notif {
+    background-color: #16A34A;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
+}
+.client-sidebar-nav a.active .badge-client-notif {
+    background-color: #FFFFFF;
+    color: #C58F43;
+    box-shadow: none;
+}
         :root {
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
@@ -242,10 +262,18 @@
             <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
             <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
             
-            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
-            <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
+            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS &amp; AKUN</span>
+            <a href="{{ route('client.riwayat.reservasi') }}">
+                <i class="fa-regular fa-calendar"></i> Riwayat Reservasi
+                @if(isset($clientValidatedCount) && $clientValidatedCount > 0)
+                    <span class="badge-client-notif" title="Update Validasi Admin">{{ $clientValidatedCount }}</span>
+                @endif
+            </a>
             <a href="{{ route('client.riwayat.transaksi') }}" class="active">
                 <i class="fa-solid fa-receipt"></i> Riwayat Transaksi
+                @if(isset($clientApprovedReadyToPayCount) && $clientApprovedReadyToPayCount > 0)
+                    <span class="badge-client-notif" title="Menunggu Pembayaran">{{ $clientApprovedReadyToPayCount }}</span>
+                @endif
             </a>
             <a href="{{ route('user.profile.edit') }}">
                 <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
@@ -300,7 +328,7 @@
                                     @endif
                                 @endforeach
                             </td>
-                            <td>{{ ($item->tanggal_acara ?? $item->tgl_acara ?? $item->tanggal_pengajuan ?? $item->tgl_reservasi)?->translatedFormat('d F Y') ?? 'â€”' }}</td>
+                            <td>{{ ($item->tanggal_acara ?? $item->tgl_acara ?? $item->tanggal_pengajuan ?? $item->tgl_reservasi)?->translatedFormat('d F Y') ?? '&mdash;' }}</td>
                             <td>{{ $item->jumlah_pesanan }}</td>
                             <td><strong>Rp {{ number_format($item->biaya_sewa ?: (($item->harga_paket ?? $item->harga_layanan ?? 0) * $item->jumlah_pesanan), 0, ',', '.') }}</strong></td>
                             <td>
@@ -349,7 +377,7 @@
             <div class="payment-modal" id="payment-modal-{{ $item->id_reservasi }}" hidden>
                 <div class="payment-modal-card" role="dialog" aria-modal="true" aria-labelledby="payment-title-{{ $item->id_reservasi }}">
                     <div class="payment-modal-head">
-                        <div><h2 id="payment-title-{{ $item->id_reservasi }}">Lanjutkan Pembayaran</h2><small style="color:var(--text-muted);">{{ $item->kode_reservasi }} Â· Reservasi disetujui admin</small></div>
+                        <div><h2 id="payment-title-{{ $item->id_reservasi }}">Lanjutkan Pembayaran</h2><small style="color:var(--text-muted);">{{ $item->kode_reservasi }} &middot; Reservasi disetujui admin</small></div>
                         <button type="button" class="payment-modal-close js-close-payment-modal" data-modal="payment-modal-{{ $item->id_reservasi }}" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="payment-modal-grid">
@@ -384,6 +412,38 @@
     <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 @endif
 <script>
+    // Generator nada "ding" lembut tanpa perlu file MP3
+    function playSuccessSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+
+            // Arpeggio C Major cerah ala e-wallet (C5 -> E5 -> G5 -> C6)
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const startTime = now + (i * 0.085); // Jeda cepat antar nada (85ms)
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+
+                // Attack cepat & decay lembut seperti lonceng digital
+                gain.gain.setValueAtTime(0.001, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.28, startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.35);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + 0.36);
+            });
+        } catch (e) {}
+    }
+    
     document.querySelectorAll('.js-open-payment-modal').forEach(button => button.addEventListener('click', () => {
         document.getElementById(button.dataset.modal).hidden = false;
     }));
@@ -434,6 +494,8 @@
         button.disabled = false;
     }
 
+    let isPaymentAlertShown = false;
+
     async function syncPaymentStatuses() {
         for (const statusElement of document.querySelectorAll('[data-payment-sync-url]')) {
             try {
@@ -453,11 +515,29 @@
                     statusElement.innerHTML = '<i class="fa-solid fa-circle-check"></i> Pembayaran Lunas';
                     statusElement.removeAttribute('data-payment-sync-url');
                     const row = statusElement.closest('tr');
+                    const kodeTransaksi = row?.querySelector('td:first-child strong')?.textContent?.trim() || '';
                     const modalTrigger = row?.querySelector('.js-open-payment-modal');
                     if (modalTrigger) {
                         const modal = document.getElementById(modalTrigger.dataset.modal);
                         if (modal) modal.hidden = true;
                         modalTrigger.remove();
+                    }
+
+                    // Tampilkan SweetAlert centang hijau 100% Lunas
+                    if (!isPaymentAlertShown) {
+                        isPaymentAlertShown = true;
+                        playSuccessSound();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pembayaran Berhasil (Lunas 100%)!',
+                            html: `Transaksi <strong>${kodeTransaksi}</strong> telah terverifikasi lunas secara otomatis.`,
+                            confirmButtonColor: '#C58F43',
+                            confirmButtonText: 'Selesai',
+                            background: '#FFFFFF',
+                            color: '#241A16'
+                        }).then(() => {
+                            isPaymentAlertShown = false;
+                        });
                     }
                 } else if (data.payment_status === 'proof_verified') {
                     statusElement.classList.add('has-proof');

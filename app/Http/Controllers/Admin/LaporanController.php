@@ -11,6 +11,8 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
+        session(['admin_last_checked_paid' => now()]);
+        
         $tanggalMulai = $request->input('tanggal_mulai', now()->startOfMonth()->toDateString());
         $tanggalSelesai = $request->input('tanggal_selesai', now()->endOfMonth()->toDateString());
         $status = $request->input('status', 'Disetujui');

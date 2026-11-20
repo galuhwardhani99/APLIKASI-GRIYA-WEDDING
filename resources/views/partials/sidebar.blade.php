@@ -47,15 +47,21 @@
 
         <li class="admin-nav-label admin-nav-spaced">AKTIVITAS &amp; AKUN</li>
         <li>
-            <a href="{{ route('admin.jadwal.index') }}" class="nav-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
-                <i class="fa-regular fa-calendar"></i> Jadwal Acara
-            </a>
-        </li>
-        <li>
+    <a href="{{ route('admin.jadwal.index') }}" class="nav-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+        <i class="fa-regular fa-calendar"></i> Jadwal Acara
+        @if(isset($pendingReservationsCount) && $pendingReservationsCount > 0)
+            <span class="badge-notification">{{ $pendingReservationsCount }}</span>
+        @endif
+    </a>
+</li>
+            <li>
             <a href="{{ route('admin.laporan.transaksi') }}" class="nav-item {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
-         </a>
-        </li>        
+                <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+                @if(isset($newPaidPaymentsCount) && $newPaidPaymentsCount > 0)
+                    <span class="badge-paid" title="Pembayaran Lunas Baru">{{ $newPaidPaymentsCount }}</span>
+                @endif
+            </a>
+        </li>       
         <li>
             <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users-gear"></i> Kelola Akun

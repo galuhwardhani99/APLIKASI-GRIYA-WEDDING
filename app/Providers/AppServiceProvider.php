@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -9,28 +10,69 @@ use App\Models\Reservasi;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Paksa semua URL generated (asset/route) menggunakan HTTPS
         if (config('app.env') !== 'local' || request()->hasHeader('x-forwarded-proto')) {
             URL::forceScheme('https');
         }
 
-        // Mengirimkan variabel $pendingReservationsCount secara otomatis ke semua tampilan admin (admin/*)
-        View::composer('admin.*', function ($view) {
-            $count = Reservasi::where('status_reservasi', 'Menunggu Konfirmasi')->count();
-            $view->with('pendingReservationsCount', $count);
+        // Notifikasi Admin
+        View::composer(['admin.*', 'layouts.admin', 'partials.sidebar', 'user.profile', 'profile'], function ($view) {
+            $pendingCount = Reservasi::whereIn('status_reservasi', ['Menunggu Konfirmasi', 'Pending', 'pending'])->count();
+
+            $lastCheckedPaid = session('admin_last_checked_paid');
+            $paidQuery = Reservasi::whereIn('payment_status', ['paid', 'settlement', 'lunas', 'capture']);
+
+            if ($lastCheckedPaid) {
+                $paidQuery->where('updated_at', '>', $lastCheckedPaid);
+            } else {
+                $paidQuery->whereDate('updated_at', today());
+            }
+
+            $view->with([
+                'pendingReservationsCount' => $pendingCount,
+                'newPaidPaymentsCount' => $paidQuery->count(),
+            ]);
+        });
+
+        // Notifikasi Client
+        // Notifikasi Client
+        View::composer(['client.*', 'user.profile', 'profile'], function ($view) {
+            $clientValidatedCount = 0;
+            $clientApprovedReadyToPayCount = 0;
+
+            if (Auth::check() && Auth::user()->role !== 'admin') {
+                $userId = Auth::id();
+                $seenValidations = session('client_seen_validations', []);
+
+                // 1. Ambil reservasi yang berstatus Disetujui / Ditolak & belum dibayar
+                $validatedReservasis = Reservasi::where('id_akun', $userId)
+                    ->whereIn('status_reservasi', ['Disetujui', 'Ditolak'])
+                    ->whereNotIn('payment_status', ['paid', 'proof_verified'])
+                    ->get(['id_reservasi', 'status_reservasi']);
+
+                // Hitung hanya yang kombinasi "id:status"-nya belum pernah dilihat client
+                $clientValidatedCount = $validatedReservasis->filter(function ($item) use ($seenValidations) {
+                    $key = $item->id_reservasi . ':' . $item->status_reservasi;
+                    return !in_array($key, $seenValidations, true);
+                })->count();
+
+                // 2. Hitung reservasi yang sudah Disetujui tapi belum dibayar (untuk badge di Riwayat Transaksi)
+                $clientApprovedReadyToPayCount = Reservasi::where('id_akun', $userId)
+                    ->where('status_reservasi', 'Disetujui')
+                    ->whereNotIn('payment_status', ['paid', 'proof_verified'])
+                    ->count();
+            }
+
+            $view->with([
+                'clientValidatedCount' => $clientValidatedCount,
+                'clientApprovedReadyToPayCount' => $clientApprovedReadyToPayCount,
+            ]);
         });
     }
 }

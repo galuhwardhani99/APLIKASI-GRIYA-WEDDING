@@ -12,20 +12,19 @@
             <p style="color: #8C8279; font-size: 0.9rem; margin-top: 4px;">Rekapitulasi pemasukan dan riwayat transaksi pelanggan.</p>
         </div>
 
-{{-- Tombol Download Excel & Cetak PDF (Meneruskan parameter filter tanggal yang sedang aktif) --}}
+        {{-- Tombol Download Excel & Pratinjau PDF (Tombol PDF tetap merah) --}}
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{{ route('admin.laporan.transaksi.excel', request()->query()) }}" 
                style="background-color: #1D6F42; color: #FFF; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-file-excel"></i> Download Excel
             </a>
 
-            <a href="{{ route('admin.laporan.transaksi.pdf', request()->query()) }}" 
-               target="_blank"
-               style="background-color: #cc0404; color: #FFF; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
+            <button type="button" 
+                    onclick="openPdfPreview('{{ route('admin.laporan.transaksi.pdf', request()->query()) }}')"
+                    style="background-color: #cc0404; color: #FFF; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
                 <i class="fa-solid fa-file-pdf"></i> Cetak Laporan PDF
-            </a>
+            </button>
         </div>
-        </a>
     </div>
 
     {{-- Form Filter Tanggal & Status --}}
@@ -139,4 +138,66 @@
         </table>
     </div>
 </div>
+
+{{-- MODAL POPUP PRATINJAU PDF (TEMA COKELAT-CREAM) --}}
+<div id="pdfPreviewModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(36, 26, 22, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FDFBF7; width: 100%; max-width: 960px; height: 90vh; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #D8CEC0; box-shadow: 0 24px 60px rgba(36, 26, 22, 0.35);">
+        
+        {{-- Header Modal Cokelat-Gold --}}
+        {{-- Ubah baris 133 di transaksi.blade.php menjadi: --}}
+<div style="background-color: rgb(197, 143, 67); color: #FFFFFF; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-print" style="font-size: 1.15rem;"></i>
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 0; font-weight: 700; letter-spacing: 0.02em;">
+                    Pratinjau Laporan Transaksi
+                </h3>
+            </div>
+            <button type="button" onclick="closePdfPreview()" title="Tutup Pratinjau"
+                    style="background: rgba(255,255,255,0.18); border: none; color: #FFF; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; font-size: 1rem; transition: 0.2s;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        {{-- Kontainer Iframe PDF --}}
+        <div style="flex: 1; background: #EFE8DE; position: relative;">
+            <div id="pdfLoadingIndicator" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #55483F; gap: 10px;">
+                <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: #C58F43;"></i>
+                <span style="font-size: 0.9rem; font-weight: 600;">Memuat pratinjau dokumen PDF...</span>
+            </div>
+            <iframe id="pdfPreviewFrame" src="" style="width: 100%; height: 100%; border: none; position: relative; z-index: 2;" onload="document.getElementById('pdfLoadingIndicator').style.display='none';"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openPdfPreview(pdfUrl) {
+        const modal = document.getElementById('pdfPreviewModal');
+        const iframe = document.getElementById('pdfPreviewFrame');
+        const loader = document.getElementById('pdfLoadingIndicator');
+        
+        loader.style.display = 'flex';
+        iframe.src = pdfUrl;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePdfPreview() {
+        const modal = document.getElementById('pdfPreviewModal');
+        const iframe = document.getElementById('pdfPreviewFrame');
+        
+        modal.style.display = 'none';
+        iframe.src = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Tutup modal jika klik di luar area box atau tekan tombol Escape
+    document.getElementById('pdfPreviewModal').addEventListener('click', function(e) {
+        if (e.target === this) closePdfPreview();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('pdfPreviewModal').style.display === 'flex') {
+            closePdfPreview();
+        }
+    });
+</script>
 @endsection

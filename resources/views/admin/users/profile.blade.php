@@ -10,6 +10,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        .badge-notification {
+    background-color: #EF4444;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+}
         :root {
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
@@ -22,6 +37,21 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
 
+        .badge-paid {
+    background-color: #16A34A;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
+}
         /* Sidebar Client */
         .client-sidebar {
             width: 260px;
@@ -171,6 +201,32 @@
             transition: border-color 0.2s;
         }
         .form-control:focus { border-color: var(--gold-primary); background: #FFF; }
+        /* Wrapper & Tombol Ikon Mata Password */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.password-wrapper .form-control {
+    padding-right: 42px; /* Memberi ruang agar teks tidak menabrak ikon */
+}
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+.toggle-password-btn:hover {
+    color: var(--gold-primary);
+}
         
         .btn-gold-save {
             background-color: var(--gold-primary);
@@ -222,8 +278,19 @@
                 <a href="{{ route('admin.kategori-paket.index') }}"><i class="fa-solid fa-tags"></i> Kategori Paket</a>
                 <a href="{{ route('admin.portofolio.index') }}"><i class="fa-solid fa-images"></i> Galeri Portofolio</a>
                 <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
-                <a href="{{ route('admin.jadwal.index') }}"><i class="fa-regular fa-calendar"></i> Jadwal Acara</a>
-                <a href="{{ route('admin.users.index') }}"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a>
+<a href="{{ route('admin.jadwal.index') }}">
+    <i class="fa-regular fa-calendar"></i> Jadwal Acara
+    @if(isset($pendingReservationsCount) && $pendingReservationsCount > 0)
+        <span class="badge-notification">{{ $pendingReservationsCount }}</span>
+    @endif
+</a>
+<a href="{{ route('admin.laporan.transaksi') }}">
+    <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+    @if(isset($newPaidPaymentsCount) && $newPaidPaymentsCount > 0)
+        <span class="badge-paid" title="Pembayaran Lunas Baru">{{ $newPaidPaymentsCount }}</span>
+    @endif
+</a>
+<a href="{{ route('admin.users.index') }}"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a>
             @else
                 <span class="client-nav-label">MENU UTAMA</span>
                 <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
@@ -299,17 +366,27 @@
                 <p style="font-size: 0.8rem; color: #8C8279; margin-bottom: 16px;">Biarkan kosong jika tidak ingin mengganti password saat ini.</p>
 
                 {{-- Password Baru --}}
-                <div class="form-group">
-                    <label>Password Baru</label>
-                    <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter">
-                    @error('password') <small style="color: #DC2626;">{{ $message }}</small> @enderror
-                </div>
+<div class="form-group">
+    <label>Password Baru</label>
+    <div class="password-wrapper">
+        <input type="password" id="password_baru" name="password" class="form-control" placeholder="Minimal 8 karakter">
+        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_baru', this)" title="Tampilkan / Sembunyikan Password">
+            <i class="fa-regular fa-eye"></i>
+        </button>
+    </div>
+    @error('password') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+</div>
 
-                {{-- Konfirmasi Password Baru --}}
-                <div class="form-group">
-                    <label>Konfirmasi Password Baru</label>
-                    <input type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
-                </div>
+{{-- Konfirmasi Password Baru --}}
+<div class="form-group">
+    <label>Konfirmasi Password Baru</label>
+    <div class="password-wrapper">
+        <input type="password" id="password_konfirmasi" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
+        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_konfirmasi', this)" title="Tampilkan / Sembunyikan Password">
+            <i class="fa-regular fa-eye"></i>
+        </button>
+    </div>
+</div>
 
                 <button type="submit" class="btn-gold-save">
                     <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
@@ -341,5 +418,19 @@
             }
         });
     }
+    function togglePasswordVisibility(inputId, btnElement) {
+    const input = document.getElementById(inputId);
+    const icon = btnElement.querySelector('i');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
 </script>
 </html>

@@ -13,6 +13,26 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
+        .badge-client-notif {
+    background-color: #16A34A;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
+}
+.client-sidebar-nav a.active .badge-client-notif {
+    background-color: #FFFFFF;
+    color: #C58F43;
+    box-shadow: none;
+}
         :root {
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
@@ -240,12 +260,18 @@
             <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
             <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
             
-            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
+            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS &amp; AKUN</span>
             <a href="{{ route('client.riwayat.reservasi') }}" class="active">
                 <i class="fa-regular fa-calendar"></i> Riwayat Reservasi
+                @if(isset($clientValidatedCount) && $clientValidatedCount > 0)
+                    <span class="badge-client-notif" title="Update Validasi Admin">{{ $clientValidatedCount }}</span>
+                @endif
             </a>
             <a href="{{ route('client.riwayat.transaksi') }}">
                 <i class="fa-solid fa-receipt"></i> Riwayat Transaksi
+                @if(isset($clientApprovedReadyToPayCount) && $clientApprovedReadyToPayCount > 0)
+                    <span class="badge-client-notif" style="background-color:#D97706;" title="Menunggu Pembayaran">{{ $clientApprovedReadyToPayCount }}</span>
+                @endif
             </a>
             <a href="{{ route('user.profile.edit') }}">
                 <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
@@ -297,7 +323,7 @@
                                 <small>Diajukan {{ ($reservasi->tanggal_pengajuan ?? $reservasi->tgl_reservasi)?->format('d/m/Y') }}</small>
                             </td>
                             <td>
-                                {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: 'â€”') }}
+                                {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—') }}
                                 <small>{{ $reservasi->lokasi_acara ?: $reservasi->lokasi }}</small>
                                 @foreach($reservasi->layanans as $layananTerpilih)
                                     @if($layananTerpilih->pivot->catatan_layanan)
@@ -305,8 +331,10 @@
                                     @endif
                                 @endforeach
                             </td>
-                            <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? 'â€”' }}</td>
-                            <td>{{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : 'â€”' }} â€“ {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : 'â€”' }}</td>
+                            <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? '—' }}</td>
+                            <td style="white-space: nowrap;">
+                                {{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '-' }} &ndash; {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '-' }}
+                            </td>
                             <td>{{ $reservasi->jumlah_pesanan }}</td>
                             <td>
                                 <span class="history-status">{{ $reservasi->status_reservasi }}</span>
@@ -365,6 +393,75 @@
                 color: '#241A16'
             });
         @endif
+        document.addEventListener('DOMContentLoaded', function() {
+            const newlyValidated = @json($newlyValidatedList ?? []);
+            if (newlyValidated.length === 0) return;
+
+            // Cegah popup muncul ulang dari bfcache browser
+            const alertSignature = newlyValidated.map(i => `${i.kode_reservasi}:${i.status_reservasi}`).join('|');
+            if (sessionStorage.getItem('last_shown_validation_alert') === alertSignature) {
+                return;
+            }
+            sessionStorage.setItem('last_shown_validation_alert', alertSignature);
+
+            const approved = newlyValidated.filter(item => item.status_reservasi === 'Disetujui');
+            const rejected = newlyValidated.filter(item => item.status_reservasi === 'Ditolak');
+
+            playValidationSound();
+
+            if (approved.length > 0) {
+                const kodeList = approved.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Reservasi Divalidasi & Disetujui!',
+                    html: `Pengajuan reservasi ${kodeList} telah disetujui oleh admin.<br><small style="color:#8C8279;">Silakan lanjutkan ke tahap pembayaran agar jadwal acara Anda terkunci.</small>`,
+                    showCancelButton: true,
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#C58F43',
+                    cancelButtonColor: '#8C8279',
+                    confirmButtonText: '<i class="fa-solid fa-credit-card"></i> Bayar Sekarang',
+                    cancelButtonText: 'Nanti Saja',
+                    background: '#FFFFFF',
+                    color: '#241A16'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('client.riwayat.transaksi') }}";
+                    }
+                });
+            } else if (rejected.length > 0) {
+                const kodeList = rejected.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Status Reservasi Diperbarui',
+                    html: `Pengajuan reservasi ${kodeList} berstatus <strong>Ditolak</strong>. Silakan cek detail atau hubungi admin untuk jadwal alternatif.`,
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#C58F43',
+                    background: '#FFFFFF',
+                    color: '#241A16'
+                });
+            }
+        });
+
+        function playValidationSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+                [587.33, 880.00].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.001, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.22, now + i * 0.12 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.42);
+                });
+            } catch (e) {}
+        }
 
         function confirmLogoutClient() {
             Swal.fire({

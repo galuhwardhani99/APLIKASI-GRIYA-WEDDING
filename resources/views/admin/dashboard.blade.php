@@ -50,6 +50,26 @@
             min-height: 100vh; 
             -webkit-font-smoothing: antialiased;
         }
+        .badge-paid {
+    background-color: #16A34A;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
+}
+.nav-item.active .badge-paid {
+    background-color: #FFFFFF;
+    color: #16A34A;
+    box-shadow: none;
+}
         
         /* Sidebar Freeze & Sharpened Borders */
         .sidebar { 
@@ -123,7 +143,15 @@
         .nav-menu::-webkit-scrollbar-track { background:transparent; }
         .nav-menu::-webkit-scrollbar-thumb { background:#EFE8DE; border-radius:4px; }
         .nav-menu { scrollbar-width:thin; scrollbar-color:#EFE8DE transparent; overscroll-behavior:contain; }
-        .admin-nav-label { padding:10px 12px 4px; }
+        /* Ubah baris 122 di dashboard.blade.php menjadi: */
+.admin-nav-label { 
+    padding: 10px 12px 4px; 
+    font-size: 0.65rem; 
+    letter-spacing: 0.12em; 
+    font-weight: 800; 
+    color: #A59A8E; 
+    text-transform: uppercase;
+}
         .admin-nav-spaced { margin-top:12px; }
         
         .nav-item { 
@@ -351,7 +379,14 @@
                     </a>
                 </li>
 
-                <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-column"></i> Laporan Transaksi</a></li>
+                <li>
+            <a href="{{ route('admin.laporan.transaksi') }}" class="nav-item {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+                @if(isset($newPaidPaymentsCount) && $newPaidPaymentsCount > 0)
+                    <span class="badge-paid" title="Pembayaran Lunas Baru">{{ $newPaidPaymentsCount }}</span>
+                @endif
+            </a>
+        </li>
                 <li><a href="{{ route('admin.users.index') }}" class="nav-item"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a></li>
                 <li><a href="{{ route('user.profile.edit') }}" class="nav-item {{ request()->routeIs('user.profile.*') ? 'active' : '' }}"><i class="fa-solid fa-user-gear"></i> Pengaturan Akun</a></li>
             </ul>
@@ -415,6 +450,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th style="width: 50px; text-align: center;">No</th>
                         <th>ID</th>
                         <th>Client</th>
                         <th>Layanan / Paket</th>
@@ -426,6 +462,9 @@
                 <tbody>
                     @forelse($transaksiTerbaru as $item)
                         <tr>
+                            <td style="text-align: center; color: var(--text-muted); font-weight: 700;">
+                                {{ $loop->iteration }}
+                            </td>
                             <td style="color: var(--text-muted); font-weight: 700;">
                                 {{ $item->kode_reservasi ?? '#GR-' . str_pad($item->id_reservasi, 4, '0', STR_PAD_LEFT) }}
                             </td>
@@ -471,7 +510,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
                                 Belum ada data transaksi reservasi.
                             </td>
                         </tr>
@@ -515,6 +554,45 @@
             });
         @endif
     });
+    document.addEventListener('DOMContentLoaded', function() {
+        const paidCount = {{ $newPaidPaymentsCount ?? 0 }};
+        const prevPaidCount = Number(sessionStorage.getItem('admin_prev_paid_count') || 0);
+
+        if (paidCount > prevPaidCount) {
+            playAdminNotifSound();
+        }
+        sessionStorage.setItem('admin_prev_paid_count', paidCount);
+    });
+
+    function playAdminNotifSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+
+            // Nada kasir / coin masuk (B5 -> E6)
+            const notes = [987.77, 1318.51];
+
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const startTime = now + (i * 0.11);
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+
+                gain.gain.setValueAtTime(0.001, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.25, startTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + 0.46);
+            });
+        } catch (e) {}
+    }
 </script>
 </body>
 </html> 
