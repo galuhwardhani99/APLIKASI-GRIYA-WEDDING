@@ -48,14 +48,14 @@ class WhatsAppController extends Controller
 
             // 1. Pesan Pengingat H-1 Acara Wedding
             $tanggal = Carbon::parse($item->tanggal_acara)->format('d/m/Y');
-            $total   = 'Rp ' . number_format($item->total_harga ?? 0, 0, ',', '.'); // Sesuaikan nama kolom total
+            $totalHarga = (int) ($item->biaya_sewa ?: (($item->harga_paket ?: $item->harga_layanan ?: 0) * ($item->jumlah_pesanan ?: 1)));
+            $total = 'Rp ' . number_format($totalHarga, 0, ',', '.');
 
             $pesanAcara = "GRIYA RIAS ELLY JR.\n"
                 . "Jl. Rengganis Nomor 333A Doko, Kab. Kediri\n"
                 . "Tgl : {$tanggal}\n"
                 . "Kode : {$item->kode_reservasi}\n"
                 . "Plgn : {$namaPemesan}\n"
-                . "Acara : " . ($item->jenis_acara ?: '-') . "\n"
                 . "Paket : {$namaAcara}\n"
                 . "TOTAL : {$total}\n\n"
                 . "Halo Admin, reservasi saya telah berhasil divalidasi. "

@@ -413,20 +413,14 @@
                 const kodeList = approved.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
                 Swal.fire({
                     icon: 'success',
-                    title: 'Reservasi Divalidasi & Disetujui!',
-                    html: `Pengajuan reservasi ${kodeList} telah disetujui oleh admin.<br><small style="color:#8C8279;">Silakan lanjutkan ke tahap pembayaran agar jadwal acara Anda terkunci.</small>`,
-                    showCancelButton: true,
+                    title: 'Reservasi berhasil silahkan tunggu validasi dari admin',
+                    html: `Kode reservasi ${kodeList} berhasil dibuat.`,
+                    showCancelButton: false,
                     allowOutsideClick: false,
                     confirmButtonColor: '#C58F43',
-                    cancelButtonColor: '#8C8279',
-                    confirmButtonText: '<i class="fa-solid fa-credit-card"></i> Bayar Sekarang',
-                    cancelButtonText: 'Nanti Saja',
+                    confirmButtonText: 'Oke',
                     background: '#FFFFFF',
                     color: '#241A16'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "{{ route('client.riwayat.transaksi') }}";
-                    }
                 });
             } else if (rejected.length > 0) {
                 const kodeList = rejected.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
