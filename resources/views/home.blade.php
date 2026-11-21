@@ -5,6 +5,7 @@
 <!-- CSS Fancybox untuk Zoom In/Out & Galeri -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
 <style>
+    @include('partials.card-slider-styles')
     @if (!empty($clientPage))
         .client-home-dashboard-action { display: flex; justify-content: center; margin-top: 30px; }
         .client-home-dashboard-button { min-width: 210px; padding: 14px 32px; font-size: 0.9rem; }
@@ -121,9 +122,14 @@
             <p>Layanan pilihan dari Griya Rias Elly Jr.</p>
         </div>
 
-        <div class="cards">
+        <div class="catalog-slider" data-catalog-slider>
+          <div class="catalog-slider-controls">
+            <button type="button" class="catalog-slider-button" data-slider-prev aria-label="Layanan sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="catalog-slider-button" data-slider-next aria-label="Layanan berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        <div class="cards catalog-slider-track" role="region" aria-label="Layanan unggulan" tabindex="0">
             @forelse ($layanans as $i => $layanan)
-                <div class="reveal" style="--d:{{ $i * 140 }}ms">
+                <div class="reveal slider-item" style="--d:{{ $i * 140 }}ms">
                     <article class="card tilt">
                         <div class="card-img {{ $i % 2 ? 'sand' : 'rose' }}">
                             @if ($layanan->foto)
@@ -141,14 +147,18 @@
                             @endif
                         </div>
                         <h3>{{ $layanan->nama_layanan }}</h3>
-                        <p>{{ $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.' }}</p>
+                        <div class="description-preview">
+                            @include('partials.format-description', ['descriptionText' => $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.', 'descriptionClass' => 'preview'])
+                            @include('partials.catalog-detail', ['detailKey' => 'home-layanan-' . $layanan->id_layanan, 'detailTitle' => $layanan->nama_layanan, 'detailDescription' => $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.', 'detailImage' => $layanan->foto, 'detailPrice' => $layanan->harga, 'detailExtra' => $layanan->variasi ?? null])
+                        </div>
                         @if ($layanan->variasi)<p class="subtle">{{ $layanan->variasi }}</p>@endif
                         <div class="price">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</div>
                     </article>
                 </div>
             @empty
-                <p class="gd-empty">Belum ada layanan unggulan untuk ditampilkan.</p>
+                <p class="gd-empty slider-empty">Belum ada layanan unggulan untuk ditampilkan.</p>
             @endforelse
+        </div>
         </div>
     </div>
 </section>
@@ -160,9 +170,14 @@
             <h2>Paket Unggulan</h2>
             <p>Paket pilihan untuk membantu merencanakan momen istimewa Anda.</p>
         </div>
-        <div class="cards">
+        <div class="catalog-slider" data-catalog-slider>
+          <div class="catalog-slider-controls">
+            <button type="button" class="catalog-slider-button" data-slider-prev aria-label="Paket sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="catalog-slider-button" data-slider-next aria-label="Paket berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        <div class="cards catalog-slider-track" role="region" aria-label="Paket unggulan" tabindex="0">
             @forelse ($pakets as $i => $paket)
-                <div class="reveal" style="--d:{{ $i * 140 }}ms">
+                <div class="reveal slider-item" style="--d:{{ $i * 140 }}ms">
                     <article class="card tilt">
                         <div class="card-img {{ $i % 2 ? 'rose' : 'sand' }}">
                             @if ($paket->foto)
@@ -180,13 +195,17 @@
                             @endif
                         </div>
                         <h3>{{ $paket->nama_paket }}</h3>
-                        <p>{{ $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.' }}</p>
+                        <div class="description-preview">
+                            @include('partials.format-description', ['descriptionText' => $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.', 'descriptionClass' => 'preview'])
+                            @include('partials.catalog-detail', ['detailKey' => 'home-paket-' . $paket->id, 'detailTitle' => $paket->nama_paket, 'detailDescription' => $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.', 'detailImage' => $paket->foto, 'detailPrice' => $paket->harga, 'detailExtra' => $paket->kategoriPaket?->nama_kategori])
+                        </div>
                         <div class="price">Rp {{ number_format($paket->harga, 0, ',', '.') }}</div>
                     </article>
                 </div>
             @empty
-                <p class="gd-empty">Belum ada paket unggulan untuk ditampilkan.</p>
+                <p class="gd-empty slider-empty">Belum ada paket unggulan untuk ditampilkan.</p>
             @endforelse
+        </div>
         </div>
     </div>
 </section>
@@ -245,6 +264,7 @@
 @push('scripts')
 <!-- JS Fancybox -->
 <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+@include('partials.card-slider-script')
 <script>
     Fancybox.bind('[data-fancybox="gallery"]', {
         compact: false,

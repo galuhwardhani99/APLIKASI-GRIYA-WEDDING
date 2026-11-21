@@ -242,7 +242,10 @@
                 @endif
 
                 <h2>{{ $paket->nama_paket }}</h2>
-                <p class="desc">{{ $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.' }}</p>
+                <div class="description-preview">
+                    @include('partials.format-description', ['descriptionText' => $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.', 'descriptionClass' => 'preview desc'])
+                    @include('partials.catalog-detail', ['detailKey' => 'catalog-paket-' . $paket->id, 'detailTitle' => $paket->nama_paket, 'detailDescription' => $paket->deskripsi ?: 'Informasi lebih lanjut mengenai paket ini dapat ditanyakan kepada tim kami.', 'detailImage' => $paket->foto, 'detailPrice' => $paket->harga, 'detailExtra' => $paket->kategoriPaket?->nama_kategori])
+                </div>
                 
                 <p class="price">Rp {{ number_format($paket->harga,0,',','.') }}</p>
                 

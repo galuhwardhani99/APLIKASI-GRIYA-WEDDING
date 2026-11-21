@@ -4,6 +4,7 @@
 
 @push('styles')
 <style>
+    @include('partials.card-slider-styles')
     .client-hero { padding-bottom: 20px; }
     .badge-client {
         display: inline-block;
@@ -236,13 +237,18 @@
             <h2>Katalog Layanan Unggulan</h2>
             <p>Pilihan variasi layanan rias profesional untuk berbagai acara Anda.</p>
         </div>
-        <div class="cards-grid">
+        <div class="catalog-slider" data-catalog-slider>
+          <div class="catalog-slider-controls">
+            <button type="button" class="catalog-slider-button" data-slider-prev aria-label="Layanan sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="catalog-slider-button" data-slider-next aria-label="Layanan berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        <div class="cards-grid catalog-slider-track" role="region" aria-label="Layanan unggulan" tabindex="0">
             @forelse ($layanans as $layanan)
                 @php
                     $msgLayanan = "Halo, saya tertarik dengan layanan " . $layanan->nama_layanan;
                     $waLayananUrl = "https://api.whatsapp.com/send?phone=" . $cleanPhone . "&text=" . urlencode($msgLayanan);
                 @endphp
-                <article class="card-item">
+                <article class="card-item slider-item">
                     @if($layanan->foto)
                         <a href="{{ asset('storage/' . $layanan->foto) }}" 
                            data-fancybox="dash-layanan" 
@@ -258,7 +264,10 @@
                     @endif
 
                     <h3>{{ $layanan->nama_layanan }}</h3>
-                    <p class="card-desc">{{ Str::limit($layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan langsung.', 90) }}</p>
+                    <div class="description-preview">
+                        @include('partials.format-description', ['descriptionText' => $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan langsung.', 'descriptionClass' => 'preview card-desc'])
+                        @include('partials.catalog-detail', ['detailKey' => 'dash-layanan-' . $layanan->id_layanan, 'detailTitle' => $layanan->nama_layanan, 'detailDescription' => $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan langsung.', 'detailImage' => $layanan->foto, 'detailPrice' => $layanan->harga, 'detailExtra' => $layanan->variasi ?? null])
+                    </div>
                     <div class="card-price">Rp {{ number_format($layanan->harga, 0, ',', '.') }}</div>
                     
                     <a class="card-link" target="_blank" rel="noopener" href="{{ $waLayananUrl }}">
@@ -266,10 +275,11 @@
                     </a>
                 </article>
             @empty
-                <div style="grid-column: 1/-1; text-align: center; color: #8C8279; padding: 30px; background: #FFF; border-radius: 10px;">
+                <div class="slider-empty" style="text-align: center; color: #8C8279; padding: 30px; background: #FFF; border-radius: 10px;">
                     Belum ada layanan aktif untuk ditampilkan.
                 </div>
             @endforelse
+        </div>
         </div>
         <div style="text-align: center; margin-top: 28px;">
             <a style="background: #C58F43; color: #FFF; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-block;" href="{{ route('client.katalog.layanan') }}">
@@ -284,13 +294,18 @@
             <h2>Katalog Paket Favorit</h2>
             <p>Paket pilihan lengkap yang dirancang khusus untuk kenyamanan momen Anda.</p>
         </div>
-        <div class="cards-grid">
+        <div class="catalog-slider" data-catalog-slider>
+          <div class="catalog-slider-controls">
+            <button type="button" class="catalog-slider-button" data-slider-prev aria-label="Paket sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="catalog-slider-button" data-slider-next aria-label="Paket berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        <div class="cards-grid catalog-slider-track" role="region" aria-label="Paket favorit" tabindex="0">
             @forelse ($pakets as $paket)
                 @php
                     $msgPaket = "Halo, saya berminat dengan paket " . $paket->nama_paket;
                     $waPaketUrl = "https://api.whatsapp.com/send?phone=" . $cleanPhone . "&text=" . urlencode($msgPaket);
                 @endphp
-                <article class="card-item">
+                <article class="card-item slider-item">
                     @if($paket->foto)
                         <a href="{{ asset('storage/' . $paket->foto) }}" 
                            data-fancybox="dash-paket" 
@@ -306,7 +321,10 @@
                     @endif
 
                     <h3>{{ $paket->nama_paket }}</h3>
-                    <p class="card-desc">{{ Str::limit($paket->deskripsi ?: 'Informasi lebih lanjut dapat ditanyakan langsung.', 90) }}</p>
+                    <div class="description-preview">
+                        @include('partials.format-description', ['descriptionText' => $paket->deskripsi ?: 'Informasi lebih lanjut dapat ditanyakan langsung.', 'descriptionClass' => 'preview card-desc'])
+                        @include('partials.catalog-detail', ['detailKey' => 'dash-paket-' . $paket->id, 'detailTitle' => $paket->nama_paket, 'detailDescription' => $paket->deskripsi ?: 'Informasi lebih lanjut dapat ditanyakan langsung.', 'detailImage' => $paket->foto, 'detailPrice' => $paket->harga, 'detailExtra' => $paket->kategoriPaket?->nama_kategori])
+                    </div>
                     <div class="card-price">Rp {{ number_format($paket->harga, 0, ',', '.') }}</div>
                     
                     <a class="card-link" target="_blank" rel="noopener" href="{{ $waPaketUrl }}">
@@ -314,10 +332,11 @@
                     </a>
                 </article>
             @empty
-                <div style="grid-column: 1/-1; text-align: center; color: #8C8279; padding: 30px; background: #FFF; border-radius: 10px;">
+                <div class="slider-empty" style="text-align: center; color: #8C8279; padding: 30px; background: #FFF; border-radius: 10px;">
                     Belum ada paket aktif untuk ditampilkan.
                 </div>
             @endforelse
+        </div>
         </div>
         <div style="text-align: center; margin-top: 28px;">
             <a style="background: #C58F43; color: #FFF; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-block;" href="{{ route('client.katalog.paket') }}">
@@ -326,3 +345,7 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    @include('partials.card-slider-script')
+@endpush

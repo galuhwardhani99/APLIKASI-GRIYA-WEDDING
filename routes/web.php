@@ -57,6 +57,58 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::get('/dashboard', function () {
     $now = Carbon::now();
 
+    // Analisis jumlah reservasi selama enam bulan terakhir.
+    $analisisReservasi = collect(range(5, 0))->map(function ($monthsAgo) use ($now) {
+        $month = $now->copy()->startOfMonth()->subMonths($monthsAgo);
+
+        return [
+            'label' => $month->translatedFormat('M Y'),
+            'total' => Reservasi::whereYear('tanggal_acara', $month->year)
+                ->whereMonth('tanggal_acara', $month->month)
+                ->count(),
+        ];
+    });
+
+    // Pendapatan dihitung dari pembayaran yang sudah diterima, berdasarkan waktu pembayaran.
+    $statusPembayaranBerhasil = ['paid', 'settlement', 'lunas', 'capture', 'proof_verified'];
+    $trenPendapatan = collect(range(5, 0))->map(function ($monthsAgo) use ($now, $statusPembayaranBerhasil) {
+        $month = $now->copy()->startOfMonth()->subMonths($monthsAgo);
+        $total = Reservasi::whereIn('payment_status', $statusPembayaranBerhasil)
+            ->whereNotNull('paid_at')
+            ->whereYear('paid_at', $month->year)
+            ->whereMonth('paid_at', $month->month)
+            ->get()
+            ->sum(fn ($item) => $item->biaya_sewa ?: (($item->harga_paket ?: $item->harga_layanan ?: 0) * ($item->jumlah_pesanan ?: 1)));
+
+        return ['label' => $month->translatedFormat('M Y'), 'total' => (int) $total];
+    });
+
+    // Komposisi pemesanan per nama paket dan layanan satuan.
+    $ringkasanProduk = collect();
+    Reservasi::with(['layanans', 'paket'])->get()->each(function ($item) use ($ringkasanProduk) {
+        if ($item->jenis_pesanan === 'paket') {
+            $nama = $item->nama_paket ?: $item->paket?->nama_paket ?: 'Paket lainnya';
+            $ringkasanProduk->put($nama, ($ringkasanProduk->get($nama, 0)) + 1);
+            return;
+        }
+
+        $namaLayanan = $item->layanans->pluck('nama_layanan')->filter();
+        if ($namaLayanan->isEmpty() && $item->nama_layanan) {
+            $namaLayanan = collect([$item->nama_layanan]);
+        }
+        foreach ($namaLayanan as $nama) {
+            $ringkasanProduk->put($nama, ($ringkasanProduk->get($nama, 0)) + 1);
+        }
+    });
+    $ringkasanProduk = $ringkasanProduk->sortDesc()->take(8);
+
+    $agendaMendatang = Reservasi::with('user')
+        ->whereBetween('tanggal_acara', [$now->toDateString(), $now->copy()->addDays(7)->toDateString()])
+        ->whereIn('status_reservasi', ['tervalidasi', 'Tervalidasi', 'disetujui', 'Disetujui', 'confirmed', 'Confirmed', 'selesai', 'Selesai'])
+        ->orderBy('tanggal_acara')
+        ->take(5)
+        ->get();
+
     // 1. Total Pendapatan Bulan Ini (Gunakan kolom tanggal_acara)
     $pendapatanBulanIni = Reservasi::whereMonth('tanggal_acara', $now->month)
         ->whereYear('tanggal_acara', $now->year)
@@ -88,7 +140,11 @@ Route::get('/dashboard', function () {
         'totalReservasi',
         'clientAktif',
         'transaksiTerbaru',
-        'pendingReservationsCount'
+        'pendingReservationsCount',
+        'analisisReservasi',
+        'trenPendapatan',
+        'ringkasanProduk',
+        'agendaMendatang'
     ));
 })->name('dashboard');
 

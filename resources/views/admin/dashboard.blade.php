@@ -250,10 +250,14 @@
             align-items: center;
             gap: 18px;
             transition: transform 0.2s ease, border-color 0.2s ease;
+            color: inherit;
+            text-decoration: none;
         }
-        .stat-card:hover {
+        a.stat-card:hover, a.stat-card:focus-visible {
             border-color: var(--gold-primary);
             transform: translateY(-2px);
+            outline: none;
+            box-shadow: 0 6px 18px rgba(197, 143, 67, 0.12);
         }
         .stat-icon {
             width: 48px;
@@ -337,6 +341,36 @@
         }
         .status-dp { background-color: #FFF3E0; color: #D97706; border: 1px solid #FDE68A; }
         .status-lunas { background-color: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+        .analysis-section, .quick-links-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px rgba(36, 26, 22, 0.03);
+        }
+        .section-heading { font-family: 'Playfair Display', serif; font-size: 1.25rem; margin-bottom: 4px; }
+        .section-caption { color: var(--text-muted); font-size: .82rem; margin-bottom: 18px; }
+        .chart-wrap { height: 280px; position: relative; }
+        .quick-links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+        .quick-link {
+            display: flex; align-items: center; gap: 12px; padding: 14px;
+            border: 1px solid var(--border-color); border-radius: 10px;
+            color: var(--text-dark); text-decoration: none; font-weight: 700; font-size: .86rem;
+            transition: border-color .2s, background .2s, transform .2s;
+        }
+        .quick-link:hover { border-color: var(--gold-primary); background: #FBF5EC; transform: translateY(-1px); }
+        .quick-link i { color: var(--gold-primary); width: 20px; text-align: center; }
+        .insight-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 20px; margin-bottom: 24px; }
+        .insight-grid .analysis-section { margin-bottom: 0; }
+        .agenda-list { display: grid; gap: 10px; }
+        .agenda-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 9px; }
+        .agenda-client { font-weight: 700; font-size: .88rem; }
+        .agenda-event { color: var(--text-muted); font-size: .78rem; margin-top: 3px; }
+        .agenda-date { flex-shrink: 0; color: var(--gold-hover); font-weight: 800; font-size: .8rem; text-align: right; }
+        .agenda-empty { color: var(--text-muted); padding: 12px 0; font-size: .88rem; }
+        @media (max-width: 900px) { .insight-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .analysis-section, .quick-links-section { padding: 18px; } .chart-wrap { height: 230px; } }
     </style>
 </head>
 <body>
@@ -415,28 +449,77 @@
         <!-- Stats Grid Berbingkai Ikon -->
         <!-- Stats Grid Berbingkai Ikon -->
         <div class="stats-grid">
-            <div class="stat-card">
+            <a class="stat-card" href="{{ route('admin.laporan.transaksi') }}" aria-label="Buka laporan transaksi">
                 <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
                 <div>
                     <div class="stat-title">Total Pendapatan Bulan Ini</div>
                     <div class="stat-value">Rp {{ number_format($pendapatanBulanIni ?? 0, 0, ',', '.') }}</div>
                 </div>
-            </div>
-            <div class="stat-card">
+            </a>
+            <a class="stat-card" href="{{ route('admin.jadwal.index') }}" aria-label="Buka jadwal acara">
                 <div class="stat-icon"><i class="fa-regular fa-calendar-check"></i></div>
                 <div>
                     <div class="stat-title">Total Reservasi</div>
                     <div class="stat-value">{{ $totalReservasi ?? 0 }} Acara</div>
                 </div>
-            </div>
-            <div class="stat-card">
+            </a>
+            <a class="stat-card" href="{{ route('admin.users.index') }}" aria-label="Buka kelola akun client">
                 <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                 <div>
                     <div class="stat-title">Client Aktif</div>
                     <div class="stat-value">{{ $clientAktif ?? 0 }} User</div>
                 </div>
-            </div>
+            </a>
         </div>
+
+        <section class="analysis-section" aria-labelledby="analysis-title">
+            <h2 class="section-heading" id="analysis-title">Analisis Reservasi</h2>
+            <p class="section-caption">Jumlah reservasi berdasarkan tanggal acara selama enam bulan terakhir.</p>
+            <div class="chart-wrap">
+                <canvas id="reservationChart" aria-label="Grafik jumlah reservasi enam bulan terakhir" role="img"></canvas>
+            </div>
+        </section>
+
+        <div class="insight-grid" style="margin-top: 24px;">
+            <section class="analysis-section" aria-labelledby="revenue-trend-title">
+                <h2 class="section-heading" id="revenue-trend-title">Tren Pendapatan Bulanan</h2>
+                <p class="section-caption">Pembayaran terkonfirmasi yang diterima per bulan selama enam bulan terakhir.</p>
+                <div class="chart-wrap">
+                    <canvas id="revenueTrendChart" aria-label="Grafik tren pendapatan bulanan" role="img"></canvas>
+                </div>
+            </section>
+
+            <section class="analysis-section" aria-labelledby="product-chart-title">
+                <h2 class="section-heading" id="product-chart-title">Paket &amp; Layanan Terlaris</h2>
+                <p class="section-caption">Proporsi jumlah pesanan berdasarkan nama paket dan layanan.</p>
+                <div class="chart-wrap">
+                    <canvas id="productMixChart" aria-label="Diagram paket dan layanan terlaris" role="img"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <section class="analysis-section" aria-labelledby="upcoming-events-title">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:16px;">
+                <div>
+                    <h2 class="section-heading" id="upcoming-events-title">Jadwal Acara Terdekat</h2>
+                    <p class="section-caption" style="margin-bottom:0;">Agenda tervalidasi dalam tujuh hari ke depan.</p>
+                </div>
+                <a href="{{ route('admin.jadwal.index') }}" style="color:var(--gold-hover); text-decoration:none; font-size:.82rem; font-weight:800; white-space:nowrap;">Semua jadwal <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <div class="agenda-list">
+                @forelse($agendaMendatang as $agenda)
+                    <div class="agenda-item">
+                        <div>
+                            <div class="agenda-client">{{ $agenda->user->name ?? 'Client' }}</div>
+                            <div class="agenda-event">{{ $agenda->nama_paket ?: ($agenda->jenis_acara ?: 'Acara') }}</div>
+                        </div>
+                        <time class="agenda-date" datetime="{{ \Carbon\Carbon::parse($agenda->tanggal_acara)->toDateString() }}">{{ \Carbon\Carbon::parse($agenda->tanggal_acara)->translatedFormat('d M Y') }}</time>
+                    </div>
+                @empty
+                    <p class="agenda-empty">Belum ada acara tervalidasi untuk tujuh hari ke depan.</p>
+                @endforelse
+            </div>
+        </section>
 
         <!-- Table Section -->
         <div class="table-section">
@@ -521,7 +604,95 @@
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
+    const reservationAnalysis = @json($analisisReservasi ?? []);
+    const revenueTrend = @json($trenPendapatan ?? []);
+    const productMix = @json($ringkasanProduk ?? []);
+    const reservationCanvas = document.getElementById('reservationChart');
+    if (reservationCanvas && window.Chart) {
+        new Chart(reservationCanvas, {
+            type: 'bar',
+            data: {
+                labels: reservationAnalysis.map(item => item.label),
+                datasets: [{
+                    label: 'Jumlah reservasi',
+                    data: reservationAnalysis.map(item => item.total),
+                    backgroundColor: 'rgba(197, 143, 67, 0.72)',
+                    borderColor: '#C58F43',
+                    borderWidth: 1,
+                    borderRadius: 7,
+                    maxBarThickness: 48
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EFE8DE' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    const revenueCanvas = document.getElementById('revenueTrendChart');
+    if (revenueCanvas && window.Chart) {
+        new Chart(revenueCanvas, {
+            type: 'line',
+            data: {
+                labels: revenueTrend.map(item => item.label),
+                datasets: [{
+                    label: 'Pendapatan',
+                    data: revenueTrend.map(item => item.total),
+                    borderColor: '#A87632',
+                    backgroundColor: 'rgba(197, 143, 67, 0.16)',
+                    pointBackgroundColor: '#C58F43',
+                    pointBorderColor: '#FFFFFF',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => 'Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y) } } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: value => 'Rp ' + new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(value) }, grid: { color: '#EFE8DE' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    const productCanvas = document.getElementById('productMixChart');
+    if (productCanvas && window.Chart) {
+        new Chart(productCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(productMix),
+                datasets: [{
+                    data: Object.values(productMix),
+                    backgroundColor: ['#C58F43', '#8F6234', '#E6C99F', '#6B8F71', '#C96C5B', '#7187A3', '#B68AA0', '#A59A8E'],
+                    borderColor: '#FFFFFF', borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: context => {
+                        const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+                        const percentage = total ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                        return `${context.label}: ${context.parsed} pesanan (${percentage}%)`;
+                    } } }
+                }
+            }
+        });
+    }
+
     function confirmLogout(formId) {
         Swal.fire({
             title: 'Konfirmasi Keluar',
@@ -595,4 +766,4 @@
     }
 </script>
 </body>
-</html> 
+</html>

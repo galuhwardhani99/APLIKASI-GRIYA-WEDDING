@@ -228,7 +228,10 @@
                 @endif
 
                 <h2>{{ $layanan->nama_layanan }}</h2>
-                <p class="desc">{{ $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.' }}</p>
+                <div class="description-preview">
+                    @include('partials.format-description', ['descriptionText' => $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.', 'descriptionClass' => 'preview desc'])
+                    @include('partials.catalog-detail', ['detailKey' => 'catalog-layanan-' . $layanan->id_layanan, 'detailTitle' => $layanan->nama_layanan, 'detailDescription' => $layanan->deskripsi ?: 'Informasi layanan dapat ditanyakan kepada tim kami.', 'detailImage' => $layanan->foto, 'detailPrice' => $layanan->harga, 'detailExtra' => $layanan->variasi ?? null])
+                </div>
                 
                 @if($layanan->variasi)
                     <p class="variation">{{ $layanan->variasi }}</p>
