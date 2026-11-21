@@ -1,268 +1,90 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Acara & Ketersediaan - Griya Rias Elly Jr.</title>
+@extends('layouts.client')
+
+@section('title', 'Jadwal Acara & Ketersediaan - Griya Rias Elly Jr.')
+
+@push('styles')
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+<style>
+    :root {
+        --success-green: #2E7D32;
+        --danger-red: #DC2626;
+    }
+
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 6px; }
+    .page-sub { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Calendar Card Container */
+    .calendar-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
     
-    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    /* Legend Keterangan Warna */
+    .legend-box { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; font-size: 0.85rem; font-weight: 600; }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background-color: var(--success-green); }
+    .dot-red { background-color: var(--danger-red); }
+    .availability-dot { width: 7px; height: 7px; background: #22C55E; border-radius: 50%; display: inline-block; margin: 5px 0 0 5px; box-shadow: 0 0 0 3px rgba(34,197,94,.14); vertical-align: top; }
+
+    /* FullCalendar Custom Styling */
+    #calendar { max-width: 100%; margin: 0 auto; }
+    .fc-event { cursor: pointer; border-radius: 6px; padding: 4px; font-weight: 600; }
+    .schedule-modal[hidden] { display: none; }
+    .schedule-modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(36,26,22,.42); backdrop-filter: blur(6px); }
+    .schedule-modal-card { width: min(500px, 100%); max-height: min(80vh, 620px); overflow-y: auto; background: #fff; border-radius: 22px; padding: 26px; box-shadow: 0 24px 70px rgba(36,26,22,.26); animation: schedule-modal-in .2s ease-out; }
+    @keyframes schedule-modal-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+    .schedule-modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+    .schedule-modal-head h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; }
+    .schedule-modal-close { width: 34px; height: 34px; border: 1px solid var(--border-color); background: #fff; border-radius: 50%; cursor: pointer; color: var(--text-muted); }
+    .schedule-modal-close:hover { color: var(--gold-hover); border-color: var(--gold-primary); }
+    .schedule-time-list { display: grid; gap: 10px; margin-top: 18px; }
+    .schedule-time-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 11px; font-size: .84rem; }
+    .schedule-time-item.busy { background: #FEF2F2; color: #991B1B; }
+    .schedule-time-item.free { background: #F0FDF4; color: #166534; }
+    .schedule-time-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px; }
+    .schedule-time-item.busy .schedule-time-dot { background: #DC2626; }
+    .schedule-time-item.free .schedule-time-dot { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
+    .schedule-modal-note { color: var(--text-muted); font-size: .75rem; line-height: 1.5; margin-top: 16px; }
     
-    <!-- FullCalendar CDN -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    .btn-reservasi-cta {
+        display: inline-block;
+        margin-top: 24px;
+        background-color: var(--gold-primary);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(197, 143, 67, 0.2);
+    }
+    .btn-reservasi-cta:hover { background-color: var(--gold-hover); }
+</style>
+@endpush
 
-    <style>
-        :root {
-            --bg-light: #FDFBF7; 
-            --bg-card: #FFFFFF; 
-            --gold-primary: #C58F43;
-            --gold-hover: #A87632;
-            --text-dark: #241A16; 
-            --text-muted: #8C8279; 
-            --border-color: #EFE8DE;
-            --success-green: #2E7D32;
-            --danger-red: #DC2626;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
+@section('content')
+    <div class="page-header">
+        <h1 class="page-title">Kalender Ketersediaan Jadwal</h1>
+        <p class="page-sub">Cek tanggal acara yang tersedia sebelum melakukan pemesanan jadwal.</p>
+    </div>
 
-        /* Sidebar Styling (Sama Persis dengan Dashboard Client) */
-        .client-sidebar {
-            width: 260px;
-            flex: 0 0 260px;
-            background: #fff;
-            border-right: 1px solid var(--border-color);
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            box-shadow: 2px 0 14px #241a1608;
-        }
-        .client-sidebar-brand {
-            padding: 4px 12px 20px;
-            border-bottom: 1px solid var(--border-color);
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-        }
-        .client-sidebar-brand span { font-size: .67rem; letter-spacing: .2em; color: var(--gold-primary); font-weight: 700; }
-        .client-sidebar-brand strong { font-family: 'Playfair Display', serif; color: var(--text-dark); font-size: 1.55rem; line-height: 1.2; }
-        .client-sidebar-brand small { color: var(--text-muted); margin-top: 4px; }
-
-        /* User Profile di Sidebar */
-        .client-sidebar-user {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            padding: 20px 8px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .client-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #f4e6d2;
-            color: #93622d;
-            display: grid;
-            place-items: center;
-            font-weight: 800;
-            flex-shrink: 0;
-        }
-        .client-sidebar-user strong, .client-sidebar-user small { display: block; }
-        .client-sidebar-user strong { font-size: .86rem; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .client-sidebar-user small { font-size: .72rem; color: var(--text-muted); margin-top: 3px; }
-
-        /* Navigasi Sidebar */
-        .client-sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            padding-top: 20px;
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .client-nav-label { font-size: .65rem; letter-spacing: .12em; font-weight: 800; color: #a59a8e; padding: 0 12px 7px; display: block; }
-        .client-nav-spaced { padding-top: 18px; }
-
-        .client-sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #55483f;
-            font-size: .86rem;
-            font-weight: 600;
-            padding: 11px 12px;
-            border-radius: 8px;
-            transition: .2s;
-        }
-        .client-sidebar-nav a i { width: 18px; text-align: center; color: var(--text-muted); }
-        .client-sidebar-nav a:hover { background: #fbf5ec; color: var(--gold-primary); }
-        .client-sidebar-nav a.active { background: var(--gold-primary); color: #fff; }
-        .client-sidebar-nav a.active i { color: #fff; }
-
-        /* Footer Sidebar */
-        .client-sidebar-footer {
-            margin-top: auto;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            display: grid;
-            gap: 7px;
-        }
-        .client-sidebar-footer > a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #55483f;
-            font-size: .86rem;
-            font-weight: 600;
-            padding: 11px 12px;
-            border-radius: 8px;
-        }
-        .client-sidebar-footer form { margin: 0; }
-        .client-sidebar-footer button {
-            width: 100%;
-            border: 1px solid #f1d0d0;
-            background: #fff5f5;
-            color: #b33b3b;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font: 600 .85rem 'Plus Jakarta Sans', sans-serif;
-            cursor: pointer;
-        }
-
-        /* Main Content */
-        .main-content { flex: 1; padding: 40px; min-width: 0; }
-        .page-header { margin-bottom: 24px; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 6px; }
-        .page-sub { color: var(--text-muted); font-size: 0.9rem; }
-
-        /* Calendar Card Container */
-        .calendar-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-        
-        /* Legend Keterangan Warna */
-        .legend-box { display: flex; gap: 20px; margin-bottom: 20px; font-size: 0.85rem; font-weight: 600; }
-        .legend-item { display: flex; align-items: center; gap: 8px; }
-        .dot { width: 14px; height: 14px; border-radius: 50%; }
-        .dot-green { background-color: var(--success-green); }
-        .dot-red { background-color: var(--danger-red); }
-        .availability-dot { width: 7px; height: 7px; background: #22C55E; border-radius: 50%; display: inline-block; margin: 5px 0 0 5px; box-shadow: 0 0 0 3px rgba(34,197,94,.14); vertical-align: top; }
-
-        /* FullCalendar Custom Styling */
-        #calendar { max-width: 100%; margin: 0 auto; }
-        .fc-event { cursor: pointer; border-radius: 6px; padding: 4px; font-weight: 600; }
-        .schedule-modal[hidden] { display: none; }
-        .schedule-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(36,26,22,.42); backdrop-filter: blur(6px); }
-        .schedule-modal-card { width: min(500px, 100%); max-height: min(80vh, 620px); overflow-y: auto; background: #fff; border-radius: 22px; padding: 26px; box-shadow: 0 24px 70px rgba(36,26,22,.26); animation: schedule-modal-in .2s ease-out; }
-        @keyframes schedule-modal-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
-        .schedule-modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
-        .schedule-modal-head h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; }
-        .schedule-modal-close { width: 34px; height: 34px; border: 1px solid var(--border-color); background: #fff; border-radius: 50%; cursor: pointer; color: var(--text-muted); }
-        .schedule-modal-close:hover { color: var(--gold-hover); border-color: var(--gold-primary); }
-        .schedule-time-list { display: grid; gap: 10px; margin-top: 18px; }
-        .schedule-time-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 11px; font-size: .84rem; }
-        .schedule-time-item.busy { background: #FEF2F2; color: #991B1B; }
-        .schedule-time-item.free { background: #F0FDF4; color: #166534; }
-        .schedule-time-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px; }
-        .schedule-time-item.busy .schedule-time-dot { background: #DC2626; }
-        .schedule-time-item.free .schedule-time-dot { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
-        .schedule-modal-note { color: var(--text-muted); font-size: .75rem; line-height: 1.5; margin-top: 16px; }
-        
-        .btn-reservasi-cta {
-            display: inline-block;
-            margin-top: 24px;
-            background-color: var(--gold-primary);
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 12px rgba(197, 143, 67, 0.2);
-        }
-        .btn-reservasi-cta:hover { background-color: var(--gold-hover); }
-    </style>
-</head>
-<body>
-
-    <!-- Sidebar Client -->
-    <aside class="client-sidebar">
-        <a class="client-sidebar-brand" href="{{ route('client.dashboard') }}">
-            <span>GRIYA RIAS</span><strong>Elly Jr.</strong><small>Area Client</small>
-        </a>
-        
-        {{-- Area Profil User Client (Yang tadinya ketinggalan) --}}
-        <div class="client-sidebar-user">
-            <span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-            <div>
-                <strong>{{ auth()->user()->name }}</strong>
-                <small>Client</small>
+    <div class="calendar-card">
+        <div class="legend-box">
+            <div class="legend-item">
+                <span class="dot dot-green"></span> Hijau: jam masih tersedia
+            </div>
+            <div class="legend-item">
+                <span class="dot dot-red"></span> Merah: full day; keterangan jam: booking sebagian
             </div>
         </div>
 
-        <nav class="client-sidebar-nav">
-            <span class="client-nav-label">MENU UTAMA</span>
-            <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
-            <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
-            <a href="{{ route('client.jadwal.index') }}" class="active"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
-            <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
-            
-            <span class="client-nav-label client-nav-spaced">AKTIVITAS & AKUN</span>
-            <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
-            <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
-            <a href="{{ route('user.profile.edit') }}" class="{{ request()->routeIs('user.profile.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
+        <div id="calendar"></div>
+
+        <div style="text-align: right;">
+            <a href="{{ route('reservasi.create') }}" class="btn-reservasi-cta">
+                <i class="fa-solid fa-calendar-plus"></i> Lanjut Buat Reservasi
             </a>
-        </nav>
-
-        <div class="client-sidebar-footer">
-    <a href="{{ route('client.home') }}"><i class="fa-solid fa-globe"></i> Halaman Client</a>
-    <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
-        @csrf
-        <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
-    </form>
-</div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Kalender Ketersediaan Jadwal</h1>
-            <p class="page-sub">Cek tanggal acara yang tersedia sebelum melakukan pemesanan jadwal.</p>
         </div>
-
-        <div class="calendar-card">
-            <!-- Indikator Warna (Hanya Tanggal Terisi) -->
-            <div class="legend-box">
-                <div class="legend-item">
-                    <span class="dot dot-green"></span> Hijau: jam masih tersedia
-                </div>
-                <div class="legend-item">
-                    <span class="dot dot-red"></span> Merah: full day; keterangan jam: booking sebagian
-                </div>
-            </div>
-
-            <!-- Elemen Kalender -->
-            <div id="calendar"></div>
-
-            <div style="text-align: right;">
-                <a href="{{ route('reservasi.create') }}" class="btn-reservasi-cta">
-                    <i class="fa-solid fa-calendar-plus"></i> Lanjut Buat Reservasi
-                </a>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <div class="schedule-modal" id="schedule-modal" hidden>
         <div class="schedule-modal-card" role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title">
@@ -274,109 +96,83 @@
             <p class="schedule-modal-note">Titik hijau menunjukkan rentang waktu yang masih kosong dan dapat dipilih saat membuat reservasi.</p>
         </div>
     </div>
+@endsection
 
-    <!-- Script Inisialisasi FullCalendar -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'id',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek'
-                },
-                displayEventTime: false,
-                dateClick: function(info) {
-                    showScheduleDetail(info.dateStr);
-                },
-                // Mengambil event dari endpoint JSON yang sudah diset merah
-                events: '{{ route("client.jadwal.json") }}',
-                dayCellDidMount: function(info) {
-                    // Warna latar default untuk tanggal kosong (hijau lembut / terang)
-                    info.el.style.backgroundColor = '#F4FAF6'; 
-                    const dot = document.createElement('span');
-                    dot.className = 'availability-dot';
-                    dot.title = 'Masih ada jam yang dapat dibooking';
-                    const dayNumber = info.el.querySelector('.fc-daygrid-day-number');
-                    if (dayNumber) dayNumber.after(dot);
-                },
-                eventDidMount: function(info) {
-                    if (info.event.extendedProps.fullDay) {
-                        let dateStr = info.event.startStr.split('T')[0];
-                        let cellEl = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
-                        if (cellEl) {
-                            cellEl.style.backgroundColor = '#FEE2E2';
-                            if (info.event.extendedProps.fullDay) cellEl.querySelector('.availability-dot')?.remove();
-                        }
+@push('scripts')
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'id',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            displayEventTime: false,
+            dateClick: function(info) {
+                showScheduleDetail(info.dateStr);
+            },
+            events: '{{ route("client.jadwal.json") }}',
+            dayCellDidMount: function(info) {
+                info.el.style.backgroundColor = '#F4FAF6'; 
+                const dot = document.createElement('span');
+                dot.className = 'availability-dot';
+                dot.title = 'Masih ada jam yang dapat dibooking';
+                const dayNumber = info.el.querySelector('.fc-daygrid-day-number');
+                if (dayNumber) dayNumber.after(dot);
+            },
+            eventDidMount: function(info) {
+                if (info.event.extendedProps.fullDay) {
+                    let dateStr = info.event.startStr.split('T')[0];
+                    let cellEl = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
+                    if (cellEl) {
+                        cellEl.style.backgroundColor = '#FEE2E2';
+                        if (info.event.extendedProps.fullDay) cellEl.querySelector('.availability-dot')?.remove();
                     }
                 }
-            });
-            calendar.render();
-
-            function formatDate(dateString) {
-                return new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date(dateString + 'T00:00:00'));
-            }
-
-            function formatTime(date) {
-                return date.toTimeString().slice(0, 5);
-            }
-
-            function showScheduleDetail(dateString) {
-                const events = calendar.getEvents().filter(event => event.startStr.split('T')[0] === dateString);
-                const ranges = events.map(event => ({
-                    start: event.allDay ? 0 : event.start.getHours() * 60 + event.start.getMinutes(),
-                    end: event.allDay ? 1440 : (event.end ? event.end.getHours() * 60 + event.end.getMinutes() : 1440),
-                    busy: true,
-                })).sort((a, b) => a.start - b.start);
-                const slots = [];
-                let cursor = 0;
-                ranges.forEach(range => {
-                    if (range.start > cursor) slots.push({ start: cursor, end: range.start, busy: false });
-                    slots.push(range);
-                    cursor = Math.max(cursor, range.end);
-                });
-                if (cursor < 1440) slots.push({ start: cursor, end: 1439, busy: false });
-
-                const minutesToTime = minutes => String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0');
-                document.getElementById('schedule-modal-title').textContent = events.length ? 'Detail Booking' : 'Jadwal Tersedia';
-                document.getElementById('schedule-modal-date').textContent = formatDate(dateString);
-                document.getElementById('schedule-time-list').innerHTML = slots.length
-                    ? slots.map(slot => `<div class="schedule-time-item ${slot.busy ? 'busy' : 'free'}"><span class="schedule-time-dot"></span><strong>${slot.busy ? 'Sudah dibooking' : 'Masih tersedia'}</strong><span>${minutesToTime(slot.start)} – ${minutesToTime(slot.end)}</span></div>`).join('')
-                    : '<div class="schedule-time-item busy"><span class="schedule-time-dot"></span><strong>Full day sudah dibooking</strong></div>';
-                document.getElementById('schedule-modal').hidden = false;
-            }
-
-            document.getElementById('schedule-modal-close').addEventListener('click', () => document.getElementById('schedule-modal').hidden = true);
-            document.getElementById('schedule-modal').addEventListener('click', event => {
-                if (event.target.id === 'schedule-modal') event.target.hidden = true;
-            });
-            document.addEventListener('keydown', event => {
-                if (event.key === 'Escape') document.getElementById('schedule-modal').hidden = true;
-            });
-        });
-    </script>
-</body>
-<!-- SweetAlert2 CDN & Script Konfirmasi -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function confirmLogoutClient() {
-        Swal.fire({
-            title: 'Keluar dari Akun?',
-            text: 'Anda harus masuk kembali untuk membuat atau melihat reservasi.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Keluar',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logout-form-client').submit();
             }
         });
-    }
+        calendar.render();
+
+        function formatDate(dateString) {
+            return new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date(dateString + 'T00:00:00'));
+        }
+
+        function showScheduleDetail(dateString) {
+            const events = calendar.getEvents().filter(event => event.startStr.split('T')[0] === dateString);
+            const ranges = events.map(event => ({
+                start: event.allDay ? 0 : event.start.getHours() * 60 + event.start.getMinutes(),
+                end: event.allDay ? 1440 : (event.end ? event.end.getHours() * 60 + event.end.getMinutes() : 1440),
+                busy: true,
+            })).sort((a, b) => a.start - b.start);
+            const slots = [];
+            let cursor = 0;
+            ranges.forEach(range => {
+                if (range.start > cursor) slots.push({ start: cursor, end: range.start, busy: false });
+                slots.push(range);
+                cursor = Math.max(cursor, range.end);
+            });
+            if (cursor < 1440) slots.push({ start: cursor, end: 1439, busy: false });
+
+            const minutesToTime = minutes => String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0');
+            document.getElementById('schedule-modal-title').textContent = events.length ? 'Detail Booking' : 'Jadwal Tersedia';
+            document.getElementById('schedule-modal-date').textContent = formatDate(dateString);
+            document.getElementById('schedule-time-list').innerHTML = slots.length
+                ? slots.map(slot => `<div class="schedule-time-item ${slot.busy ? 'busy' : 'free'}"><span class="schedule-time-dot"></span><strong>${slot.busy ? 'Sudah dibooking' : 'Masih tersedia'}</strong><span>${minutesToTime(slot.start)} – ${minutesToTime(slot.end)}</span></div>`).join('')
+                : '<div class="schedule-time-item busy"><span class="schedule-time-dot"></span><strong>Full day sudah dibooking</strong></div>';
+            document.getElementById('schedule-modal').hidden = false;
+        }
+
+        document.getElementById('schedule-modal-close').addEventListener('click', () => document.getElementById('schedule-modal').hidden = true);
+        document.getElementById('schedule-modal').addEventListener('click', event => {
+            if (event.target.id === 'schedule-modal') event.target.hidden = true;
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') document.getElementById('schedule-modal').hidden = true;
+        });
+    });
 </script>
-</html>
+@endpush

@@ -1,479 +1,237 @@
-﻿<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Riwayat Reservasi - Griya Rias Elly Jr.</title>
+﻿@extends('layouts.client')
+
+@section('title', 'Riwayat Reservasi - Griya Rias Elly Jr.')
+
+@push('styles')
+<style>
+    :root {
+        --status-bg: #FBF2E4;
+        --status-text: #8A6026;
+    }
+
+    .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 6px; }
+    .page-sub { color: var(--text-muted); font-size: 0.9rem; }
+
+    .btn-gold {
+        background-color: var(--gold-primary);
+        color: #FFF;
+        padding: 10px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.88rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+    }
+    .btn-gold:hover { background-color: var(--gold-hover); }
+
+    /* Table Card Container */
+    .history-table-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        overflow-x: auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .history-table { width: 100%; min-width: 750px; border-collapse: collapse; }
+    .history-table th {
+        text-align: left;
+        padding: 16px;
+        background: #FCFAF8;
+        color: var(--text-muted);
+        font-size: 11px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .history-table td { padding: 18px 16px; border-top: 1px solid #F0EBE6; vertical-align: middle; font-size: 0.9rem; }
+    .history-table td small { display: block; color: var(--text-muted); margin-top: 4px; font-size: 0.8rem; }
+
+    .history-status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: var(--status-bg);
+        color: var(--status-text);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
     
-    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CSS SweetAlert2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    .history-empty { text-align: center; color: var(--text-muted); padding: 48px !important; }
+    .history-empty a { color: var(--gold-primary); font-weight: 700; text-decoration: none; }
+    .history-empty a:hover { text-decoration: underline; }
 
-    <style>
-        .badge-client-notif {
-    background-color: #16A34A;
-    color: #FFFFFF;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 9999px;
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
-}
-.client-sidebar-nav a.active .badge-client-notif {
-    background-color: #FFFFFF;
-    color: #C58F43;
-    box-shadow: none;
-}
-        :root {
-            --bg-light: #FDFBF7; 
-            --bg-card: #FFFFFF; 
-            --gold-primary: #C58F43;
-            --gold-hover: #A87632;
-            --text-dark: #241A16; 
-            --text-muted: #8C8279; 
-            --border-color: #EFE8DE;
-            --status-bg: #FBF2E4;
-            --status-text: #8A6026;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
-        .swal2-container { z-index: 10000 !important; }
+    .history-pagination { display: flex; justify-content: center; margin-top: 24px; }
+    
+    /* Layout Pembayaran Rapih */
+    .payment-box {
+        background: #FAFAFA;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .payment-amount { font-size: 1rem; font-weight: 800; color: var(--gold-primary); }
+    .payment-status-info { font-size: 0.78rem; display: flex; align-items: center; gap: 5px; }
+</style>
+@endpush
 
-        /* Sidebar Client */
-        .client-sidebar {
-            width: 260px;
-            flex: 0 0 260px;
-            background: #FFF;
-            border-right: 1px solid var(--border-color);
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            box-shadow: 2px 0 14px rgba(36, 26, 22, 0.03);
-        }
-        .client-sidebar-brand {
-            padding: 4px 12px 20px;
-            border-bottom: 1px solid var(--border-color);
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-        }
-        .client-sidebar-brand span { font-size: .67rem; letter-spacing: .2em; color: var(--gold-primary); font-weight: 700; text-transform: uppercase; }
-        .client-sidebar-brand strong { font-family: 'Playfair Display', serif; color: var(--text-dark); font-size: 1.55rem; line-height: 1.2; }
-        .client-sidebar-brand small { color: var(--text-muted); margin-top: 4px; }
-
-        /* User Profile di Sidebar */
-        .client-sidebar-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 10px;
-            margin: 16px 0;
-            background: #FAFAFA;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-        }
-        .client-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #F4E6D2;
-            color: var(--gold-hover);
-            display: grid;
-            place-items: center;
-            font-weight: 800;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-        .client-sidebar-user strong { font-size: .88rem; color: var(--text-dark); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .client-sidebar-user small { font-size: .75rem; color: var(--text-muted); display: block; }
-
-        /* Navigasi Sidebar */
-        .client-sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .client-nav-label { font-size: .65rem; letter-spacing: .12em; font-weight: 800; color: #A59A8E; padding: 10px 12px 4px; display: block; }
-
-        .client-sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #55483F;
-            font-size: .86rem;
-            font-weight: 600;
-            padding: 11px 12px;
-            border-radius: 8px;
-            transition: .2s;
-        }
-        .client-sidebar-nav a i { width: 18px; text-align: center; color: var(--text-muted); }
-        .client-sidebar-nav a:hover { background: #FBF5EC; color: var(--gold-hover); }
-        .client-sidebar-nav a.active { background: var(--gold-primary); color: #FFF; }
-        .client-sidebar-nav a.active i { color: #FFF; }
-
-        /* Footer Sidebar */
-        .client-sidebar-footer {
-            margin-top: auto;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            display: grid;
-            gap: 7px;
-        }
-        .client-sidebar-footer > a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #55483F;
-            font-size: .86rem;
-            font-weight: 600;
-            padding: 11px 12px;
-            border-radius: 8px;
-        }
-        .client-sidebar-footer button {
-            width: 100%;
-            border: 1px solid #F1D0D0;
-            background: #FFF5F5;
-            color: #B33B3B;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font: 600 .85rem 'Plus Jakarta Sans', sans-serif;
-            cursor: pointer;
-        }
-
-        /* Main Content Layout */
-        .main-content { flex: 1; padding: 40px; min-width: 0; }
-        .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 6px; }
-        .page-sub { color: var(--text-muted); font-size: 0.9rem; }
-
-        .btn-gold {
-            background-color: var(--gold-primary);
-            color: #FFF;
-            padding: 10px 18px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.88rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-        }
-        .btn-gold:hover { background-color: var(--gold-hover); }
-
-        /* Table Card Container */
-        .history-table-wrap {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        .history-table { width: 100%; min-width: 750px; border-collapse: collapse; }
-        .history-table th {
-            text-align: left;
-            padding: 16px;
-            background: #FCFAF8;
-            color: var(--text-muted);
-            font-size: 11px;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            font-weight: 700;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .history-table td { padding: 18px 16px; border-top: 1px solid #F0EBE6; vertical-align: middle; font-size: 0.9rem; }
-        .history-table td small { display: block; color: var(--text-muted); margin-top: 4px; font-size: 0.8rem; }
-
-        .history-status {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            background: var(--status-bg);
-            color: var(--status-text);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: capitalize;
-        }
-        
-        .history-empty { text-align: center; color: var(--text-muted); padding: 48px !important; }
-        .history-empty a { color: var(--gold-primary); font-weight: 700; text-decoration: none; }
-        .history-empty a:hover { text-decoration: underline; }
-
-        .history-pagination { display: flex; justify-content: center; margin-top: 24px; }
-        
-        /* Layout Pembayaran Rapih */
-        .payment-box {
-            background: #FAFAFA;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .payment-amount { font-size: 1rem; font-weight: 800; color: var(--gold-primary); }
-        .payment-status-info { font-size: 0.78rem; display: flex; align-items: center; gap: 5px; }
-    </style>
-</head>
-<body>
-
-    <!-- Sidebar Client -->
-    <aside class="client-sidebar">
-        <a class="client-sidebar-brand" href="{{ route('client.dashboard') }}">
-            <span>GRIYA RIAS</span><strong>Elly Jr.</strong><small>Area Client</small>
-        </a>
-        
-        <div class="client-sidebar-user">
-            <span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-            <div style="min-width: 0;">
-                <strong>{{ auth()->user()->name }}</strong>
-                <small>Client</small>
-            </div>
+@section('content')
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Riwayat Reservasi</h1>
+            <p class="page-sub">Daftar pengajuan booking dan perkembangan jadwal acara Anda.</p>
         </div>
-
-        <nav class="client-sidebar-nav">
-            <span class="client-nav-label">MENU UTAMA</span>
-            <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
-            <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
-            <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
-            <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
-            
-            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS &amp; AKUN</span>
-            <a href="{{ route('client.riwayat.reservasi') }}" class="active">
-                <i class="fa-regular fa-calendar"></i> Riwayat Reservasi
-                @if(isset($clientValidatedCount) && $clientValidatedCount > 0)
-                    <span class="badge-client-notif" title="Update Validasi Admin">{{ $clientValidatedCount }}</span>
-                @endif
+        <div>
+            <a class="btn-gold" href="{{ route('reservasi.create') }}">
+                <i class="fa-solid fa-plus"></i> Buat Reservasi
             </a>
-            <a href="{{ route('client.riwayat.transaksi') }}">
-                <i class="fa-solid fa-receipt"></i> Riwayat Transaksi
-                @if(isset($clientApprovedReadyToPayCount) && $clientApprovedReadyToPayCount > 0)
-                    <span class="badge-client-notif" style="background-color:#D97706;" title="Menunggu Pembayaran">{{ $clientApprovedReadyToPayCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('user.profile.edit') }}">
-                <i class="fa-solid fa-user-gear"></i> Pengaturan Akun
-            </a>
-        </nav>
-
-        <div class="client-sidebar-footer">
-            <a href="{{ route('client.home') }}"><i class="fa-solid fa-globe"></i> Halaman Client</a>
-            <form id="logout-form-client" action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                @csrf
-                <button type="button" onclick="confirmLogoutClient()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
-            </form>
         </div>
-    </aside>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Riwayat Reservasi</h1>
-                <p class="page-sub">Daftar pengajuan booking dan perkembangan jadwal acara Anda.</p>
-            </div>
-            <div>
-                <a class="btn-gold" href="{{ route('reservasi.create') }}">
-                    <i class="fa-solid fa-plus"></i> Buat Reservasi
-                </a>
-            </div>
-        </div>
-
-        <div class="history-table-wrap">
-            <table class="history-table">
-                <thead>
+    <div class="history-table-wrap">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Paket / Layanan</th>
+                    <th>Tanggal Acara</th>
+                    <th>Waktu</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                    <th>Pembayaran &amp; Bukti</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($reservasis as $reservasi)
                     <tr>
-                        <th>Kode</th>
-                        <th>Paket / Layanan</th>
-                        <th>Tanggal Acara</th>
-                        <th>Waktu</th>
-                        <th>Jumlah</th>
-                        <th>Status</th>
-                        <th>Pembayaran &amp; Bukti</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($reservasis as $reservasi)
-                        <tr>
-                            @php($namaLayananTerpilih = $reservasi->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
-                            <td>
-                                <strong>{{ $reservasi->kode_reservasi }}</strong>
-                                <small>Diajukan {{ ($reservasi->tanggal_pengajuan ?? $reservasi->tgl_reservasi)?->format('d/m/Y') }}</small>
-                            </td>
-                            <td>
-                                {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—') }}
-                                <small>{{ $reservasi->lokasi_acara ?: $reservasi->lokasi }}</small>
-                                @foreach($reservasi->layanans as $layananTerpilih)
-                                    @if($layananTerpilih->pivot->catatan_layanan)
-                                        <small style="white-space:pre-line;"><strong>Catatan {{ $layananTerpilih->pivot->nama_layanan }}:</strong> {{ $layananTerpilih->pivot->catatan_layanan }}</small>
-                                    @endif
-                                @endforeach
-                            </td>
-                            <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? '—' }}</td>
-                            <td style="white-space: nowrap;">
-                                {{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '-' }} &ndash; {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '-' }}
-                            </td>
-                            <td>{{ $reservasi->jumlah_pesanan }}</td>
-                            <td>
-                                <span class="history-status">{{ $reservasi->status_reservasi }}</span>
-                            </td>
-                            <td style="min-width:240px;">
-                                <div class="payment-box">
-                                    @php($totalPembayaran = (int) (($reservasi->harga_paket ?: $reservasi->harga_layanan ?: 0) * ($reservasi->jumlah_pesanan ?: 1)))
-                                    <div class="payment-amount">Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</div>
-                                    
-                                    @if(in_array($reservasi->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
-                                        <div class="payment-status-info" style="color:#15803D;"><i class="fa-solid fa-circle-check"></i> Pembayaran lunas</div>
+                        @php($namaLayananTerpilih = $reservasi->layanans->map(fn ($layanan) => $layanan->pivot->nama_layanan)->filter()->implode(', '))
+                        <td>
+                            <strong>{{ $reservasi->kode_reservasi }}</strong>
+                            <small>Diajukan {{ ($reservasi->tanggal_pengajuan ?? $reservasi->tgl_reservasi)?->format('d/m/Y') }}</small>
+                        </td>
+                        <td>
+                            {{ $reservasi->nama_paket ?: ($namaLayananTerpilih ?: $reservasi->nama_layanan ?: $reservasi->paket?->nama_paket ?: $reservasi->layanan?->nama_layanan ?: $reservasi->detail_acara ?: '—') }}
+                            <small>{{ $reservasi->lokasi_acara ?: $reservasi->lokasi }}</small>
+                            @foreach($reservasi->layanans as $layananTerpilih)
+                                @if($layananTerpilih->pivot->catatan_layanan)
+                                    <small style="white-space:pre-line;"><strong>Catatan {{ $layananTerpilih->pivot->nama_layanan }}:</strong> {{ $layananTerpilih->pivot->catatan_layanan }}</small>
+                                @endif
+                            @endforeach
+                        </td>
+                        <td>{{ ($reservasi->tanggal_acara ?? $reservasi->tgl_acara)?->translatedFormat('d F Y') ?? '—' }}</td>
+                        <td style="white-space: nowrap;">
+                            {{ $reservasi->waktu_mulai ? substr($reservasi->waktu_mulai, 0, 5) : '-' }} &ndash; {{ $reservasi->waktu_selesai ? substr($reservasi->waktu_selesai, 0, 5) : '-' }}
+                        </td>
+                        <td>{{ $reservasi->jumlah_pesanan }}</td>
+                        <td>
+                            <span class="history-status">{{ $reservasi->status_reservasi }}</span>
+                        </td>
+                        <td style="min-width:240px;">
+                            <div class="payment-box">
+                                @php($totalPembayaran = (int) (($reservasi->harga_paket ?: $reservasi->harga_layanan ?: 0) * ($reservasi->jumlah_pesanan ?: 1)))
+                                <div class="payment-amount">Rp {{ number_format($totalPembayaran, 0, ',', '.') }}</div>
+                                
+                                @if(in_array($reservasi->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
+                                    <div class="payment-status-info" style="color:#15803D;"><i class="fa-solid fa-circle-check"></i> Pembayaran lunas</div>
+                                @else
+                                    @if($reservasi->status_reservasi === 'Disetujui' && config('services.midtrans.client_key') && $totalPembayaran > 0)
+                                        <a class="btn-gold" href="{{ route('client.riwayat.transaksi', ['reservasi' => $reservasi->id_reservasi]) }}" style="text-decoration:none;padding:6px 10px;font-size:.75rem;justify-content:center;">
+                                            <i class="fa-solid fa-credit-card"></i> Lanjut ke Pembayaran
+                                        </a>
+                                    @elseif($reservasi->status_reservasi !== 'Disetujui')
+                                        <div class="payment-status-info" style="color:#8C8279;"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</div>
                                     @else
-                                        @if($reservasi->status_reservasi === 'Disetujui' && config('services.midtrans.client_key') && $totalPembayaran > 0)
-                                            <a class="btn-gold" href="{{ route('client.riwayat.transaksi', ['reservasi' => $reservasi->id_reservasi]) }}" style="text-decoration:none;padding:6px 10px;font-size:.75rem;justify-content:center;">
-                                                <i class="fa-solid fa-credit-card"></i> Lanjut ke Pembayaran
-                                            </a>
-                                        @elseif($reservasi->status_reservasi !== 'Disetujui')
-                                            <div class="payment-status-info" style="color:#8C8279;"><i class="fa-solid fa-clock"></i> Menunggu validasi admin</div>
-                                        @else
-                                            <div class="payment-status-info" style="color:#B45309;">Gateway belum dikonfigurasi</div>
-                                        @endif
+                                        <div class="payment-status-info" style="color:#B45309;">Gateway belum dikonfigurasi</div>
                                     @endif
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="history-empty">
+                            <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
+                            Belum ada pengajuan reservasi. <a href="{{ route('reservasi.create') }}">Buat reservasi pertama Anda.</a>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+            {{ $reservasis->links('vendor.pagination.client-custom') }}
+    </div>
+@endsection
 
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="history-empty">
-                                <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem; color: #D1C7BD; margin-bottom: 12px; display: block;"></i>
-                                Belum ada pengajuan reservasi. <a href="{{ route('reservasi.create') }}">Buat reservasi pertama Anda.</a>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const newlyValidated = @json($newlyValidatedList ?? []);
+        if (newlyValidated.length === 0) return;
 
-        <div class="history-pagination">
-            {{ $reservasis->links() }}
-        </div>
-    </main>
+        const alertSignature = newlyValidated.map(i => `${i.kode_reservasi}:${i.status_reservasi}`).join('|');
+        if (sessionStorage.getItem('last_shown_validation_alert') === alertSignature) {
+            return;
+        }
+        sessionStorage.setItem('last_shown_validation_alert', alertSignature);
 
-    <!-- SweetAlert2 CDN & Script Konfirmasi -->
-    <!-- SweetAlert2 CDN & Script Konfirmasi -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Popup Notifikasi Flash Session dari Controller
-        @if(session('success'))
+        const approved = newlyValidated.filter(item => item.status_reservasi === 'Disetujui');
+        const rejected = newlyValidated.filter(item => item.status_reservasi === 'Ditolak');
+
+        playValidationSound();
+
+        if (approved.length > 0) {
+            const kodeList = approved.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
             Swal.fire({
                 icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
+                title: 'Reservasi berhasil silahkan tunggu validasi dari admin',
+                html: `Kode reservasi ${kodeList} berhasil dibuat.`,
+                showCancelButton: false,
+                allowOutsideClick: false,
+                confirmButtonColor: '#C58F43',
+                confirmButtonText: 'Oke',
+                background: '#FFFFFF',
+                color: '#241A16'
+            });
+        } else if (rejected.length > 0) {
+            const kodeList = rejected.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
+            Swal.fire({
+                icon: 'info',
+                title: 'Status Reservasi Diperbarui',
+                html: `Pengajuan reservasi ${kodeList} berstatus <strong>Ditolak</strong>. Silakan cek detail atau hubungi admin untuk jadwal alternatif.`,
+                allowOutsideClick: false,
                 confirmButtonColor: '#C58F43',
                 background: '#FFFFFF',
                 color: '#241A16'
             });
-        @endif
-        document.addEventListener('DOMContentLoaded', function() {
-            const newlyValidated = @json($newlyValidatedList ?? []);
-            if (newlyValidated.length === 0) return;
-
-            // Cegah popup muncul ulang dari bfcache browser
-            const alertSignature = newlyValidated.map(i => `${i.kode_reservasi}:${i.status_reservasi}`).join('|');
-            if (sessionStorage.getItem('last_shown_validation_alert') === alertSignature) {
-                return;
-            }
-            sessionStorage.setItem('last_shown_validation_alert', alertSignature);
-
-            const approved = newlyValidated.filter(item => item.status_reservasi === 'Disetujui');
-            const rejected = newlyValidated.filter(item => item.status_reservasi === 'Ditolak');
-
-            playValidationSound();
-
-            if (approved.length > 0) {
-                const kodeList = approved.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Reservasi berhasil silahkan tunggu validasi dari admin',
-                    html: `Kode reservasi ${kodeList} berhasil dibuat.`,
-                    showCancelButton: false,
-                    allowOutsideClick: false,
-                    confirmButtonColor: '#C58F43',
-                    confirmButtonText: 'Oke',
-                    background: '#FFFFFF',
-                    color: '#241A16'
-                });
-            } else if (rejected.length > 0) {
-                const kodeList = rejected.map(i => `<strong>${i.kode_reservasi}</strong>`).join(', ');
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Status Reservasi Diperbarui',
-                    html: `Pengajuan reservasi ${kodeList} berstatus <strong>Ditolak</strong>. Silakan cek detail atau hubungi admin untuk jadwal alternatif.`,
-                    allowOutsideClick: false,
-                    confirmButtonColor: '#C58F43',
-                    background: '#FFFFFF',
-                    color: '#241A16'
-                });
-            }
-        });
-
-        function playValidationSound() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                const ctx = new AudioCtx();
-                const now = ctx.currentTime;
-                [587.33, 880.00].forEach((freq, i) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
-                    gain.gain.setValueAtTime(0.001, now + i * 0.12);
-                    gain.gain.exponentialRampToValueAtTime(0.22, now + i * 0.12 + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.4);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now + i * 0.12);
-                    osc.stop(now + i * 0.12 + 0.42);
-                });
-            } catch (e) {}
         }
+    });
 
-        function confirmLogoutClient() {
-            Swal.fire({
-                title: 'Keluar dari Akun?',
-                text: 'Anda harus masuk kembali untuk membuat atau melihat reservasi.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#C58F43',
-                cancelButtonColor: '#8C8279',
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('logout-form-client').submit();
-                }
+    function playValidationSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+            [587.33, 880.00].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                gain.gain.setValueAtTime(0.001, now + i * 0.12);
+                gain.gain.exponentialRampToValueAtTime(0.22, now + i * 0.12 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + i * 0.12);
+                osc.stop(now + i * 0.12 + 0.42);
             });
-        }
-    </script>
-</body>
-</html>
+        } catch (e) {}
+    }
+</script>
+@endpush

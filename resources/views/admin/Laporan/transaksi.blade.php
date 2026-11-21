@@ -2,6 +2,65 @@
 
 @section('title', 'Laporan Transaksi - Griya Rias Elly Jr.')
 
+@push('styles')
+<style>
+    /* Pagination Custom Griya Rias */
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px 20px;
+        border-top: 1px solid #EFE8DE;
+        background: #FAF9F6;
+    }
+    .pagination-info {
+        font-size: 0.82rem;
+        color: #8C8279;
+        font-weight: 600;
+    }
+    .pagination-links {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #D8CEC0;
+        background: #FFFFFF;
+        color: #241A16;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: #FBF5EC;
+        border-color: #C58F43;
+        color: #A87632;
+    }
+    .page-btn.active {
+        background: #C58F43;
+        border-color: #C58F43;
+        color: #FFFFFF;
+        box-shadow: 0 2px 6px rgba(197, 143, 67, 0.25);
+    }
+    .page-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #F5F3F0;
+    }
+</style>
+@endpush
+
 @section('content')
 <div style="padding: 32px; background-color: #FDFBF7; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: #241A16;">
     
@@ -12,7 +71,7 @@
             <p style="color: #8C8279; font-size: 0.9rem; margin-top: 4px;">Rekapitulasi pemasukan dan riwayat transaksi pelanggan.</p>
         </div>
 
-        {{-- Tombol Download Excel & Pratinjau PDF (Tombol PDF tetap merah) --}}
+        {{-- Tombol Download Excel & Pratinjau PDF --}}
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{{ route('admin.laporan.transaksi.excel', request()->query()) }}" 
                style="background-color: #1D6F42; color: #FFF; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
@@ -77,65 +136,69 @@
     </div>
 
     {{-- Tabel Data Transaksi --}}
-    <div style="background: #FFF; border: 1px solid #EFE8DE; border-radius: 14px; overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
-            <thead>
-                <tr style="background: #FCFAF8; border-bottom: 1px solid #EFE8DE; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #8C8279;">
-                    <th style="padding: 16px;">No</th>
-                    <th style="padding: 16px;">Kode</th>
-                    <th style="padding: 16px;">Tanggal Acara</th>
-                    <th style="padding: 16px;">Nama Client</th>
-                    <th style="padding: 16px;">Acara & Paket</th>
-                    <th style="padding: 16px;">Status</th>
-                    <th style="padding: 16px; text-align: right;">Nominal</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($transaksi as $index => $item)
-                    @php
-                        $namaLayanan = $item->layanans->map(fn($l) => $l->pivot->nama_layanan)->filter()->implode(', ');
-                        $paket = $item->nama_paket ?: ($namaLayanan ?: ($item->paket?->nama_paket ?: ($item->nama_layanan ?: '—')));
-                        $nominal = ($item->biaya_sewa ?? 0) > 0 
-                            ? $item->biaya_sewa 
-                            : (($item->harga_paket ?? $item->harga_layanan ?? 0) * ($item->jumlah_pesanan ?? 1));
-                    @endphp
-                    <tr style="border-top: 1px solid #F0EBE6; font-size: 0.9rem;">
-                        <td style="padding: 16px;">{{ $index + 1 }}</td>
-                        <td style="padding: 16px;"><strong>{{ $item->kode_reservasi }}</strong></td>
-                        <td style="padding: 16px;">{{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d M Y') }}</td>
-                        <td style="padding: 16px;">{{ $item->user->name ?? 'Client' }}</td>
-                        <td style="padding: 16px;">
-                            <strong>{{ $item->jenis_acara ?: 'Acara' }}</strong><br>
-                            <small style="color: #8C8279;">{{ $paket }}</small>
-                        </td>
-                        <td style="padding: 16px;">
-                            <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; 
-                                background: {{ $item->status_reservasi === 'Disetujui' ? '#EAF6EE' : '#FBF2E4' }}; 
-                                color: {{ $item->status_reservasi === 'Disetujui' ? '#267145' : '#8A6026' }};">
-                                {{ ucfirst($item->status_reservasi) }}
-                            </span>
-                        </td>
-                        <td style="padding: 16px; text-align: right;"><strong>Rp {{ number_format($nominal, 0, ',', '.') }}</strong></td>
+    <div style="background: #FFF; border: 1px solid #EFE8DE; border-radius: 14px; overflow: hidden;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                <thead>
+                    <tr style="background: #FCFAF8; border-bottom: 1px solid #EFE8DE; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #8C8279;">
+                        <th style="padding: 16px;">No</th>
+                        <th style="padding: 16px;">Kode</th>
+                        <th style="padding: 16px;">Tanggal Acara</th>
+                        <th style="padding: 16px;">Nama Client</th>
+                        <th style="padding: 16px;">Acara &amp; Paket</th>
+                        <th style="padding: 16px;">Status</th>
+                        <th style="padding: 16px; text-align: right;">Nominal</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #8C8279;">
-                            Tidak ada data transaksi pada rentang tanggal tersebut.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-            @if($transaksi->count() > 0)
-                <tfoot>
-                    <tr style="background: #FCFAF8; border-top: 2px solid #EFE8DE; font-weight: 700;">
-                        <td colspan="6" style="padding: 16px; text-align: right;">TOTAL PENDAPATAN</td>
-                        <td style="padding: 16px; text-align: right; color: #C58F43; font-size: 1.05rem;">
-                            Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
-                        </td>
-                    </tr>
-                </tfoot>
-            @endif
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($transaksi as $index => $item)
+                        @php
+                            $namaLayanan = $item->layanans->map(fn($l) => $l->pivot->nama_layanan)->filter()->implode(', ');
+                            $paket = $item->nama_paket ?: ($namaLayanan ?: ($item->paket?->nama_paket ?: ($item->nama_layanan ?: '—')));
+                            $nominal = ($item->biaya_sewa ?? 0) > 0 
+                                ? $item->biaya_sewa 
+                                : (($item->harga_paket ?? $item->harga_layanan ?? 0) * ($item->jumlah_pesanan ?? 1));
+                        @endphp
+                        <tr style="border-top: 1px solid #F0EBE6; font-size: 0.9rem;">
+                            <td style="padding: 16px;">{{ ($transaksi->firstItem() ?? 1) + $index }}</td>
+                            <td style="padding: 16px;"><strong>{{ $item->kode_reservasi }}</strong></td>
+                            <td style="padding: 16px;">{{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d M Y') }}</td>
+                            <td style="padding: 16px;">{{ $item->user->name ?? 'Client' }}</td>
+                            <td style="padding: 16px;">
+                                <strong>{{ $item->jenis_acara ?: 'Acara' }}</strong><br>
+                                <small style="color: #8C8279;">{{ $paket }}</small>
+                            </td>
+                            <td style="padding: 16px;">
+                                <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; 
+                                    background: {{ $item->status_reservasi === 'Disetujui' ? '#EAF6EE' : '#FBF2E4' }}; 
+                                    color: {{ $item->status_reservasi === 'Disetujui' ? '#267145' : '#8A6026' }};">
+                                    {{ ucfirst($item->status_reservasi) }}
+                                </span>
+                            </td>
+                            <td style="padding: 16px; text-align: right;"><strong>Rp {{ number_format($nominal, 0, ',', '.') }}</strong></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #8C8279;">
+                                Tidak ada data transaksi pada rentang tanggal tersebut.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if($transaksi->count() > 0)
+                    <tfoot>
+                        <tr style="background: #FCFAF8; border-top: 2px solid #EFE8DE; font-weight: 700;">
+                            <td colspan="6" style="padding: 16px; text-align: right;">TOTAL PENDAPATAN</td>
+                            <td style="padding: 16px; text-align: right; color: #C58F43; font-size: 1.05rem;">
+                                Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+
+        @include('partials.pagination', ['paginator' => $transaksi])
     </div>
 </div>
 
@@ -144,8 +207,7 @@
     <div style="background: #FDFBF7; width: 100%; max-width: 960px; height: 90vh; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #D8CEC0; box-shadow: 0 24px 60px rgba(36, 26, 22, 0.35);">
         
         {{-- Header Modal Cokelat-Gold --}}
-        {{-- Ubah baris 133 di transaksi.blade.php menjadi: --}}
-<div style="background-color: rgb(197, 143, 67); color: #FFFFFF; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background-color: rgb(197, 143, 67); color: #FFFFFF; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <i class="fa-solid fa-print" style="font-size: 1.15rem;"></i>
                 <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 0; font-weight: 700; letter-spacing: 0.02em;">
@@ -190,7 +252,6 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Tutup modal jika klik di luar area box atau tekan tombol Escape
     document.getElementById('pdfPreviewModal').addEventListener('click', function(e) {
         if (e.target === this) closePdfPreview();
     });

@@ -11,7 +11,10 @@ class KategoriPaketController extends Controller
 {
     public function index()
     {
-        $kategoriPakets = KategoriPaket::withCount('pakets')->orderBy('nama_kategori')->get();
+        $kategoriPakets = KategoriPaket::withCount('pakets')
+            ->orderBy('nama_kategori')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.kategori-paket.index', compact('kategoriPakets'));
     }

@@ -1,9 +1,195 @@
+@if(auth()->user()->role === 'client')
+    @extends('layouts.client')
+
+    @section('title', 'Pengaturan Akun - Griya Rias Elly Jr.')
+
+    @section('content')
+        {{-- Konten khusus client --}}
+    @endsection
+@elseif(auth()->user()->role === 'admin')
+    {{-- Layout atau konten khusus admin --}}
+
+    @push('styles')
+    <style>
+        .profile-content { width: min(720px, 100%); margin: 0 auto; }
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 6px; }
+        .page-sub { color: var(--text-muted); font-size: 0.9rem; }
+
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 680px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #FAFAFA;
+            color: var(--text-dark);
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus { border-color: var(--gold-primary); background: #FFF; }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper .form-control { padding-right: 42px; }
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .toggle-password-btn:hover { color: var(--gold-primary); }
+
+        .btn-gold-save {
+            background-color: var(--gold-primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .btn-gold-save:hover { background-color: var(--gold-hover); }
+
+        .alert-success-custom {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #C8E6C9;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+    </style>
+    @endpush
+
+    @section('content')
+        <div class="profile-content">
+            <div class="page-header">
+                <h1 class="page-title">Pengaturan Akun</h1>
+                <p class="page-sub">Kelola data diri dan kata sandi akun Anda.</p>
+            </div>
+
+            <div class="profile-card">
+                @if(session('success'))
+                    <div class="alert-success-custom">
+                        <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                <form action="{{ route('user.profile.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" name="name" class="form-control" value="{{ old('name', $user->name ?? auth()->user()->name) }}" required>
+                        @error('name') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label>Alamat Email <small style="color: #8C8279;">(Sesuai registrasi)</small></label>
+                        <input type="email" class="form-control" value="{{ $user->email ?? auth()->user()->email }}" readonly style="background-color: #FAFAFA; color: #8C8279; cursor: not-allowed;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>No. WhatsApp / Telepon</label>
+                        <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone ?? auth()->user()->no_hp ?? '') }}" placeholder="Contoh: 081234567890" required>
+                        @error('phone') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label>Alamat Lengkap</label>
+                        <textarea name="address" class="form-control" rows="3" placeholder="Masukkan alamat domisili atau alamat acara Anda">{{ old('address', $user->address ?? auth()->user()->alamat ?? '') }}</textarea>
+                        @error('address') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #EFE8DE; margin: 28px 0 20px 0;">
+
+                    <h4 style="font-size: 1rem; color: #241A16; margin-bottom: 4px;">Ubah Password</h4>
+                    <p style="font-size: 0.8rem; color: #8C8279; margin-bottom: 16px;">Biarkan kosong jika tidak ingin mengganti password saat ini.</p>
+
+                    <div class="form-group">
+                        <label>Password Baru</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password_baru" name="password" class="form-control" placeholder="Minimal 8 karakter">
+                            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_baru', this)" title="Tampilkan / Sembunyikan Password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        @error('password') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label>Konfirmasi Password Baru</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password_konfirmasi" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
+                            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_konfirmasi', this)" title="Tampilkan / Sembunyikan Password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-gold-save">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endsection
+
+    @push('scripts')
+    <script>
+        function togglePasswordVisibility(inputId, btnElement) {
+            const input = document.getElementById(inputId);
+            const icon = btnElement.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+    @endpush
+
+@else
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengaturan Akun - Griya Rias Elly Jr.</title>
+    <title>Pengaturan Akun - Admin Griya Rias Elly Jr.</title>
     
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,20 +197,20 @@
 
     <style>
         .badge-notification {
-    background-color: #EF4444;
-    color: #FFFFFF;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 9999px;
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
-}
+            background-color: #EF4444;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+        }
         :root {
             --bg-light: #FDFBF7; 
             --bg-card: #FFFFFF; 
@@ -38,21 +224,20 @@
         body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; min-height: 100vh; }
 
         .badge-paid {
-    background-color: #16A34A;
-    color: #FFFFFF;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 9999px;
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
-}
-        /* Sidebar Client */
+            background-color: #16A34A;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 5px rgba(22, 163, 74, 0.3);
+        }
         .client-sidebar {
             width: 260px;
             flex: 0 0 260px;
@@ -78,7 +263,6 @@
         .client-sidebar-brand strong { font-family: 'Playfair Display', serif; color: var(--text-dark); font-size: 1.55rem; line-height: 1.2; }
         .client-sidebar-brand small { color: var(--text-muted); margin-top: 4px; }
 
-        /* User Profile di Sidebar */
         .client-sidebar-user {
             display: flex;
             align-items: center;
@@ -104,7 +288,6 @@
         .client-sidebar-user strong { font-size: .88rem; color: var(--text-dark); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .client-sidebar-user small { font-size: .75rem; color: var(--text-muted); display: block; }
 
-        /* Navigasi Sidebar */
         .client-sidebar-nav {
             display: flex;
             flex-direction: column;
@@ -132,7 +315,6 @@
         .client-sidebar-nav a.active { background: var(--gold-primary); color: #fff; }
         .client-sidebar-nav a.active i { color: #fff; }
 
-        /* Footer Sidebar */
         .client-sidebar-footer {
             margin-top: auto;
             padding-top: 16px;
@@ -165,7 +347,6 @@
             cursor: pointer;
         }
 
-        /* Main Content */
         .main-content { flex: 1; padding: 40px; min-width: 0; }
         .profile-content { width: min(720px, 100%); margin: 0 auto; }
         @media(max-width:768px) {
@@ -201,32 +382,27 @@
             transition: border-color 0.2s;
         }
         .form-control:focus { border-color: var(--gold-primary); background: #FFF; }
-        /* Wrapper & Tombol Ikon Mata Password */
-.password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-.password-wrapper .form-control {
-    padding-right: 42px; /* Memberi ruang agar teks tidak menabrak ikon */
-}
-.toggle-password-btn {
-    position: absolute;
-    right: 12px;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 4px;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-}
-.toggle-password-btn:hover {
-    color: var(--gold-primary);
-}
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper .form-control { padding-right: 42px; }
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .toggle-password-btn:hover { color: var(--gold-primary); }
         
         .btn-gold-save {
             background-color: var(--gold-primary);
@@ -265,53 +441,41 @@
             <span class="client-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
             <div style="min-width: 0;">
                 <strong>{{ auth()->user()->name }}</strong>
-            <small>{{ auth()->user()->role === 'admin' ? 'Administrator' : 'Client' }}</small>
+                <small>Administrator</small>
             </div>
         </div>
 
         <nav class="client-sidebar-nav">
-            @if(auth()->user()->role === 'admin')
-                <span class="client-nav-label">MENU UTAMA</span>
-                <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-                <a href="{{ route('admin.layanan.index') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
-                <a href="{{ route('admin.paket.index') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
-                <a href="{{ route('admin.kategori-paket.index') }}"><i class="fa-solid fa-tags"></i> Kategori Paket</a>
-                <a href="{{ route('admin.portofolio.index') }}"><i class="fa-solid fa-images"></i> Galeri Portofolio</a>
-                <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
-<a href="{{ route('admin.jadwal.index') }}">
-    <i class="fa-regular fa-calendar"></i> Jadwal Acara
-    @if(isset($pendingReservationsCount) && $pendingReservationsCount > 0)
-        <span class="badge-notification">{{ $pendingReservationsCount }}</span>
-    @endif
-</a>
-<a href="{{ route('admin.laporan.transaksi') }}">
-    <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
-    @if(isset($newPaidPaymentsCount) && $newPaidPaymentsCount > 0)
-        <span class="badge-paid" title="Pembayaran Lunas Baru">{{ $newPaidPaymentsCount }}</span>
-    @endif
-</a>
-<a href="{{ route('admin.users.index') }}"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a>
-            @else
-                <span class="client-nav-label">MENU UTAMA</span>
-                <a href="{{ route('client.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
-                <a href="{{ route('client.katalog.layanan') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
-                <a href="{{ route('client.katalog.paket') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
-                <a href="{{ route('client.jadwal.index') }}"><i class="fa-regular fa-calendar-days"></i> Jadwal Acara</a>
-                <a href="{{ route('reservasi.create') }}"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</a>
-                <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
-                <a href="{{ route('client.riwayat.reservasi') }}"><i class="fa-regular fa-calendar"></i> Riwayat Reservasi</a>
-                <a href="{{ route('client.riwayat.transaksi') }}"><i class="fa-solid fa-receipt"></i> Riwayat Transaksi</a>
-            @endif
+            <span class="client-nav-label">MENU UTAMA</span>
+            <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ route('admin.layanan.index') }}"><i class="fa-solid fa-scissors"></i> Katalog Layanan</a>
+            <a href="{{ route('admin.paket.index') }}"><i class="fa-solid fa-box-open"></i> Katalog Paket</a>
+            <a href="{{ route('admin.kategori-paket.index') }}"><i class="fa-solid fa-tags"></i> Kategori Paket</a>
+            <a href="{{ route('admin.portofolio.index') }}"><i class="fa-solid fa-images"></i> Galeri Portofolio</a>
+            <span class="client-nav-label" style="margin-top: 12px;">AKTIVITAS & AKUN</span>
+            <a href="{{ route('admin.jadwal.index') }}">
+                <i class="fa-regular fa-calendar"></i> Jadwal Acara
+                @if(isset($pendingReservationsCount) && $pendingReservationsCount > 0)
+                    <span class="badge-notification">{{ $pendingReservationsCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.laporan.transaksi') }}">
+                <i class="fa-solid fa-chart-column"></i> Laporan Transaksi
+                @if(isset($newPaidPaymentsCount) && $newPaidPaymentsCount > 0)
+                    <span class="badge-paid" title="Pembayaran Lunas Baru">{{ $newPaidPaymentsCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.users.index') }}"><i class="fa-solid fa-users-gear"></i> Kelola Akun</a>
             <a href="{{ route('user.profile.edit') }}" class="active"><i class="fa-solid fa-user-gear"></i> Pengaturan Akun</a>
         </nav>
 
         <div class="client-sidebar-footer">
-    <a href="{{ auth()->user()->role === 'admin' ? route('home') : route('client.home') }}"><i class="fa-solid fa-globe"></i> {{ auth()->user()->role === 'admin' ? 'Halaman Utama' : 'Halaman Client' }}</a>
-    <form id="logout-form-profile" action="{{ route('logout') }}" method="POST" style="margin: 0;">
-        @csrf
-        <button type="button" onclick="confirmLogoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
-    </form>
-</div>
+            <a href="{{ route('home') }}"><i class="fa-solid fa-globe"></i> Halaman Utama</a>
+            <form id="logout-form-profile" action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                @csrf
+                <button type="button" onclick="confirmLogoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> Keluar Akun</button>
+            </form>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -323,114 +487,107 @@
             </div>
 
             <div class="profile-card">
-            @if(session('success'))
-                <div class="alert-success-custom">
-                    <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
-                </div>
-            @endif
+                @if(session('success'))
+                    <div class="alert-success-custom">
+                        <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+                    </div>
+                @endif
 
-            <form action="{{ route('user.profile.update') }}" method="POST">
-                @csrf
-                @method('PUT')
+                <form action="{{ route('user.profile.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
 
-                {{-- Nama Lengkap --}}
-                <div class="form-group">
-                    <label>Nama Lengkap</label>
-                    <input type="text" name="name" class="form-control" value="{{ old('name', $user->name ?? auth()->user()->name) }}" required>
-                    @error('name') <small style="color: #DC2626;">{{ $message }}</small> @enderror
-                </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" name="name" class="form-control" value="{{ old('name', $user->name ?? auth()->user()->name) }}" required>
+                        @error('name') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
 
-                {{-- Email --}}
-                <div class="form-group">
-                    <label>Alamat Email <small style="color: #8C8279;">(Sesuai registrasi)</small></label>
-                    <input type="email" class="form-control" value="{{ $user->email ?? auth()->user()->email }}" readonly style="background-color: #FAFAFA; color: #8C8279; cursor: not-allowed;">
-                </div>
+                    <div class="form-group">
+                        <label>Alamat Email <small style="color: #8C8279;">(Sesuai registrasi)</small></label>
+                        <input type="email" class="form-control" value="{{ $user->email ?? auth()->user()->email }}" readonly style="background-color: #FAFAFA; color: #8C8279; cursor: not-allowed;">
+                    </div>
 
-                {{-- No. WhatsApp --}}
-                <div class="form-group">
-                    <label>No. WhatsApp / Telepon</label>
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone ?? auth()->user()->no_hp ?? '') }}" placeholder="Contoh: 081234567890" required>
-                    @error('phone') <small style="color: #DC2626;">{{ $message }}</small> @enderror
-                </div>
+                    <div class="form-group">
+                        <label>No. WhatsApp / Telepon</label>
+                        <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone ?? auth()->user()->no_hp ?? '') }}" placeholder="Contoh: 081234567890" required>
+                        @error('phone') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
 
-                {{-- Alamat --}}
-                <div class="form-group">
-                    <label>Alamat Lengkap</label>
-                    <textarea name="address" class="form-control" rows="3" placeholder="Masukkan alamat domisili atau alamat acara Anda">{{ old('address', $user->address ?? auth()->user()->alamat ?? '') }}</textarea>
-                    @error('address') <small style="color: #DC2626;">{{ $message }}</small> @enderror
-                </div>
+                    <div class="form-group">
+                        <label>Alamat Lengkap</label>
+                        <textarea name="address" class="form-control" rows="3" placeholder="Masukkan alamat domisili atau alamat acara Anda">{{ old('address', $user->address ?? auth()->user()->alamat ?? '') }}</textarea>
+                        @error('address') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
 
-                <hr style="border: 0; border-top: 1px solid #EFE8DE; margin: 28px 0 20px 0;">
+                    <hr style="border: 0; border-top: 1px solid #EFE8DE; margin: 28px 0 20px 0;">
 
-                <h4 style="font-size: 1rem; color: #241A16; margin-bottom: 4px;">Ubah Password</h4>
-                <p style="font-size: 0.8rem; color: #8C8279; margin-bottom: 16px;">Biarkan kosong jika tidak ingin mengganti password saat ini.</p>
+                    <h4 style="font-size: 1rem; color: #241A16; margin-bottom: 4px;">Ubah Password</h4>
+                    <p style="font-size: 0.8rem; color: #8C8279; margin-bottom: 16px;">Biarkan kosong jika tidak ingin mengganti password saat ini.</p>
 
-                {{-- Password Baru --}}
-<div class="form-group">
-    <label>Password Baru</label>
-    <div class="password-wrapper">
-        <input type="password" id="password_baru" name="password" class="form-control" placeholder="Minimal 8 karakter">
-        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_baru', this)" title="Tampilkan / Sembunyikan Password">
-            <i class="fa-regular fa-eye"></i>
-        </button>
-    </div>
-    @error('password') <small style="color: #DC2626;">{{ $message }}</small> @enderror
-</div>
+                    <div class="form-group">
+                        <label>Password Baru</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password_baru" name="password" class="form-control" placeholder="Minimal 8 karakter">
+                            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_baru', this)" title="Tampilkan / Sembunyikan Password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        @error('password') <small style="color: #DC2626;">{{ $message }}</small> @enderror
+                    </div>
 
-{{-- Konfirmasi Password Baru --}}
-<div class="form-group">
-    <label>Konfirmasi Password Baru</label>
-    <div class="password-wrapper">
-        <input type="password" id="password_konfirmasi" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
-        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_konfirmasi', this)" title="Tampilkan / Sembunyikan Password">
-            <i class="fa-regular fa-eye"></i>
-        </button>
-    </div>
-</div>
+                    <div class="form-group">
+                        <label>Konfirmasi Password Baru</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password_konfirmasi" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
+                            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password_konfirmasi', this)" title="Tampilkan / Sembunyikan Password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                <button type="submit" class="btn-gold-save">
-                    <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
-                </button>
-            </form>
+                    <button type="submit" class="btn-gold-save">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                    </button>
+                </form>
             </div>
         </div>
     </main>
 
-</body>
-<!-- SweetAlert2 CDN & Script Konfirmasi -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function confirmLogoutProfile() {
-        const isAdmin = @json(auth()->user()->role === 'admin');
-        Swal.fire({
-            title: isAdmin ? 'Keluar dari Panel Admin?' : 'Keluar dari Akun?',
-            text: isAdmin ? 'Sesi admin Anda akan diakhiri.' : 'Anda harus masuk kembali untuk melihat reservasi.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#C58F43',
-            cancelButtonColor: '#8C8279',
-            confirmButtonText: 'Ya, Keluar',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logout-form-profile').submit();
-            }
-        });
-    }
-    function togglePasswordVisibility(inputId, btnElement) {
-    const input = document.getElementById(inputId);
-    const icon = btnElement.querySelector('i');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmLogoutProfile() {
+            Swal.fire({
+                title: 'Keluar dari Panel Admin?',
+                text: 'Sesi admin Anda akan diakhiri.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#C58F43',
+                cancelButtonColor: '#8C8279',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form-profile').submit();
+                }
+            });
+        }
+        function togglePasswordVisibility(inputId, btnElement) {
+            const input = document.getElementById(inputId);
+            const icon = btnElement.querySelector('i');
 
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-}
-</script>
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
 </html>
+@endif

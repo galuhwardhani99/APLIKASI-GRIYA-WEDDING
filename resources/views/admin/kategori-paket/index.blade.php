@@ -4,6 +4,61 @@
 
 @push('styles')
 <style>
+    /* Pagination Custom Griya Rias */
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px 20px;
+        border-top: 1px solid var(--border-color);
+        background: #FAF9F6;
+    }
+    .pagination-info {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+    .pagination-links {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #D8CEC0;
+        background: #FFFFFF;
+        color: var(--text-dark);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: #FBF5EC;
+        border-color: var(--gold-primary);
+        color: var(--gold-hover);
+    }
+    .page-btn.active {
+        background: var(--gold-primary);
+        border-color: var(--gold-primary);
+        color: #FFFFFF;
+        box-shadow: 0 2px 6px rgba(197, 143, 67, 0.25);
+    }
+    .page-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #F5F3F0;
+    }
+
     .wrap { max-width: 100%; margin: 0 auto; }
     
     .top, .toolbar, .actions { display: flex; align-items: center; gap: 12px; }
@@ -186,7 +241,7 @@
 
     <section class="panel">
         <div class="toolbar">
-            <h2>Daftar Kategori <span class="subtle">({{ $kategoriPakets->count() }})</span></h2>
+            <h2>Daftar Kategori <span class="subtle">({{ $kategoriPakets->total() }})</span></h2>
         </div>
         
         <div class="table-wrap">
@@ -236,6 +291,8 @@
                 </tbody>
             </table>
         </div>
+
+        @include('partials.pagination', ['paginator' => $kategoriPakets])
     </section>
 </div>
 
@@ -380,8 +437,6 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
-                } else {
-                    // Do nothing
                 }
             });
         } else {

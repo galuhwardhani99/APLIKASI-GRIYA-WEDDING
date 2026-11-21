@@ -17,7 +17,9 @@ class PaketController extends Controller
         $pakets = Paket::query()->when($search, fn ($query) => $query->where(fn ($q) => $q
             ->where('nama_paket', 'like', "%{$search}%")
             ->orWhereHas('kategoriPaket', fn ($q) => $q->where('nama_kategori', 'like', "%{$search}%"))))
-            ->latest()->get();
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         $kategoriPakets = KategoriPaket::orderBy('nama_kategori')->get();
 

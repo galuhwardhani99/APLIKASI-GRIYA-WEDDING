@@ -11,15 +11,20 @@ use Illuminate\Validation\Rule;
 class LayananController extends Controller
 {
     public function index(Request $request)
-    {
-        $search = trim((string) $request->query('search', ''));
-        $layanans = Layanan::query()->when($search, fn ($query) => $query->where(fn ($q) => $q
-            ->where('nama_layanan', 'like', "%{$search}%")
-            ->orWhere('variasi', 'like', "%{$search}%")))
-            ->latest('id_layanan')->get();
+{
+    $search = $request->query('search');
 
-        return view('admin.layanan.index', compact('layanans', 'search'));
-    }
+    $layanans = Layanan::query()
+        ->when($search, function ($query, $search) {
+            $query->where('nama_layanan', 'like', "%{$search}%")
+                  ->orWhere('variasi', 'like', "%{$search}%");
+        })
+        ->latest('id_layanan')
+        ->paginate(10)
+        ->withQueryString();
+
+    return view('admin.layanan.index', compact('layanans', 'search'));
+}
 
     public function store(Request $request)
     {

@@ -24,9 +24,9 @@ class LaporanController extends Controller
             $query->where('status_reservasi', $status);
         }
 
-        $transaksi = $query->orderBy('tanggal_acara', 'asc')->get();
-
-        $totalPendapatan = $transaksi->sum(function ($item) {
+        // Hitung total keseluruhan sebelum di-paginate
+        $allTransaksi = (clone $query)->get();
+        $totalPendapatan = $allTransaksi->sum(function ($item) {
             if (!empty($item->biaya_sewa) && $item->biaya_sewa > 0) {
                 return $item->biaya_sewa;
             }
@@ -34,8 +34,12 @@ class LaporanController extends Controller
             $qty = $item->jumlah_pesanan ?? 1;
             return $harga * $qty;
         });
+        $totalTransaksi = $allTransaksi->count();
 
-        $totalTransaksi = $transaksi->count();
+        // Data tabel dipaginasi per 10 baris dengan mempertahankan filter tanggal & status
+        $transaksi = $query->orderBy('tanggal_acara', 'asc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.laporan.transaksi', compact(
             'transaksi',

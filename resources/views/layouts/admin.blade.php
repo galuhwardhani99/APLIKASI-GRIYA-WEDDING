@@ -44,6 +44,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         
         body { 
             background-color: var(--bg-light); 
@@ -228,6 +229,61 @@
             min-width: 0;
         }
 
+        /* Global Pagination Custom Griya Rias */
+        .pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            background: #FAF9F6;
+        }
+        .pagination-info {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .pagination-links {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-dark);
+            background: #FFFFFF;
+            color: var(--text-dark);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .page-btn:hover:not(.disabled):not(.active) {
+            background: #FBF5EC;
+            border-color: var(--gold-primary);
+            color: var(--gold-hover);
+        }
+        .page-btn.active {
+            background: var(--gold-primary);
+            border-color: var(--gold-primary);
+            color: #FFFFFF;
+            box-shadow: 0 2px 6px rgba(197, 143, 67, 0.25);
+        }
+        .page-btn.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: #F5F3F0;
+        }
+
         @media (max-width: 768px) {
             body { display: block; }
             .sidebar { position: relative; width: 100%; min-width: 0; height: auto; min-height: 0; border-right: 0; border-bottom: 1px solid var(--border-dark); }
@@ -285,34 +341,34 @@
         });
 
         function playAdminNotifSound() {
-        try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            const ctx = new AudioCtx();
-            const now = ctx.currentTime;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
 
-            // Nada kasir / coin masuk (B5 -> E6)
-            const notes = [987.77, 1318.51];
+                // Nada kasir / coin masuk (B5 -> E6)
+                const notes = [987.77, 1318.51];
 
-            notes.forEach((freq, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                const startTime = now + (i * 0.11);
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const startTime = now + (i * 0.11);
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, startTime);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, startTime);
 
-                gain.gain.setValueAtTime(0.001, startTime);
-                gain.gain.exponentialRampToValueAtTime(0.25, startTime + 0.015);
-                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
+                    gain.gain.setValueAtTime(0.001, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.25, startTime + 0.015);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
 
-                osc.connect(gain);
-                gain.connect(ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
 
-                osc.start(startTime);
-                osc.stop(startTime + 0.46);
-            });
-        } catch (e) {}
-    }
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.46);
+                });
+            } catch (e) {}
+        }
     </script>
 
     @stack('scripts')

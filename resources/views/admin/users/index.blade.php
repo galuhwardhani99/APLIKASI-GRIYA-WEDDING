@@ -1,7 +1,64 @@
-@extends('layouts.admin') {{-- Sesuaikan dengan nama file layout kalian, misal 'layouts.app' --}}
+@extends('layouts.admin')
+
+@section('title', 'Kelola Akun Pengguna - Admin Griya Rias Elly Jr.')
 
 @section('content')
 <style>
+    /* Pagination Custom Griya Rias */
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 16px;
+        margin-top: 16px;
+        border-top: 1px solid #EFE8DE;
+    }
+    .pagination-info {
+        font-size: 0.82rem;
+        color: #8C8279;
+        font-weight: 600;
+    }
+    .pagination-links {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #D8CEC0;
+        background: #FFFFFF;
+        color: #241A16;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: #FBF5EC;
+        border-color: #C58F43;
+        color: #A87632;
+    }
+    .page-btn.active {
+        background: #C58F43;
+        border-color: #C58F43;
+        color: #FFFFFF;
+        box-shadow: 0 2px 6px rgba(197, 143, 67, 0.25);
+    }
+    .page-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #F5F3F0;
+    }
+
     /* Styling Kustom Tabel Kelola Akun */
     .user-card-section {
         background-color: #FFFFFF;
@@ -23,7 +80,7 @@
         text-align: left;
         padding: 14px 16px;
         font-size: 0.75rem;
-        color: #C58F43; /* Gold primary */
+        color: #C58F43;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         border-bottom: 2px solid #EFE8DE;
@@ -126,65 +183,68 @@
 
 <!-- Dashboard Header Bar -->
 <div class="user-management-content">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <div>
-        <h1 style="font-family: 'Playfair Display', serif; color: #241A16; font-size: 1.6rem; font-weight: 700;">Kelola Akun Pengguna</h1>
-        <p style="font-size: 0.85rem; color: #8C8279; margin-top: 4px;">Daftar seluruh akun admin dan client yang terdaftar.</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h1 style="font-family: 'Playfair Display', serif; color: #241A16; font-size: 1.6rem; font-weight: 700;">Kelola Akun Pengguna</h1>
+            <p style="font-size: 0.85rem; color: #8C8279; margin-top: 4px;">Daftar seluruh akun admin dan client yang terdaftar.</p>
+        </div>
     </div>
-</div>
 
-<!-- Container Tabel Bergaya Card -->
-<div class="user-card-section">
-    <div style="overflow-x: auto;">
-        <table class="custom-table">
-            <thead>
-                <tr>
-                    <th style="width: 60px; text-align: center;">No</th>
-                    <th>Nama Lengkap</th>
-                    <th>Email</th>
-                    <th>No. WhatsApp</th>
-                    <th style="text-align: center;">Role</th>
-                    <th style="text-align: center; width: 180px;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($users as $index => $user)
+    <!-- Container Tabel Bergaya Card -->
+    <div class="user-card-section">
+        <div style="overflow-x: auto;">
+            <table class="custom-table">
+                <thead>
                     <tr>
-                        <td style="text-align: center; color: #8C8279; font-weight: 600;">{{ $index + 1 }}</td>
-                        <td><strong>{{ $user->name }}</strong></td>
-                        <td style="color: #8C8279;">{{ $user->email ?? '-' }}</td>
-                        <td style="color: #8C8279;">{{ $user->phone ?? '-' }}</td>
-                        <td style="text-align: center;">
-                            <span class="role-badge {{ $user->role === 'admin' ? 'role-admin' : 'role-client' }}">
-                                {{ ucfirst($user->role) }}
-                            </span>
-                        </td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; justify-content: center; gap: 8px;">
-                                @if($user->role === 'admin')
-                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-action-edit">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </a>
-                                @else
-                                    <span class="client-only-note">Client hanya dapat dihapus</span>
-                                @endif
-                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="confirmDelete(event, this)" style="margin: 0;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-action-delete">
-                                        <i class="fa-solid fa-trash"></i> Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        <th style="width: 60px; text-align: center;">No</th>
+                        <th>Nama Lengkap</th>
+                        <th>Email</th>
+                        <th>No. WhatsApp</th>
+                        <th style="text-align: center;">Role</th>
+                        <th style="text-align: center; width: 180px;">Aksi</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" style="text-align: center; color: #8C8279; padding: 30px;">Belum ada data akun yang terdaftar.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($users as $index => $user)
+                        <tr>
+                            <td style="text-align: center; color: #8C8279; font-weight: 600;">{{ ($users->firstItem() ?? 1) + $index }}</td>
+                            <td><strong>{{ $user->name }}</strong></td>
+                            <td style="color: #8C8279;">{{ $user->email ?? '-' }}</td>
+                            <td style="color: #8C8279;">{{ $user->phone ?? '-' }}</td>
+                            <td style="text-align: center;">
+                                <span class="role-badge {{ $user->role === 'admin' ? 'role-admin' : 'role-client' }}">
+                                    {{ ucfirst($user->role) }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center; gap: 8px;">
+                                    @if($user->role === 'admin')
+                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-action-edit">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                    @else
+                                        <span class="client-only-note">Client hanya dapat dihapus</span>
+                                    @endif
+                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="confirmDelete(event, this)" style="margin: 0;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-action-delete">
+                                            <i class="fa-solid fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #8C8279; padding: 30px;">Belum ada data akun yang terdaftar.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @include('partials.pagination', ['paginator' => $users])
     </div>
 </div>
 

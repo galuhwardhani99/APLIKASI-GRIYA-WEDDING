@@ -12,9 +12,10 @@ class PortofolioController extends Controller
 {
     public function index()
     {
-        $portofolios = Portofolio::latest()->get();
+        $portofolios = Portofolio::latest()
+            ->paginate(10)
+            ->withQueryString();
         
-        // Ambil kategori unik yang tersimpan di tabel pakets
         $kategoriList = KategoriPaket::orderBy('nama_kategori')->pluck('nama_kategori');
 
         return view('admin.portofolio.index', compact('portofolios', 'kategoriList'));
