@@ -165,10 +165,6 @@
         {{ $transaksi->links('vendor.pagination.client-custom') }}
     </div>
 
-    <div class="history-pagination">
-        {{ $transaksi->links() }}
-    </div>
-
     @foreach($transaksi as $item)
         @if($item->status_reservasi === 'Disetujui' && !in_array($item->payment_status ?? 'unpaid', ['paid', 'proof_verified'], true))
             @php($totalModal = (int) (($item->biaya_sewa ?: ($item->harga_paket ?? $item->harga_layanan ?? 0)) * ($item->jumlah_pesanan ?: 1)))

@@ -68,7 +68,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
         <div>
             <h1 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0;">Laporan Transaksi</h1>
-            <p style="color: #8C8279; font-size: 0.9rem; margin-top: 4px;">Rekapitulasi pemasukan dan riwayat transaksi pelanggan.</p>
+            <p style="color: #8C8279; font-size: 0.9rem; margin-top: 4px;">Rekapitulasi pemasukan dan riwayat transaksi pelanggan (diurutkan dari pelunasan terbaru).</p>
         </div>
 
         {{-- Tombol Download Excel & Pratinjau PDF --}}
@@ -91,21 +91,21 @@
         <form action="{{ route('admin.laporan.transaksi') }}" method="GET" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;">
             <div>
                 <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #55483F;">Dari Tanggal Acara</label>
-                <input type="date" name="tanggal_mulai" value="{{ $tanggalMulai }}" 
+                <input type="date" name="tanggal_mulai" value="{{ $tanggalMulai ?? '' }}" 
                        style="padding: 9px 12px; border: 1px solid #EFE8DE; border-radius: 8px; font-size: 0.88rem;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #55483F;">Sampai Tanggal</label>
-                <input type="date" name="tanggal_selesai" value="{{ $tanggalSelesai }}" 
+                <input type="date" name="tanggal_selesai" value="{{ $tanggalSelesai ?? '' }}" 
                        style="padding: 9px 12px; border: 1px solid #EFE8DE; border-radius: 8px; font-size: 0.88rem;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #55483F;">Status Reservasi</label>
                 <select name="status" style="padding: 9px 12px; border: 1px solid #EFE8DE; border-radius: 8px; font-size: 0.88rem; background: #FFF;">
-                    <option value="Disetujui" {{ $status == 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="Pending" {{ $status == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="Ditolak" {{ $status == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-                    <option value="Semua" {{ $status == 'Semua' ? 'selected' : '' }}>Semua Status</option>
+                    <option value="Semua" {{ ($status ?? 'Semua') == 'Semua' ? 'selected' : '' }}>Semua Status</option>
+                    <option value="Disetujui" {{ ($status ?? '') == 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
+                    <option value="Menunggu Konfirmasi" {{ ($status ?? '') == 'Menunggu Konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+                    <option value="Ditolak" {{ ($status ?? '') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
                 </select>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -135,14 +135,73 @@
         </div>
     </div>
 
+    {{-- Kotak Highlight Pelunasan Terbaru Diterima (Midtrans) --}}
+    @if(isset($pelunasanTerbaru) && $pelunasanTerbaru->isNotEmpty())
+        @php
+            $paidSignature = $pelunasanTerbaru->pluck('id_reservasi')->implode('-');
+        @endphp
+        <div id="box-pelunasan-terbaru" data-signature="{{ $paidSignature }}" style="background: #F4FAF6; border: 1px solid #C8E6C9; border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: #166534;">
+                    <i class="fa-solid fa-bell"></i> Pelunasan Terbaru Diterima (Midtrans)
+                </div>
+                <button type="button" onclick="dismissPelunasanBox()" title="Sembunyikan notifikasi"
+                        style="background: #DCFCE7; border: 1px solid #BBF7D0; color: #166534; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; font-size: 0.8rem;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                @foreach($pelunasanTerbaru as $baru)
+                    @php
+                        $nomBaru = ($baru->biaya_sewa ?? 0) > 0
+                            ? $baru->biaya_sewa
+                            : (($baru->harga_paket ?? $baru->harga_layanan ?? 0) * ($baru->jumlah_pesanan ?? 1));
+                        $waktuLunas = $baru->paid_at ? \Carbon\Carbon::parse($baru->paid_at) : \Carbon\Carbon::parse($baru->updated_at);
+                    @endphp
+                    <div style="background: #FFFFFF; border: 1px solid #DCFCE7; border-radius: 10px; padding: 12px 14px; font-size: 0.84rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>{{ $baru->kode_reservasi }}</strong>
+                            <span style="background: #16A34A; color: #FFF; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;">LUNAS</span>
+                        </div>
+                        <div style="color: #241A16; margin-top: 4px; font-weight: 600;">
+                            {{ $baru->user->name ?? 'Client' }} &bull; <span style="font-weight: 400; color: #55483F;">Acara {{ \Carbon\Carbon::parse($baru->tanggal_acara)->locale('id')->translatedFormat('d M Y') }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                            <span style="color: #15803D; font-weight: 700;">Rp {{ number_format($nomBaru, 0, ',', '.') }}</span>
+                            <small style="color: #8C8279; font-size: 0.75rem;">{{ $waktuLunas->locale('id')->diffForHumans() }}</small>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                const box = document.getElementById('box-pelunasan-terbaru');
+                if (!box) return;
+                const sig = box.dataset.signature;
+                if (localStorage.getItem('dismissed_pelunasan_sig') === sig) {
+                    box.style.display = 'none';
+                }
+            })();
+
+            function dismissPelunasanBox() {
+                const box = document.getElementById('box-pelunasan-terbaru');
+                if (!box) return;
+                localStorage.setItem('dismissed_pelunasan_sig', box.dataset.signature);
+                box.style.display = 'none';
+            }
+        </script>
+    @endif
+
     {{-- Tabel Data Transaksi --}}
     <div style="background: #FFF; border: 1px solid #EFE8DE; border-radius: 14px; overflow: hidden;">
         <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 860px;">
                 <thead>
                     <tr style="background: #FCFAF8; border-bottom: 1px solid #EFE8DE; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #8C8279;">
                         <th style="padding: 16px;">No</th>
-                        <th style="padding: 16px;">Kode</th>
+                        <th style="padding: 16px;">Kode &amp; Waktu Lunas</th>
                         <th style="padding: 16px;">Tanggal Acara</th>
                         <th style="padding: 16px;">Nama Client</th>
                         <th style="padding: 16px;">Acara &amp; Paket</th>
@@ -158,11 +217,31 @@
                             $nominal = ($item->biaya_sewa ?? 0) > 0 
                                 ? $item->biaya_sewa 
                                 : (($item->harga_paket ?? $item->harga_layanan ?? 0) * ($item->jumlah_pesanan ?? 1));
+                            $isPaid = in_array($item->payment_status ?? '', ['paid', 'settlement', 'lunas', 'capture', 'proof_verified'], true);
+                            $isBaruLunas = $isPaid && $item->paid_at && \Carbon\Carbon::parse($item->paid_at)->greaterThanOrEqualTo(now()->subDay());
                         @endphp
-                        <tr style="border-top: 1px solid #F0EBE6; font-size: 0.9rem;">
+                        <tr style="border-top: 1px solid #F0EBE6; font-size: 0.9rem; {{ $isBaruLunas ? 'background-color: #F9FDFB;' : '' }}">
                             <td style="padding: 16px;">{{ ($transaksi->firstItem() ?? 1) + $index }}</td>
-                            <td style="padding: 16px;"><strong>{{ $item->kode_reservasi }}</strong></td>
-                            <td style="padding: 16px;">{{ \Carbon\Carbon::parse($item->tanggal_acara)->translatedFormat('d M Y') }}</td>
+                            <td style="padding: 16px;">
+                                <strong>{{ $item->kode_reservasi }}</strong>
+                                @if($isBaruLunas)
+                                    <span style="background: #16A34A; color: #FFF; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">BARU LUNAS</span>
+                                @endif
+                                @if($isPaid && $item->paid_at)
+                                    <small style="display: block; color: #15803D; font-size: 0.75rem; margin-top: 3px;">
+                                        <i class="fa-solid fa-circle-check"></i> Lunas {{ \Carbon\Carbon::parse($item->paid_at)->locale('id')->translatedFormat('d M Y, H:i') }}
+                                    </small>
+                                @elseif($isPaid)
+                                    <small style="display: block; color: #15803D; font-size: 0.75rem; margin-top: 3px;">
+                                        <i class="fa-solid fa-circle-check"></i> Pembayaran Lunas
+                                    </small>
+                                @else
+                                    <small style="display: block; color: #8C8279; font-size: 0.75rem; margin-top: 3px;">
+                                        Belum Lunas
+                                    </small>
+                                @endif
+                            </td>
+                            <td style="padding: 16px;">{{ \Carbon\Carbon::parse($item->tanggal_acara)->locale('id')->translatedFormat('d M Y') }}</td>
                             <td style="padding: 16px;">{{ $item->user->name ?? 'Client' }}</td>
                             <td style="padding: 16px;">
                                 <strong>{{ $item->jenis_acara ?: 'Acara' }}</strong><br>

@@ -31,7 +31,18 @@
     <div class="meta">
         <table>
             <tr>
-                <td><strong>Periode Acara:</strong> {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggalSelesai)->translatedFormat('d M Y') }}</td>
+                <td>
+                    <strong>Periode Acara:</strong>
+                    @if($tanggalMulai && $tanggalSelesai)
+                        {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggalSelesai)->translatedFormat('d M Y') }}
+                    @elseif($tanggalMulai)
+                        Mulai {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d M Y') }}
+                    @elseif($tanggalSelesai)
+                        Sampai {{ \Carbon\Carbon::parse($tanggalSelesai)->translatedFormat('d M Y') }}
+                    @else
+                        Semua Periode
+                    @endif
+                </td>
                 <td class="text-right"><strong>Filter Status:</strong> {{ $status }}</td>
             </tr>
             <tr>

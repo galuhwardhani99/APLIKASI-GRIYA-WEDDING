@@ -12,7 +12,17 @@
         </tr>
         <tr>
             <td colspan="7" style="text-align: center;">
-                Periode: {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggalSelesai)->translatedFormat('d M Y') }} | Status: {{ $status }}
+                Periode:
+                @if($tanggalMulai && $tanggalSelesai)
+                    {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggalSelesai)->translatedFormat('d M Y') }}
+                @elseif($tanggalMulai)
+                    Mulai {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d M Y') }}
+                @elseif($tanggalSelesai)
+                    Sampai {{ \Carbon\Carbon::parse($tanggalSelesai)->translatedFormat('d M Y') }}
+                @else
+                    Semua Periode
+                @endif
+                | Status: {{ $status }}
             </td>
         </tr>
         <tr></tr>

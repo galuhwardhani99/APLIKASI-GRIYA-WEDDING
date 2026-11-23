@@ -15,6 +15,7 @@ class JadwalController extends Controller
         $pendingReservationsCount = Reservasi::where('status_reservasi', 'Menunggu Konfirmasi')->count();
 
         $reservasi = Reservasi::with(['user', 'jadwal', 'layanans'])
+            ->orderByRaw("CASE WHEN status_reservasi = 'Menunggu Konfirmasi' THEN 0 ELSE 1 END")
             ->latest('id_reservasi')
             ->paginate(10)
             ->withQueryString();

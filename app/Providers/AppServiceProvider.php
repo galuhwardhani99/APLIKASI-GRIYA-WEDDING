@@ -2,11 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Reservasi;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Reservasi;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +18,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        app()->setLocale('id');
+        Carbon::setLocale('id');
+
         if (config('app.env') !== 'local' || request()->hasHeader('x-forwarded-proto')) {
             URL::forceScheme('https');
         }
@@ -26,12 +30,22 @@ class AppServiceProvider extends ServiceProvider
             $pendingCount = Reservasi::whereIn('status_reservasi', ['Menunggu Konfirmasi', 'Pending', 'pending'])->count();
 
             $lastCheckedPaid = session('admin_last_checked_paid');
-            $paidQuery = Reservasi::whereIn('payment_status', ['paid', 'settlement', 'lunas', 'capture']);
+            $paidQuery = Reservasi::whereIn('payment_status', ['paid', 'settlement', 'lunas', 'capture', 'proof_verified']);
 
             if ($lastCheckedPaid) {
-                $paidQuery->where('updated_at', '>', $lastCheckedPaid);
+                $paidQuery->where(function ($q) use ($lastCheckedPaid) {
+                    $q->where('paid_at', '>', $lastCheckedPaid)
+                      ->orWhere(function ($sub) use ($lastCheckedPaid) {
+                          $sub->whereNull('paid_at')->where('updated_at', '>', $lastCheckedPaid);
+                      });
+                });
             } else {
-                $paidQuery->whereDate('updated_at', today());
+                $paidQuery->where(function ($q) {
+                    $q->whereDate('paid_at', today())
+                      ->orWhere(function ($sub) {
+                          $sub->whereNull('paid_at')->whereDate('updated_at', today());
+                      });
+                });
             }
 
             $view->with([
@@ -40,7 +54,6 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        // Notifikasi Client
         // Notifikasi Client
         View::composer(['client.*', 'user.profile', 'profile'], function ($view) {
             $clientValidatedCount = 0;
