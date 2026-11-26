@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PortofolioController as AdminPortofolioController
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Client\ChatbotController;
 use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
 use App\Http\Controllers\Client\JadwalController as ClientJadwalController;
 use App\Http\Controllers\Client\PaymentController;
@@ -174,6 +175,9 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::post('/reservasi/{reservasi}/payment', [PaymentController::class, 'create'])->name('reservasi.payment.create');
     Route::post('/reservasi/{reservasi}/payment/sync', [PaymentController::class, 'syncStatus'])->name('reservasi.payment.sync');
     Route::get('/transaksi/{reservasi}/pembayaran', [PaymentController::class, 'show'])->name('client.payment.show');
+
+    // Chatbot Asisten WO & EO (Khusus Client)
+    Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('client.chatbot.ask');
 });
 
 // ---------- Profil User (Admin & Client) ----------

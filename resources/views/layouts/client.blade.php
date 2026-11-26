@@ -541,5 +541,8 @@
     </script>
 
     @stack('scripts')
+    @if(auth()->check() && auth()->user()->role === 'client')
+        @include('partials.client-chatbot')
+    @endif
 </body>
 </html>
